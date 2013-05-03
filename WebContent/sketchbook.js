@@ -197,7 +197,10 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds) {
 			var text = new paper.PointText(new paper.Point(element.text.x, element.text.y));
 			text.content = element.text.content;
 			text.characterStyle.fontSize = element.text.textSize;
-			text.paragraphStyle.justification = 'center';
+			text.paragraphStyle.justification = element.text.textJustify;
+			
+			console.log("justify = ", element.text.textJustify);
+			
 			text.characterStyle.fillColor = colorToPaperjs(element.text.textColor);
 			text.sketchElementId = element.id;
 			items.push(text);
@@ -516,7 +519,8 @@ Sketchbook.prototype.addTextAction = function(sketchId, text) {
 	action.sketchId = sketchId;
 	var color = { red: text.fillColor.red, green: text.fillColor.green, blue: text.fillColor.blue };
 	// TODO width, height, etc.
-	var textel = { textColor: color, textSize: text.characterStyle.fontSize, content: text.content, x: text.point.x, y: text.point.y };
+	// Add support for text justification
+	var textel = { textColor: color, textSize: text.characterStyle.fontSize, content: text.content, textJustify: text.paragraphStyle.justification, x: text.point.x, y: text.point.y };
 	action.elements =  [{ text : textel }]; 
 	return action;
 };
@@ -807,6 +811,12 @@ SetPropertiesAction.prototype.setText = function(text) {
 	this.text = text;
 };
 
+SetPropertiesAction.prototype.setTextJustify = function(value) {
+	this.textJustify = value;
+	
+	console.log("setTextJustify = ", value);
+};
+
 SetPropertiesAction.prototype.setRescale = function(text) {
 	this.rescale = rescale;
 };
@@ -959,6 +969,7 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo = {};
 						el.undo.content = elval.content;
 						el.undo.textSize = elval.textSize;
+						el.undo.textJustify = elval.textJustify;
 						el.undo.textColor = elval.textColor;
 						el.undo.frameStyle = elval.frameStyle;
 						el.undo.lineColor = elval.lineColor;
@@ -971,6 +982,8 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.content = action.text;
 						if (action.textSize)
 							elval.textSize = action.textSize;
+						if (action.textJustify)
+							elval.textJustify = action.textJustify;
 						if (action.textColor)
 							elval.textColor = action.textColor;
 						if (action.frameStyle)

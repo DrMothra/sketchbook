@@ -213,21 +213,21 @@ function PropertyText(name, propertyId) {
 			self.onSetValue(value);
 		}
 	};
-	$('#'+this.propertyId+' input').on('change', checkfn);
-	$('#'+this.propertyId+' input').on('blur', checkfn);	
+	$('#'+this.propertyId+' textarea').on('change', checkfn);
+	$('#'+this.propertyId+' textarea').on('blur', checkfn);	
 }
 
 //called when no longer showing selection value, i.e. new value
 PropertyText.prototype.resetValue = function() {
 	console.log('text reset, isOrphan='+this.isOrphan+', orphanText='+this.orphanText);
 	if (!this.isOrphan) {
-		$('#'+this.propertyId+' input').val(this.orphanText);
+		$('#'+this.propertyId+' textarea').val(this.orphanText);
 		this.isOrphan = true;
 	}
 };
 	
 PropertyText.prototype.getValue = function() {
-	return $('#'+this.propertyId+' input').val();
+	return $('#'+this.propertyId+' textarea').val();
 };
 
 PropertyText.prototype.setValue = function(value) {
@@ -237,7 +237,9 @@ PropertyText.prototype.setValue = function(value) {
 		this.orphanText = this.getValue();
 	}
 	this.value = value;
-	$('#'+this.propertyId+' input').val(value);
+	$('#'+this.propertyId+' textarea').val(value);
+	
+	console.log("textSetValue = ", '#'+this.propertyId+' textarea');
 };
 
 PropertyText.prototype.setEnabled = function(enabled) {
@@ -474,6 +476,7 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.lineWidth.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction');
 			propertyEditors.textSize.setEnabled(actionId=='addTextAction');
 			propertyEditors.text.setEnabled(actionId=='addFrameAction' || actionId=='addTextAction');
+			propertyEditors.textJustify.setEnabled(actionId=='addTextAction');
 		}
 	} else {
 		// element(s) with color(s)?
@@ -484,6 +487,7 @@ function updatePropertiesForCurrentSelection() {
 		var lineWidth = null;
 		var textSize = null;
 		var text = null;
+		var textJustify = null;
 		for (var i=0; i<currentSelections.length; i++) {
 			var cs = currentSelections[i];
 			if (cs.record.selection.elements) {
@@ -512,6 +516,8 @@ function updatePropertiesForCurrentSelection() {
 							textSize = el.text.textSize;
 						if (el.text.content)
 							text = el.text.content;
+						if (el.text.textJustify)
+							textJustify = el.text.textJustify;
 					}
 					else if (el.frame) {
 						if (el.frame.description)
@@ -571,12 +577,18 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.text.setEnabled(false);
+		if (textJustify) {
+			propertyEditors.textJustify.setEnabled(true);
+			propertyEditors.textJustify.setValue(textJustify);
+		}
+		else
+			propertyEditors.textJustify.setEnabled(false);
 	}
 }
 	
 /** called by sketchertools */
 function getProperty(name, defaultValue) {
-	if (!propertyEditors[name]) {
+	if (!propertyEditors[name]) {f
 		console.log('property '+name+' unknown');
 		return defaultValue;
 	}
@@ -1370,6 +1382,9 @@ function toolUp(ev) {
 	if (tool) {
 		// switch tool
 		toolProject.activate();
+		
+		console.log("tool activated = ", tool);
+		
 		var action = tool.end(view2project(toolView, ev.pageX, ev.pageY));
 		tool = undefined;
 		if (action)
@@ -2285,6 +2300,9 @@ function doAction(action) {
 	}
 	else if (action.type=='setProperties' || action.type=='orderToBack') {
 		var sketchIds = [];
+		
+		console.log("setProps");
+		
 		for (var ei=0; ei<action.elements.length; ei++) {
 			var element = action.elements[ei];
 			if (sketchIds.indexOf(element.sketchId)<0) {
@@ -2303,6 +2321,8 @@ function doAction(action) {
 	else if (action.type=='select') {
 		//console.log('handle select '+JSON.stringify(action));
 		// TODO
+		console.log("handling select action");
+		
 		handleSelections(action.selections);
 	}
 	else if (action.type=='delete') {
@@ -2575,6 +2595,7 @@ function onSetProperty(action) {
 		}
 	}
 	console.log('setting properties on current selection');
+	console.log("action = ", action);
 	doAction(action);
 }
 // property editor entry point
@@ -2655,6 +2676,19 @@ function onSetText(value) {
 	}
 }
 
+function onSetTextJustify(value) {
+	if (!value)
+		return;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setTextJustify(value);
+		
+		console.log("onSetTextJustify action = ", action);
+		
+		onSetProperty(action);
+	}
+}
+
 function onAlphaSelected(event) {
 	$('.alpha').removeClass('alphaSelected');
 	$(this).addClass('alphaSelected');
@@ -2723,6 +2757,8 @@ $(document).ready(function() {
 	propertyEditors.text.onSetValue = onSetText;
 	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
 	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
+	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
+	propertyEditors.textJustify.onSetValue = onSetTextJustify;
 
 	onShowIndex();
 	

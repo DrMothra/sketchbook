@@ -16,7 +16,7 @@
 </head>
 <body>
 <div id="page" class="page">
-<h1>Sketcher2</h1>
+<h1>SketcherTone</h1>
 	<div class="indexHeader">
 		<div class="headerItem">
 			Sketchbook:
@@ -156,7 +156,16 @@
 					<div class="propertiesShow" id="propertiesShowNew">New Items</div>					
 				</td></tr>
 				<tr class="property" id="textProperty"><td>Text</td>
-					<td><input id="orphanText" type="text" width="20"/></td>
+					<td><textarea id="orphanText" rows="5" cols="20"></textarea></td>
+					
+				</tr>
+				<tr class="property propertyDisabled" id="textJustifyProperty"><td>Justify</td>
+					<td>
+						<div class="option" id="textJustify_left">Left</div>
+						<div class="option optionDefault optionSelected" id="textJustify_center">Centre</div>
+						<div class="option" id="textJustify_right">Right</div>
+					</td>
+				</tr>
 				</tr>
 				<!-- font size -->
 				<tr class="property propertyDisabled" id="textSizeProperty"><td>Font Size</td>

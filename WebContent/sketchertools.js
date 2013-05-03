@@ -512,7 +512,7 @@ TextTool.prototype.begin = function(point) {
 	activateOverlay(this.project);
 	this.text = new paper.PointText(point);
 	this.text.characterStyle.fillColor = getTextColor();
-	this.text.paragraphStyle.justification = 'center';
+	this.text.paragraphStyle.justification = getProperty('textJustify', 'center');
 	this.text.characterStyle.fontSize = getProperty('textSize', 12); //default
 	this.text.content = this.content;	
 };
