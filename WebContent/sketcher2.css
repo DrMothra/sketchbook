@@ -110,6 +110,11 @@ canvas.detailCanvas {
 	height:400px;
 	width: 99%;
 }
+textarea.detailText {
+	position: absolute;
+	left: 1000px;
+	top: 200px;
+}
 div.commonFacilities {
 	clear:both;
 	position:relative;

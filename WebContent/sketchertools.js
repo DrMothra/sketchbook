@@ -342,6 +342,9 @@ SelectTool.prototype.checkSelect = function(point) {
 	if (item) {
 		// item id?
 		var elementId = getSketchElementId(item);
+		
+		console.log("element id = ", elementId);
+		
 		if (elementId) {
 			if (this.selectedElementIds.indexOf(elementId)<0) {
 				this.selectedItems.push(item);
