@@ -789,11 +789,12 @@ function handlePropertiesShowSelected(id) {
 	}
 }
 
-function onPropertyEdit(event) {
-	console.log("Selections = ", currentSelections.length);
+function onDetailEdit(event) {
+	//console.log("Selections = ", currentSelections.length);
 	
 	for (var i=0; i<currentSelections.length; i++) {
 			var cs = currentSelections[i];
+			
 			if (cs.record.selection.elements) {
 				for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
 					var el = cs.record.selection.elements[ei];
@@ -810,6 +811,25 @@ function onPropertyEdit(event) {
 	}
 }
 
+function onDetailFinished(event) {
+	for (var i=0; i<currentSelections.length; i++) {
+			var cs = currentSelections[i];
+			
+			if (cs.record.selection.elements) {
+				for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
+					var el = cs.record.selection.elements[ei];
+					if (el.text) {
+						var editText = $('#objectDetailTextarea');
+						//console.log("Text edited ", editText.val());
+						el.text.content = editText.val();
+						propertyEditors.text.setValue(el.text.content);
+						onSetText(el.text.content);
+						editText.hide();
+					}
+				}
+			}
+	}
+}
 //GUI entry point
 function onPropertiesShowSelected(event) {
 	var id = $(this).attr('id');
@@ -1343,6 +1363,7 @@ function registerHighlightEvents() {
 		$(this).blur();
 		$('#orphanText').focus();
 	});
+	$(document).on('mouseout', '#objectDetailTextarea', onDetailFinished);
 
 }
 
@@ -2760,7 +2781,7 @@ $(document).ready(function() {
 	$('.propertiesShow').on('click', onPropertiesShowSelected);
 	//$('#colorProperty .option').on('click', onColorSelected);
 	$('.alpha').on('click', onAlphaSelected);
-	$('#objectDetailCanvas').on('dblclick', onPropertyEdit);
+	$('#objectDetailCanvas').on('dblclick', onDetailEdit);
 	$(document).on('mousedown', '#sequences1Div .sequenceFrame', onSequenceFrameSelected);
 	$(document).on('mousedown', '#sequences1Div .sequenceObject', onSequenceFrameSelected);
 	$(document).on('mousedown', '#sequences2Div .sequenceSequence', onSequenceItemSelected);
