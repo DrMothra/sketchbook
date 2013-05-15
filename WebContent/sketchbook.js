@@ -170,6 +170,20 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds) {
 			group.sketchElementId = element.id;
 			items.push(group);
 		}
+		if (element.circle!==undefined) {
+			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
+			if (element.circle.lineWidth)
+				path.strokeWidth = element.circle.lineWidth;
+			if (element.circle.lineColor && (!element.circle.frameStyle || element.circle.frameStyle.indexOf('border')>=0))
+				path.strokeColor = colorToPaperjs(element.circle.lineColor);
+			if (element.circle.fillColor && element.circle.frameStyle && element.circle.frameStyle.indexOf('fill')>=0) {
+				path.fillColor = colorToPaperjs(element.circle.fillColor);
+				path.closed = true;
+			}
+			// preserve id
+			path.sketchElementId = element.id;
+			items.push(path);
+		}
 		if (element.image!==undefined) {
 			var imageId = null;
 			for (var iid in images) {
@@ -514,6 +528,16 @@ Sketchbook.prototype.addCurveAction = function(sketchId, path, lineColor) {
 	return action;
 };
 
+Sketchbook.prototype.addCircleAction = function(sketchId, centre, rad, strokewidth, frameStyle, lineColor, fillColor) {
+	var action = new Action(this, 'addElements');
+	action.sketchId = sketchId;
+	var lineColor2 = parseHexColor(lineColor);
+	var fillColor2 = parseHexColor(fillColor);
+	var circle2 = { centrePoint : centre, radius : rad, lineColor: lineColor2, fillColor : fillColor2, lineWidth: strokewidth, frameStyle: frameStyle};
+	action.elements =  [{ circle : circle2 }]; // id?
+	return action;
+};
+
 Sketchbook.prototype.addTextAction = function(sketchId, text) {
 	var action = new Action(this, 'addElements');
 	action.sketchId = sketchId;
@@ -564,11 +588,18 @@ Sketchbook.prototype.addElementsAction = function(sketchId, elements, fromBounds
 					seg.handleOut.y *= toBounds.height / fromBounds.height;
 				}
 			}
+			if (newel.circle) {
+				console.log("before = ", newel.circle.x, " ", newel.circle.y);
+				transformIcon(newel.circle, fromBounds, toBounds);
+				console.log("after = ", newel.circle.x, " ", newel.circle.y);
+			}
 			if (newel.icon) {
 				transformIcon(newel.icon, fromBounds, toBounds);
 			}
 			if (newel.frame) {
+				console.log("before = ", newel.frame.x, " ", newel.frame.y);
 				transformIcon(newel.frame, fromBounds, toBounds);
+				console.log("after = ", newel.frame.x, " ", newel.frame.y);
 			}
 			if (newel.image) {
 				transformIcon(newel.image, fromBounds, toBounds);
@@ -1081,6 +1112,22 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.textHAlign = action.textHAlign;
 						if (action.textHFit)
 							elval.textHFit = action.textHFit;
+					}
+					else if (element.circle) {
+						var elval = element.circle;
+						el.undo = {};
+						el.undo.lineColor = elval.lineColor;
+						el.undo.fillColor = elval.fillColor;
+						el.undo.lineWidth = elval.lineWidth;
+						el.undo.frameStyle = elval.frameStyle;
+						if (action.lineColor)
+							elval.lineColor = action.lineColor;
+						if (action.fillColor)
+							elval.fillColor = action.fillColor;
+						if (action.lineWidth)
+							elval.lineWidth= action.lineWidth;
+						if (action.frameStyle)
+							elval.frameStyle= action.frameStyle;
 					}
 					else {
 						console.log('setProperties cannot handle element '+elementId+' in sketch '+sketchId);

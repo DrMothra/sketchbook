@@ -82,6 +82,54 @@ LineTool.prototype.end = function(point) {
 	return null;
 };
 
+function CircleTool(project, sketchbook, sketchId) {
+	// call super cons
+	Tool.call(this, 'circle', project);
+	this.sketchbook = sketchbook;
+	this.sketchId = sketchId;
+	this.radius = 3;
+}
+
+CircleTool.prototype = new Tool();
+
+CircleTool.prototype.begin = function(point) {
+	// activate overlay layer
+	activateOverlay(this.project);
+	this.frameStyle = getProperty('frameStyle', 'border');
+	this.lineColor = getLineColor();
+	this.fillColor = getFillColor();
+	this.lineWidth = getProperty('lineWidth', 1);
+	this.startPoint = point;
+	this.path = new paper.Path.Circle(this.startPoint, this.radius);	
+	if (this.frameStyle.indexOf('border')>=0 || !this.frameStyle)
+		this.path.strokeColor = this.lineColor;
+	if(this.frameStyle.indexOf('fill')>=0) {
+		this.path.closed = true;
+		this.path.fillColor = this.fillColor;
+	}
+};
+
+CircleTool.prototype.move = function(point) {
+	if (this.path) {
+		this.path.remove();
+	}
+	// activate overlay layer
+	activateOverlay(this.project);	//Can't just subtract vectors?!!?	var newPoint = new paper.Point(point.x - this.startPoint.x, point.y - this.startPoint.y);	this.radius = newPoint.length;	
+	this.path = new paper.Path.Circle(this.startPoint, this.radius);
+	this.path.strokeColor = 'red';
+};
+
+CircleTool.prototype.end = function(point) {
+	if (this.path) {		console.log("linewidth = ", this.path.strokeWidth);
+		var action = this.sketchbook.addCircleAction(this.sketchId, this.startPoint, this.radius, this.lineWidth, this.frameStyle, this.lineColor, this.fillColor);
+		this.path.remove();
+		delete this.path;
+		return action;
+	}
+	delete this.path;
+	return null;
+};
+
 /** centre view tool */
 function ShowAllTool(project) {
 	Tool.call(this, 'showAll', project);
@@ -463,7 +511,7 @@ CopyToSketchTool.prototype.end = function(point) {
 		delete this.group;
 	}
 	if (this.elements) {
-		var bounds = new paper.Rectangle(this.startPoint, point);
+		var bounds = new paper.Rectangle(this.startPoint, point);		console.log("elements = ", this.elements);
 		return this.sketchbook.addElementsAction(this.sketchId, this.elements, this.elementBounds, bounds);
 	}
 	return null;
