@@ -577,6 +577,7 @@ Sketchbook.prototype.addElementsAction = function(sketchId, elements, fromBounds
 	for (var ei=0; ei<elements.length; ei++) {
 		var el = elements[ei];
 		var newel = JSON.parse(JSON.stringify(el));
+		
 		if (fromBounds && toBounds) {
 			if (newel.line) {
 				for (var si=0; si<newel.line.segments.length;si++) {
@@ -589,9 +590,9 @@ Sketchbook.prototype.addElementsAction = function(sketchId, elements, fromBounds
 				}
 			}
 			if (newel.circle) {
-				console.log("before = ", newel.circle.x, " ", newel.circle.y);
-				transformIcon(newel.circle, fromBounds, toBounds);
-				console.log("after = ", newel.circle.x, " ", newel.circle.y);
+				newel.circle.centrePoint.x = (newel.circle.centrePoint.x-fromBounds.left)*toBounds.width/fromBounds.width+toBounds.left;
+				newel.circle.centrePoint.y = (newel.circle.centrePoint.y-fromBounds.top)*toBounds.height/fromBounds.height+toBounds.top;
+				newel.circle.radius = toBounds.width < toBounds.height ? toBounds.width/2.0 : toBounds.height/2.0;
 			}
 			if (newel.icon) {
 				transformIcon(newel.icon, fromBounds, toBounds);
