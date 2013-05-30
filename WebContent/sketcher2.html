@@ -7,9 +7,11 @@
 <script type="text/javascript" src="jquery-1.7.2.min.js"></script> 
 <!-- from https://raw.github.com/desandro/imagesloaded/master/jquery.imagesloaded.min.js -->
 <script type="text/javascript" src="jquery.imagesloaded.min.js"></script>
-<script type="text/javascript" src="paper-weiser.js"></script>
+<!--script type="text/javascript" src="paper-weiser.js"></script> -->
+<script type="text/javascript" src="paper-20130430.js"></script>
 <script type="text/javascript" src="sketchbook.js"></script>
 <script type="text/javascript" src="sketchertools.js"></script>
+<script type="text/javascript" src="import.js"></script>
 <script type="text/javascript" src="sketcher2.js"></script>
 <script type="text/javascript" src="BlobBuilder.js"></script>
 <script type="text/javascript" src="FileSaver.js"></script>
@@ -48,13 +50,12 @@
 	</div>
 	<!--  object index -->
 	<div id="index" class="index tabview" style="display:none">
-		<div class="indexHeader">
+		<div id='indexHashtags' class="indexHeader">
 			<div class="headerItem">
-				<form>
-					<span class="label">Filter:</span><input type="text" id="indexFilterText" value="" class="filterText" onchange="javascript:onObjectFilterChanges();" disabled/>
-				</form>
+				<span class="label">Filter:</span><input type="text" id="indexFilterText" value="" class="filterText" onchange="javascript:onObjectFilterChanges();"/>
+				<input type='button' value='Show All' class='button' onclick='javascript:onObjectFilterClear();'/>
 			</div>
-			
+			<div id='indexHashtagsMarker'></div>
 			<div class="footer"></div>
 		</div>
 		<canvas id="indexCanvas" class="indexCanvas" ></canvas>								
@@ -68,9 +69,7 @@
 						<span class="label">Sequences(1)</span>
 					</div>
 					<div class="headerItem">
-						<form>
-							<span class="label">Filter:</span><input type="text" id="sequences1FilterText" value="" class="filterText" onchange="javascript:onObjectFilterChanges();" disabled/>
-						</form>
+						<span class="label">Filter:</span><input type="text" id="sequences1FilterText" value="" class="filterText" onchange="javascript:onObjectFilterChanges();" disabled/>
 					</div>
 					
 					<div class="footer"></div>
@@ -83,9 +82,7 @@
 						<span class="label">Sequences(2)</span>
 					</div>
 					<div class="headerItem">
-						<form>
-							<span class="label">Filter:</span><input type="text" id="sequences2FilterText" value="" class="filterText" onchange="javascript:onObjectFilterChanges();" disabled/>
-						</form>
+						<span class="label">Filter:</span><input type="text" id="sequences2FilterText" value="" class="filterText" onchange="javascript:onObjectFilterChanges();" disabled/>
 					</div>
 					
 					<div class="footer"></div>
@@ -168,6 +165,14 @@
 					</td>
 				</tr>
 				</tr>
+				<tr class="property propertyDisabled" id="showLabelProperty"><td>Show Label</td>
+					<td>
+						<div class="option optionDefault optionSelected" id="showLabel_">None</div>
+						<div class="option" id="showLabel_sketch">Sketch</div>
+						<div class="option" id="showLabel_frame">Frame</div>
+						<div class="option" id="showLabel_sketch_frame">Both</div>
+					</td>
+				</tr>
 				<!-- font size -->
 				<tr class="property propertyDisabled" id="textSizeProperty"><td>Font Size</td>
 					<td>
@@ -188,10 +193,19 @@
 						<div class="option" style="background-color:#ffff00" id="textColor_ffff00"></div>
 					</td>
 				</tr>
+				<tr class="property propertyDisabled" id="textVAlignProperty"><td>Text Align</td>
+					<td>
+						<div class="option optionDefault optionSelected" id="textVAlign_above">Above</div>
+						<div class="option" id="textVAlign_top">Top</div>
+						<div class="option" id="textVAlign_middle">Mid</div>
+						<div class="option" id="textVAlign_bottom">Bottom</div>
+						<div class="option" id="textVAlign_below">Below</div>
+					</td>
+				</tr>
 				<tr class="property propertyDisabled" id="frameStyleProperty"><td>Style</td>
 					<td>
-						<div class="option" id="frameStyle_">None</div>
-						<div class="option optionDefault optionSelected" id="frameStyle_border">Border</div>
+						<div class="option optionDefault optionSelected" id="frameStyle_">None</div>
+						<div class="option" id="frameStyle_border">Border</div>
 						<div class="option" id="frameStyle_fill">Fill</div>
 						<div class="option" id="frameStyle_border_fill">Both</div>
 					</td>
@@ -227,6 +241,12 @@
 						<div class="option" style="background-color:#ffff00" id="fillColor_ffff00"></div>
 					</td>
 				</tr>
+				<tr class="property propertyDisabled" id="rescaleProperty"><td>Rescale</td>
+					<td>
+						<div class="option optionDefault optionSelected" id="rescale_fit">Fit</div>
+						<div class="option" id="rescale_stretch">Stretch</div>
+					</td>
+				</tr>
 			</table>
 		</div>
 		<div style="width:80%;float:left">
@@ -234,10 +254,10 @@
 				<div class="action actionSelected" id="selectAction">Select[Q]</div>
 				<div class="action" id="backAction">Back[Backspace]</div>
 				<p class="actionLabel label">Sketch:</p>
+				<div class="action" id="panAction">Select&Pan[C]</div>
 				<div class="action" id="showAllAction">Show all[V]</div>
 				<div class="action" id="zoomInAction">Zoom-in[Z]</div>
 				<div class="action" id="zoomOutAction">Zoom-out[X]</div>
-				<div class="action" id="panAction">Pan[C]</div>
 				<div class="action actionDisabled" id="orderToBackAction">To
 					back[W]</div>
 				<div class="action actionDisabled" id="addLineAction">Line[A]</div>
@@ -246,7 +266,7 @@
 				<div class="action actionDisabled" id="addTextAction">Text[S]</div>
 				<div class="action actionDisabled" id="addFrameAction">Frame[F]</div>
 				<p class="actionLabel label">Selection:</p>
-				<div class="action" id="editAction">Edit[E]</div>
+				<div class="action" id="editAction">Open[E]</div>
 				<div class="action" id="moveAction">Move[E]</div>
 				<div class="action" id="copyAction">Copy[D]</div>
 				<div class="action" id="placeAction">Link[D]</div>

@@ -274,6 +274,7 @@ function takeOrphanText() {
 var BREADCRUMB_TYPE_INDEX = "index";
 var BREADCRUMB_TYPE_SEQUENCES = "sequences";
 var BREADCRUMB_TYPE_SKETCH = "sketch";
+var BREADCRUMB_TYPE_ELEMENT = "element";
 
 function Breadcrumb(type, sketchId, elementId) {
 	this.type = type;
@@ -291,6 +292,10 @@ Breadcrumb.prototype.isSequences = function() {
 
 Breadcrumb.prototype.isSketch = function() {
 	return this.type==BREADCRUMB_TYPE_SKETCH;
+};
+
+Breadcrumb.prototype.isElement = function() {
+	return this.type==BREADCRUMB_TYPE_ELEMENT;
 };
 
 Breadcrumb.prototype.toString = function() {
@@ -461,7 +466,7 @@ function updatePropertiesForCurrentSelection() {
 	}
 	else if (!propertiesShowSelection()) {
 		// update color to last selected
-		var add = actionId.substring(0, 3)=='add';
+		var add = actionId.substring(0, 3)=='add' || actionId.substr(0,5)=='place';
 		for (var pname in propertyEditors) {
 			var propertyEditor = propertyEditors[pname];
 			propertyEditor.resetValue();
@@ -469,14 +474,21 @@ function updatePropertiesForCurrentSelection() {
 				propertyEditor.setEnabled(true);
 		}
 		if (add) {
-			propertyEditors.lineColor.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction');
-			propertyEditors.fillColor.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction');
-			propertyEditors.frameStyle.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction');
-			propertyEditors.textColor.setEnabled(actionId=='addTextAction');
-			propertyEditors.lineWidth.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction');
-			propertyEditors.textSize.setEnabled(actionId=='addTextAction');
+			propertyEditors.lineColor.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction'||
+							     actionId=='placeAction' || actionId=='addFrameAction');
+			propertyEditors.fillColor.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
+							     actionId=='addFrameAction');
+			propertyEditors.frameStyle.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
+							      actionId=='addFrameAction');
+			propertyEditors.textColor.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
+			propertyEditors.lineWidth.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction'||
+							     actionId=='placeAction' || actionId=='addFrameAction');
+			propertyEditors.textSize.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.text.setEnabled(actionId=='addFrameAction' || actionId=='addTextAction');
 			propertyEditors.textJustify.setEnabled(actionId=='addTextAction');
+			propertyEditors.showLabel.setEnabled(actionId=='placeAction' || actionId=='addFrameAction');
+			propertyEditors.textVAlign.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
+			propertyEditors.rescale.setEnabled(actionId=='placeAction');
 		}
 	} else {
 		// element(s) with color(s)?
@@ -486,6 +498,9 @@ function updatePropertiesForCurrentSelection() {
 		var textColor = null;
 		var lineWidth = null;
 		var textSize = null;
+		var showLabel = null;
+		var textVAlign = null;
+		var rescale = null;
 		var text = null;
 		var textJustify = null;
 		for (var i=0; i<currentSelections.length; i++) {
@@ -516,12 +531,46 @@ function updatePropertiesForCurrentSelection() {
 							textSize = el.text.textSize;
 						if (el.text.content)
 							text = el.text.content;
+						if (el.text.textVAlign)
+							textVAlign = el.text.textVAlign;
+						else
+							textVAlign = 'middle';
 						if (el.text.textJustify)
 							textJustify = el.text.textJustify;
 					}
 					else if (el.frame) {
 						if (el.frame.description)
 							text = el.frame.description;
+						if (el.frame.lineColor) 
+							lineColor = el.frame.lineColor;
+						else 
+							lineColor = DEFAULT_LINE_COLOR;
+						if (el.frame.lineWidth)
+							lineWidth = el.frame.lineWidth;
+						if (el.frame.fillColor)
+							fillColor = el.frame.fillColor;
+						else
+							fillColor = DEFAULT_FILL_COLOR;
+						if (el.frame.frameStyle)
+							frameStyle = el.frame.frameStyle;
+						else
+							frameStyle = '';
+						if (el.frame.textColor) 
+							textColor = el.frame.textColor;
+						else
+							textColor = 'black';
+						if (el.frame.textSize)
+							textSize = el.frame.textSize;
+						else
+							textSize = 12;
+						if (el.frame.textVAlign)
+							textVAlign = el.frame.textVAlign;
+						else
+							textVAlign = 'middle';
+						if (el.frame.showLabel)
+							showLabel = el.frame.showLabel;
+						else
+							showLabel = 'frame';
 					}
 					else if (el.sequence) {
 						if (el.sequence.description)
@@ -547,6 +596,48 @@ function updatePropertiesForCurrentSelection() {
 						else
 							frameStyle = 'border';
 					}
+					else if (el.icon) {
+						if (el.icon.lineColor) 
+							lineColor = el.icon.lineColor;
+						else 
+							lineColor = DEFAULT_LINE_COLOR;
+						if (el.icon.lineWidth)
+							lineWidth = el.icon.lineWidth;
+						if (el.icon.fillColor)
+							fillColor = el.icon.fillColor;
+						else
+							fillColor = DEFAULT_FILL_COLOR;
+						if (el.icon.frameStyle)
+							frameStyle = el.icon.frameStyle;
+						else
+							frameStyle = '';
+						if (el.icon.textColor) 
+							textColor = el.icon.textColor;
+						else
+							textColor = 'black';
+						if (el.icon.textSize)
+							textSize = el.icon.textSize;
+						else
+							textSize = 12;
+						if (el.icon.textVAlign)
+							textVAlign = el.icon.textVAlign;
+						else
+							textVAlign = 'middle';
+						if (el.icon.showLabel)
+							showLabel = el.icon.showLabel;
+						else
+							showLabel = '';
+						if (el.icon.rescale)
+							rescale = el.icon.rescale;
+						else
+							rescale = 'fit';
+					}
+					else if (el.image) {
+						if (el.image.rescale)
+							rescale = el.image.rescale;
+						else
+							rescale = 'fit';
+					}
 				}
 			}
 		}
@@ -562,7 +653,7 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.fillColor.setEnabled(false);
-		if (frameStyle) {
+		if (frameStyle!==null) {
 			propertyEditors.frameStyle.setEnabled(true);
 			propertyEditors.frameStyle.setValue(frameStyle);
 		}
@@ -599,12 +690,30 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.textJustify.setEnabled(false);
+		if (textVAlign) {
+			propertyEditors.textVAlign.setEnabled(true);
+			propertyEditors.textVAlign.setValue(textVAlign);
+		}
+		else
+			propertyEditors.textVAlign.setEnabled(false);
+		if (showLabel!==null) {
+			propertyEditors.showLabel.setEnabled(true);
+			propertyEditors.showLabel.setValue(showLabel);
+		}
+		else
+			propertyEditors.showLabel.setEnabled(false);
+		if (rescale!==null) {
+			propertyEditors.rescale.setEnabled(true);
+			propertyEditors.rescale.setValue(rescale);
+		}
+		else
+			propertyEditors.rescale.setEnabled(false);
 	}
 }
 	
 /** called by sketchertools */
 function getProperty(name, defaultValue) {
-	if (!propertyEditors[name]) {f
+	if (!propertyEditors[name]) {
 		console.log('property '+name+' unknown');
 		return defaultValue;
 	}
@@ -657,15 +766,23 @@ function handleActionSelected(id) {
 	else if (id=='backAction') {
 		logBreadcrumbs();
 		if (breadcrumbs.length>1) {
-			breadcrumbs.pop();
+			var oldBreadcrumb = breadcrumbs.pop();
 			var breadcrumb = breadcrumbs[breadcrumbs.length-1];
 			//console.log('back to '+breadcrumb.type);
 			if (breadcrumb.isIndex())
 				showIndex(true);
 			else if (breadcrumb.isSequences())
 				showSequences(true);
-			else if (breadcrumb.isSketch()) 
-				showEditor(breadcrumb.sketchId, true);
+			else if (breadcrumb.isSketch()) {
+				if (oldBreadcrumb.isElement() && oldBreadcrumb.sketchId==breadcrumb.sketchId && currentSketch && currentSketch.id==breadcrumb.sketchId) {
+					var all = getZoomAll(objectDetailProject);
+					animateTo(objectDetailProject, all.zoom, all.center);
+				}
+				else
+					showEditor(breadcrumb.sketchId, true);
+			}
+			else if (breadcrumb.isElement()) 
+				showEditor(breadcrumb.sketchId, true, breadcrumb.elementId);
 			else 
 				console.log('unsupported breadcrumb type '+breadcrumb.type);
 		}
@@ -681,7 +798,7 @@ function handleActionSelected(id) {
 	if (id=='selectAction') {
 		handlePropertiesShowSelected('propertiesShowSelection');
 	} 
-	else if (id.substr(0,3)=='add') {
+	else if (id.substr(0,3)=='add' || id.substr(0,5)=='place') {
 		handlePropertiesShowSelected('propertiesShowNew');		
 	}
 	
@@ -715,7 +832,10 @@ function handleActionSelected(id) {
 			}
 		}
 		$('#'+id).removeClass('actionSelected');
-		$('#selectAction').addClass('actionSelected');
+		if (showingIndex || showingSequences)
+			$('#selectAction').addClass('actionSelected');
+		else
+			$('#panAction').addClass('actionSelected');
 		updatePropertiesForCurrentSelection();
 
 		canDeleteSelection = false;
@@ -745,7 +865,10 @@ function handleActionSelected(id) {
 			}
 			// revert to select
 			$('#'+id).removeClass('actionSelected');
-			$('#selectAction').addClass('actionSelected');
+			if (showingIndex || showingSequences)
+				$('#selectAction').addClass('actionSelected');
+			else
+				$('#panAction').addClass('actionSelected');
 			updatePropertiesForCurrentSelection();
 			return;
 		}
@@ -755,29 +878,43 @@ function handleActionSelected(id) {
 		for (var si=0; si<currentSelections.length; si++) {
 			var cs = currentSelections[si];
 			var sketchId = null;
+			var elementId = null;
+			var url = null;
 			if (cs.record.selection.sketch && cs.record.selection.sketch.id) {
 				sketchId = cs.record.selection.sketch.id;
 			}
-			else if (cs.record.selection.elements && cs.record.selection.elements.length>0 && cs.record.selection.elements[0].icon)
+			else if (cs.record.selection.elements && cs.record.selection.elements.length>0 && cs.record.selection.elements[0].icon) {
 				sketchId = cs.record.selection.elements[0].icon.sketchId;
+				elementId = cs.record.selection.elements[0].icon.elementId;
+			}
+			else if (cs.record.selection.elements && cs.record.selection.elements.length>0 && cs.record.selection.elements[0].text) {
+				var text = cs.record.selection.elements[0].text.content;
+				if (text.substr(0,5)=='http:' || text.substr(0,6)=='https:')
+					url = text;
+			}
 			else if (cs.record.selection.sequence && cs.record.selection.sequence.items && cs.record.selection.sequence.items.length>0) {
 				if (cs.record.selection.sequence.items[0].sketchRef)
 					sketchId = cs.record.selection.sequence.items[0].sketchRef.sketchId;
-				else if (cs.record.selection.sequence.items[0].frameRef)
+				else if (cs.record.selection.sequence.items[0].frameRef) {
 					sketchId = cs.record.selection.sequence.items[0].frameRef.sketchId;
+					elementId = cs.record.selection.sequence.items[0].frameRef.elementId;
+				}
 			}
 			if (sketchId) {
 				if (sketchbook.sketches[sketchId]) {
-					showEditor(sketchId);
+					showEditor(sketchId, false, elementId);
 					// TODO element(s) within sketch? i.e. when currentSketch = sketch
 					// note: showEditor resets actions
-					$('#'+id).removeClass('actionSelected');
-					$('#selectAction').addClass('actionSelected');
 					updatePropertiesForCurrentSelection();
 					return;
 				}
 				else 
 					console.log('Could not find to edit sketch '+sketchId);
+			}
+			if (url) {
+				console.log('open url '+url);
+				// default to new window
+				window.open(url);
 			}
 		}
 	}
@@ -838,6 +975,28 @@ function showIndex(noBreadcrumb) {
 		breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_INDEX));
 	}
 	
+	// rebuild index hashtags
+	$('#indexHashtags .indexHashtag').remove();
+	var hashtags = [];
+	for (var sid in sketchbook.sketches) {	
+		var sketch = sketchbook.sketches[sid];
+		console.log('check sketch description for tags: '+sketch.description);
+		if (sketch.description) {
+			var re = /([#]\w+)/g;
+			var match;
+			while (match=re.exec(sketch.description)) {
+				console.log('found tag '+match[1]+' in '+match[0]);
+				var tag = match[1];
+				if (hashtags.indexOf(tag)<0)
+					hashtags.push(tag);
+			}
+		}
+	}
+	for (var tix=0; tix<hashtags.length; tix++) {
+		var tag = hashtags[tix];
+		$('#indexHashtagsMarker').after('<input type="button" value="'+tag+'" class="button indexHashtag" onclick="javascript:onObjectFilterTag(\''+tag+'\');"/>');
+	}
+	
 	// update tab classes
 	$('.tab').removeClass('tabselected');
 	$('#tabIndex').addClass('tabselected');
@@ -868,7 +1027,17 @@ function showIndex(noBreadcrumb) {
 	
 	clearProject(indexProject);
 	
+	var filter = $('#indexFilterText').val();
+	console.log('index filter: '+filter);
+	
 	for (var sid in sketchbook.sketches) {
+		
+		var sketch = sketchbook.sketches[sid];
+		if (filter && (!sketch.description || sketch.description.indexOf(filter)<0)) {
+			console.log('skip index item '+sid+' with filter '+filter);
+			continue;
+		}
+		
 		var group = createIndexItem(sid, indexProject);
 		group.translate(new paper.Point(x*INDEX_CELL_SIZE, y*INDEX_CELL_SIZE));
 		console.log('add index item '+sid+' at '+x+','+y+': '+group);
@@ -1003,7 +1172,7 @@ function onSequenceItemSelected(ev) {
 			}
 		}		
 	} 
-	else if ($('#copyAction').hasClass('actionSelected')) {
+	else if ($('#copyAction').hasClass('actionSelected') || $('#placeAction').hasClass('actionSelected')) {
 		if (si) {
 			if (si.sequenceId) {
 				var sequence = sketchbook.getSequenceById(si.sequenceId);
@@ -1212,7 +1381,7 @@ function restoreState(jstate, mergeFlag) {
 			sketchbook2.unmarshall(jstate);
 		}
 		catch (err) {
-        	alert('Sorry, there was a problem reading that file - it is probably not a sketchbook');
+        	alert('Sorry, there was a problem reading that file ('+(err.message ? err.message : err)+')');
 			return;
 		}
 		sketchbook.merge(sketchbook2);
@@ -1222,7 +1391,7 @@ function restoreState(jstate, mergeFlag) {
 			sketchbook.unmarshall(jstate);
 		}
 		catch (err) {
-			alert('Sorry, there was a problem reading that file - it is probably not a sketchbook');
+			alert('Sorry, there was a problem reading that file ('+(err.message ? err.message : err)+')');
 			sketchbook = new Sketchbook();
 			return;
 		}
@@ -1268,8 +1437,8 @@ function setupPaperjs() {
 	paper.setup();
 
 	indexProject = setupCanvas('indexCanvas');
-	objectOverviewProject = setupCanvas('objectOverviewCanvas');	
 	objectDetailProject = setupCanvas('objectDetailCanvas');
+	objectOverviewProject = setupCanvas('objectOverviewCanvas');	
 	selectionProject = setupCanvas('selectionCanvas');
 	sequencesViewProject = setupCanvas('sequencesViewCanvas');
 }
@@ -1443,7 +1612,7 @@ function checkHighlight(ev) {
 	if (!tool) {
 		var p = getProject(ev.target);
 		if (p && p.view) {
-			if ($('#selectAction').hasClass('actionSelected') || 
+			if ($('#selectAction').hasClass('actionSelected') || $('#panAction').hasClass('actionSelected') ||
 					($('#orderToBackAction').hasClass('actionSelected') && p!==selectionProject)) {
 				tool = new HighlightTool(p);
 				toolView = p.view;
@@ -1459,7 +1628,14 @@ function checkHighlight(ev) {
 function getNewTool(project, view) {
 	if ($('#selectAction').hasClass('actionSelected')) {
 		var sketchId = currentSketch ? currentSketch.id : undefined;
-		return new SelectTool(project, sketchbook, sketchId);
+		return new SelectAreaTool(project, sketchbook, sketchId);
+	}
+	else if ($('#panAction').hasClass('actionSelected')) {
+		var sketchId = currentSketch ? currentSketch.id : undefined;
+		if (project==selectionProject)
+			return new SelectAreaTool(project, sketchbook, sketchId);
+		else
+			return new PanAndZoomTool(project, sketchbook, sketchId);
 	}
 	if (project!=selectionProject) {
 		if ($('#showAllAction').hasClass('actionSelected')) {
@@ -1470,9 +1646,6 @@ function getNewTool(project, view) {
 		}
 		else if ($('#zoomOutAction').hasClass('actionSelected')) {
 			return new ZoomTool(project, false);
-		}
-		else if ($('#panAction').hasClass('actionSelected')) {
-			return new PanTool(project);
 		}
 	}
 	if (project==objectOverviewProject || project==objectDetailProject) {
@@ -1503,17 +1676,40 @@ function getNewTool(project, view) {
 		else if ($('#copyAction').hasClass('actionSelected') || $('#placeAction').hasClass('actionSelected')/* && !showingIndex*/) {
 			var sketchId = currentSketch ? currentSketch.id : undefined;
 			var elements = [];
+			// icon styling
+			var iconLineWidth = Number(getProperty('lineWidth', 1));
+			var iconFrameStyle = getProperty('frameStyle', '');
+			var iconLineColor = getLineColor();
+			var iconFillColor = getFillColor();
+			var iconTextVAlign = getProperty('textVAlign', 'middle');
+			var iconShowLabel = getProperty('showLabel', '');
+			var iconTextSize = getProperty('textSize', 12);
+			var iconTextColor = getTextColor();
+			var iconRescale = getProperty('rescale' ,'fit');
 			// convert selection to elements to add
 			for (var si=0; si<currentSelections.length; si++) {
 				var cs = currentSelections[si];
 				if (cs.record.selection.sketch) {
 					// copy an entire sketch = icon/link ('place')
-					var icon = { icon: { sketchId: cs.record.selection.sketch.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE } };
+					var icon = { icon: { sketchId: cs.record.selection.sketch.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
+						lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
+						showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize,
+						rescale : iconRescale } };
 					elements.push(icon);
 				} else if (cs.record.selection.elements) {
 					// copy elements into a new sketch
 					for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
-						elements.push(cs.record.selection.elements[ei]);
+						// unless it is a frame from another sketch
+						var el = cs.record.selection.elements[ei];
+						if (el.frame && sketchId!==cs.record.selection.sketchId) {
+							var icon = { icon: { sketchId: cs.record.selection.sketchId, elementId: el.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
+								lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
+								showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize,
+								rescale : iconRescale } };
+							elements.push(icon);						
+						}
+						else
+							elements.push(cs.record.selection.elements[ei]);
 					}
 				}
 			}
@@ -1750,6 +1946,21 @@ function handleTabChange() {
 	// TODO
 }
 
+function getZoomForBounds(project, bounds) {
+	if (!bounds) {
+		console.log('showAll: bounds is null');
+		return { zoom: 1, center: new paper.Point(0,0) };
+	} else {
+		var bw = bounds.width+MIN_SIZE;
+		var bh = bounds.height+MIN_SIZE;
+		var w = $(project.view._element).width();
+		var h = $(project.view._element).height();
+		var zoom = Math.min(MAX_ZOOM, w/bw, h/bh);
+		console.log('showAll: bounds='+bw+','+bh+', canvas='+w+','+h+', zoom='+zoom+', bounds.center='+bounds.center);
+		return { zoom: zoom, center: bounds.center };
+	}
+
+}
 
 // scale view to show all of project
 function getZoomAll(project) {
@@ -1766,18 +1977,7 @@ function getZoomAll(project) {
 				bounds = bounds.unite(b);
 		}
 	}
-	if (bounds==null) {
-		console.log('showAll: bounds is null');
-		return { zoom: 1, center: new paper.Point(0,0) };
-	} else {
-		var bw = bounds.width+MIN_SIZE;
-		var bh = bounds.height+MIN_SIZE;
-		var w = $(project.view._element).width();
-		var h = $(project.view._element).height();
-		var zoom = Math.min(MAX_ZOOM, w/bw, h/bh);
-		console.log('showAll: bounds='+bw+','+bh+', canvas='+w+','+h+', zoom='+zoom+', bounds.center='+bounds.center);
-		return { zoom: zoom, center: bounds.center };
-	}
+	return getZoomForBounds(project, bounds);
 }
 //scale view to show all of project
 function showAll(project) {
@@ -1843,7 +2043,8 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 		var title = getSketchTitle(sketch);
 		label.content = title;
 		label.paragraphStyle.justification = 'center';
-		label.characterStyle = { fillColor: 'black', fontSize: LABEL_FONT_SIZE };
+		label.characterStyle.fillColor = 'black';
+		label.characterStyle.fontSize = LABEL_FONT_SIZE;
 		children.push(label);
 		var box = new paper.Path.Rectangle(new paper.Point(INDEX_CELL_MARGIN/2, INDEX_CELL_MARGIN/2),
 				new paper.Point(INDEX_CELL_SIZE-INDEX_CELL_MARGIN/2, INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT-INDEX_CELL_MARGIN/2));
@@ -1874,7 +2075,8 @@ function createIndexItemFromSequenceItems(sequenceId, description, sequenceItems
 		var title = new paper.PointText(0, 0);
 		title.content = description;
 		title.paragraphStyle.justification = 'left';
-		title.characterStyle = { fillColor: 'gray', fontSize: TITLE_FONT_SIZE };
+		title.characterStyle.fillColor = 'gray';
+		title.characterStyle.fontSize = TITLE_FONT_SIZE;
 		items.push(title);
 	}
 	for (var ix=0; ix<sequenceItems.length; ix++) {
@@ -1888,7 +2090,8 @@ function createIndexItemFromSequenceItems(sequenceId, description, sequenceItems
 		var item = new paper.PointText(new paper.Point(LABEL_FONT_SIZE*4/3, y));
 		item.content = text;
 		item.paragraphStyle.justification = 'left';
-		item.characterStyle = { fillColor: 'black', fontSize: LABEL_FONT_SIZE };
+		item.characterStyle.fillColor = 'black';
+		item.characterStyle.fontSize = LABEL_FONT_SIZE;
 		items.push(item);
 	}
 	if (items.length>0) {
@@ -2002,6 +2205,7 @@ function updateActionsForCurrentSelection() {
 		// sketch exists?			
 		var cs = currentSelections[0];
 		var sketchId = null;
+		var url = null;
 		if (cs.record.selection.sketch && cs.record.selection.sketch.id) {
 			// selected a (whole) sketch
 			sketchId = cs.record.selection.sketch.id;
@@ -2011,6 +2215,8 @@ function updateActionsForCurrentSelection() {
 			if (el.icon && el.icon.sketchId)
 				// selected a link to a sketch
 				sketchId = el.icon.sketchId;
+			if (el.text && el.text.content && (el.text.content.substr(0,5)=='http:' || el.text.content.substr(0,6)=='https:'))
+				url = el.text.content;
 		}
 		else if (cs.record.selection.sequence && cs.record.selection.sequence.items && cs.record.selection.sequence.items.length==1) {
 			var sitem = cs.record.selection.sequence.items[0];
@@ -2020,7 +2226,7 @@ function updateActionsForCurrentSelection() {
 				// TODO frame within sketch?
 				sketchId = sitem.frameRef.sketchId;
 		}
-		if (sketchId && sketchbook.sketches[sketchId] && (!currentSketch || currentSketch.id!==sketchId)) 
+		if (sketchId && sketchbook.sketches[sketchId] && (!currentSketch || currentSketch.id!==sketchId) || url)
 			// OK to edit
 			$('#editAction').removeClass('actionDisabled');
 	}
@@ -2042,8 +2248,20 @@ function updateActionsForCurrentSelection() {
 		}
 		else if (cs.record.selection.sketch)
 			canPlace = true;
-		else if (cs.record.selection.elements)
-			canCopy = true;
+		else if (cs.record.selection.elements) {
+			// 'place' if frame on a differnt sketch
+			if (currentSketch && currentSketch.id!==cs.record.selection.sketchId) {
+				for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
+					var el = cs.record.selection.elements[ei];
+					if (el.frame)
+						canPlace = true;
+					else 
+						canCopy = true;
+				}
+			}
+			else
+				canCopy = true;
+		}		
 	}
 	if (canCopy) {
 		$('#copyAction').removeClass('actionDisabled');
@@ -2099,10 +2317,13 @@ function updateActionsForCurrentSelection() {
 }
 
 /** show editor for object ID */
-function showEditor(sketchId, noBreadcrumb) {
+function showEditor(sketchId, noBreadcrumb, elementId) {
 	if (!noBreadcrumb && (!currentSketch || currentSketch.id!==sketchId)) {
-		console.log('breadcrumb sketch '+sketchId);
-		breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_SKETCH, sketchId));		
+		console.log('breadcrumb sketch '+sketchId+' element '+elementId);
+		if (elementId)
+			breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_ELEMENT, sketchId, elementId));		
+		else
+			breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_SKETCH, sketchId));		
 	}	
 	else 
 		console.log('no breadcrumb sketch '+sketchId+', currentSketch.id='+(currentSketch ? currentSketch.id : undefined)+', noBreadcrumb='+noBreadcrumb);
@@ -2147,7 +2368,7 @@ function showEditor(sketchId, noBreadcrumb) {
 	$('#addCircleAction').removeClass('actionDisabled');
 	$('#addTextAction').removeClass('actionDisabled');
 	$('#addFrameAction').removeClass('actionDisabled');
-	onActionSelected.call($('#selectAction'));
+	onActionSelected.call($('#panAction'));
 
 	updateActionsForCurrentSketch();
 	updateActionsForCurrentSelection();
@@ -2169,13 +2390,33 @@ function showEditor(sketchId, noBreadcrumb) {
 	// NB set zoom/center after resize workaround
 	var settings = editorSettings[sketchId];
 	if (settings===undefined) {
+		showAll(objectOverviewProject);
+		showAll(objectDetailProject);
 		settings = new Object();
-		settings.overviewZoom = 1;
-		settings.detailZoom = 1;
-		settings.overviewCenter = new paper.Point(0,0);
-		settings.detailCenter = new paper.Point(0,0);
+		settings.overviewZoom = objectOverviewProject.view.zoom;
+		settings.detailZoom = objectDetailProject.view.zoom;
+		settings.overviewCenter = objectOverviewProject.view.center;
+		settings.detailCenter = objectDetailProject.view.center;
 		editorSettings[sketchId] = settings;
 	}
+	
+	if (elementId) {
+		var done = false;
+		for (var ci in objectDetailProject.activeLayer.children) {
+			var c = objectDetailProject.activeLayer.children[ci];
+			if (c.sketchElementId==elementId) {
+				var zoom = getZoomForBounds(objectDetailProject, c.bounds);
+				console.log('Zooming to element '+elementId);
+				settings.detailZoom = objectDetailProject.view.zoom = zoom.zoom;
+				settings.detailCenter = objectDetailProject.view.center = zoom.center;
+				done = true;
+				break;
+			}
+		}
+		if (!done)
+			console.log('could not find element '+elementId+' to zoom');
+	}
+	
 	objectDetailProject.view.zoom = settings.detailZoom;
 	objectDetailProject.view.center = settings.detailCenter;
 	objectOverviewProject.view.zoom = settings.overviewZoom;
@@ -2371,6 +2612,53 @@ function doAction(action) {
 		console.log("handling select action");
 		
 		handleSelections(action.selections);
+		// delayed zoom (animation)
+		if (action.zoomProject && currentSketch) {
+			if (action.selections.length==0 || !action.selections[0].elements || action.selections[0].elements.length==0) {
+				// all
+				var all = getZoomAll(action.zoomProject);
+				animateTo(action.zoomProject, all.zoom, all.center);
+				// breadcrumbs?
+				if (action.zoomProject==objectDetailProject && breadcrumbs.length>0) {
+					var breadcrumb = breadcrumbs[breadcrumbs.length-1];
+					if (breadcrumb.isElement()) {
+						breadcrumbs.pop();
+						if (breadcrumbs.length>0) {
+							var breadcrumb2 = breadcrumbs[breadcrumbs.length-1];
+							if (breadcrumb2.isSketch() && breadcrumb2.sketchId==breadcrumb.sketchId)
+								; // ok
+							else {
+								console.log('fixing breadcrumb from element to sketch on out');
+								breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_SKETCH, breadcrumb.sketchId));
+							}
+						}
+					}
+				}
+			}
+			else {
+				var el = action.selections[0].elements[0];
+				if (el.id) {
+					// scale view to show all of project
+					for (var ci in action.zoomProject.activeLayer.children) {
+						var c = action.zoomProject.activeLayer.children[ci];
+						if (c.sketchElementId==el.id) {
+							var zoom = getZoomForBounds(action.zoomProject, c.bounds);
+							animateTo(action.zoomProject, zoom.zoom, zoom.center);
+							// breadcrumbs
+							if (action.zoomProject==objectDetailProject) { 
+								if (breadcrumbs.length>0) {
+									var breadcrumb = breadcrumbs[breadcrumbs.length-1];
+									if (breadcrumb.isElement() && breadcrumb.sketchId==action.selections[0].sketchId) 	
+										breadcrumbs.pop();
+								}
+								breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_ELEMENT, action.selections[0].sketchId, el.id));
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	else if (action.type=='delete') {
 		var deletedCurrent = false;
@@ -2416,7 +2704,8 @@ function loadImageAndSelect(url) {
 	// select as callback/continuation (load may be delayed)
 	var select = function(image) {
 		// fake a select action for the image
-		var element = { image: { url: image.url, x: 0, y: 0, width: image.info.width, height: image.info.height } };
+		var rescale = getProperty('rescale', 'fit');
+		var element = { image: { url: image.url, x: 0, y: 0, width: image.info.width, height: image.info.height, rescale: rescale } };
 		var selection = { elements: [ element ] };
 		var action = new Action(this, 'select');
 		action.selections = [ selection ];
@@ -2519,8 +2808,15 @@ function readChosenFile(mergeFlag) {
         	restoreState(jstate, mergeFlag);
         }
         catch (err) {
-        	alert('Sorry, there was a problem reading that file - it is probably not a sketchbook');
-        	console.log('error parsing JSON state: '+err.message);
+        	console.log('error parsing JSON state: '+(err.message ? err.message : err));
+        	try {
+        		jstate = loadPrezi(evt.target.result);
+            	restoreState(jstate, mergeFlag);
+        	}
+        	catch (err) {
+        		alert('Sorry, there was a problem reading that file - it is probably not a sketchbook');
+        		console.log('error parsing Prezi state: '+(err.message ? err.message : err));
+        	}
         }
     };
 
@@ -2575,7 +2871,20 @@ function onShowSequences() {
 
 // GUI entry point 
 function onObjectFilterChanges() {
-	// TODO
+	if (showingIndex) {
+		console.log('onObjectFilterChanges');
+		// reshow, no breadcrumb
+		showIndex(true);
+	}
+	return false;
+}
+function onObjectFilterClear() {
+	$('#indexFilterText').val('');
+	onObjectFilterChanges();
+}
+function onObjectFilterTag(tag) {
+	$('#indexFilterText').val(tag);
+	onObjectFilterChanges();
 }
 
 // GUI Entry point
@@ -2694,12 +3003,41 @@ function onSetFrameStyle(value) {
 		onSetProperty(action);
 	}
 }
+//property editor entry point
+function onSetShowLabel(value) {
+	if (value===undefined || value===null)
+		return;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setShowLabel(value);
+		onSetProperty(action);
+	}
+}
+//property editor entry point
+function onSetTextVAlign(value) {
+	if (value===undefined || value===null)
+		return;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setTextVAlign(value);
+		onSetProperty(action);
+	}
+}
 function onSetLineWidth(value) {
 	if (!value)
 		return;
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
 		action.setLineWidth(value);
+		onSetProperty(action);
+	}
+}
+function onSetRescale(value) {
+	if (!value)
+		return;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setRescale(value);
 		onSetProperty(action);
 	}
 }
@@ -2807,6 +3145,12 @@ $(document).ready(function() {
 	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
 	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
 	propertyEditors.textJustify.onSetValue = onSetTextJustify;
+	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
+	propertyEditors.showLabel.onSetValue = onSetShowLabel;
+	propertyEditors.textVAlign = new PropertySelect('textVAlign', 'textVAlignProperty');
+	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
+	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
+	propertyEditors.rescale.onSetValue = onSetRescale;
 
 	onShowIndex();
 	

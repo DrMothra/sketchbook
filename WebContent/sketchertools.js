@@ -288,6 +288,17 @@ function addHighlight(project, item) {
 	// highlight layer
 	project.layers[2].activate();
 	
+	// special case clipped link to frame
+	if (item instanceof paper.Group && item.sketchFrameFlag) {
+		for (var ci=0; ci<item.children.length; ci++) {
+			var c = item.children[ci];
+			if (c.clipped && c.children.length>0) {
+				item = c.children[0];			
+				break;
+			}
+		}
+	}
+	
 	// temporary hack to show red box at bounds as highlight
 	var topLeft = item.bounds.topLeft;
 	var bottomRight = item.bounds.bottomRight;
@@ -318,6 +329,20 @@ function getItemAtPoint(project, point) {
 	for (var ci=0; ci<children.length; ci++) {
 		var c = children[ci];
 		var bounds = c.bounds;
+		if (c instanceof paper.Group && c.sketchFrameFlag) {
+			for (var ci2=0; ci2<c.children.length; ci2++) {
+				var c2 = c.children[ci2];
+				if (c2.clipped && c2.children.length>0) {
+					// special case clipped frame
+					var topLeft = c2.children[0].bounds.topLeft;
+					var bottomRight = c2.children[0].bounds.bottomRight;
+					topLeft = c2.matrix.transform(topLeft);
+					bottomRight = c2.matrix.transform(bottomRight);
+					bounds = new paper.Rectangle(topLeft, bottomRight);
+					break;
+				}
+			}
+		}
 		if (point.x>=bounds.left-tolerance &&
 			point.x<=bounds.right+tolerance &&
 			point.y>=bounds.top-tolerance &&
@@ -333,6 +358,38 @@ function getItemAtPoint(project, point) {
 		//console.log('- no children: '+point.x+','+point.y);
 	var item = (items.length>0) ? items[items.length-1] : null;
 	return item;
+}
+
+/** find item (if any) at point in project - for select and highlight */
+function getItemsInBounds(project, rect) {
+	var items = new Array();
+	var children = project.layers[1].children;
+	for (var ci=0; ci<children.length; ci++) {
+		var c = children[ci];
+		var bounds = c.bounds;
+		if (c instanceof paper.Group && c.sketchFrameFlag) {
+			for (var ci2=0; ci2<c.children.length; ci2++) {
+				var c2 = c.children[ci2];
+				if (c2.clipped && c2.children.length>0) {
+					// special case clipped frame
+					var topLeft = c2.children[0].bounds.topLeft;
+					var bottomRight = c2.children[0].bounds.bottomRight;
+					topLeft = c2.matrix.transform(topLeft);
+					bottomRight = c2.matrix.transform(bottomRight);
+					bounds = new paper.Rectangle(topLeft, bottomRight);
+					break;
+				}
+			}
+		}
+		if (rect.intersects(bounds)) {
+			items.push(c);
+			//console.log('- hit '+ci+':'+point.x+','+point.y+' vs '+bounds+'+/-'+tolerance);
+		}
+		else {
+			//console.log('- missed '+ci+':'+point.x+','+point.y+' vs '+bounds+'+/-'+tolerance);
+		}
+	}
+	return items;
 }
 
 HighlightTool.prototype.checkHighlight = function(point) {
@@ -443,6 +500,162 @@ SelectTool.prototype.end = function(point) {
 	return this.sketchbook.selectItemsAction(this.sketchId, items);
 };
 
+/** select tool */
+function SelectAreaTool(project, sketchbook, sketchId) {
+	Tool.call(this, 'select', project);
+	this.sketchbook = sketchbook;
+	this.sketchId = sketchId;	
+	this.selectedItems = new Array();
+	this.highlightItems = new Array();
+}
+SelectAreaTool.prototype = new Tool();
+
+SelectAreaTool.prototype.clearHighlightItems = function() {
+	for (var ix=0; ix<this.highlightItems.length; ix++) 
+		this.highlightItems[ix].remove();
+	this.highlightItems = new Array();
+};
+SelectAreaTool.prototype.checkArea = function(from, to) {
+	var bounds = new paper.Rectangle(new paper.Point(from.x, from.y), new paper.Point(to.x, to.y));
+	var items = getItemsInBounds(this.project, bounds);
+	this.clearHighlightItems();
+	this.selectedItems = new Array();
+	this.selectedElementIds = [];
+	this.selectedSketchIds = [];
+	this.selectedSelectionRecordIds = [];
+	
+	// changed?
+	for (var ii=0 in items) {
+		var item = items[ii];
+		// item id?
+		var elementId = getSketchElementId(item);
+		if (elementId) {
+			if (this.selectedElementIds.indexOf(elementId)<0) {
+				this.selectedItems.push(item);
+				this.selectedElementIds.push(elementId);
+				this.highlightItems.push(addHighlight(this.project, item));
+			}
+		} else {
+			var sketchId = item.sketchId;
+			if (sketchId) {
+				if (this.selectedSketchIds.indexOf(sketchId)<0) {
+					this.selectedItems.push(item);
+					this.selectedSketchIds.push(sketchId);
+					this.highlightItems.push(addHighlight(this.project, item));
+				}
+			}
+			else {
+				var selectionRecordId = item.selectionRecordId;
+				if (selectionRecordId) {
+					if (this.selectedSelectionRecordIds.indexOf(selectionRecordId)<0) {
+						this.selectedItems.push(item);
+						this.selectedSelectionRecordIds.push(selectionRecordId);
+						this.highlightItems.push(addHighlight(this.project, item));
+					}
+				}
+				else 
+					console.log('could not select item without elementId, sketchId or selectionRecordId: '+item);
+			}
+		}
+	}
+};
+SelectAreaTool.prototype.begin = function(point) {
+	this.clearHighlightItems();
+	this.selectedItems = new Array();
+	this.selectedElementIds = [];
+	this.selectedSketchIds = [];
+	this.selectedSelectionRecordIds = [];
+	this.startPoint = point;
+	this.checkArea(this.startPoint, point);
+};
+SelectAreaTool.prototype.move = function(point) {
+	if (this.path) {
+		this.path.remove();
+	}
+	// activate overlay layer
+	activateOverlay(this.project);
+	this.path = new paper.Path.Rectangle(this.startPoint, point);
+	this.path.strokeColor = 'red';
+	this.path.strokeWidth = 1;
+
+	this.checkArea(this.startPoint, point);
+};
+SelectAreaTool.prototype.end = function(point) {
+	this.checkArea(this.startPoint, point);
+	if (this.path) {
+		this.path.remove();
+		this.path = null;
+	}
+	this.clearHighlightItems();
+	var items = this.selectedItems;
+	this.selectedItems = [];
+	// we'll use an action for this although it doesn't actually modify the sketchbook state!
+	return this.sketchbook.selectItemsAction(this.sketchId, items);
+};
+
+/** common zoom tool */
+function PanAndZoomTool(project, sketchbook, sketchId) {
+	Tool.call(this,'panAndZoom', project);
+	this.sketchbook = sketchbook;
+	this.sketchId = sketchId;	
+	this.panPoint = null;
+	this.panView = null;
+	this.pannedFlag = false;
+	this.highlightItem = null;
+};
+PanAndZoomTool.prototype.pan = function(point) {
+	// from Pan
+	if (!this.panView || !this.panPoint)
+		return;
+	var dx = this.panPoint.x-point.x;
+	var dy = this.panPoint.y-point.y;
+	if (dx!=0 || dy!=0) {
+		this.pannedFlag = true;
+		//console.log('- d='+dx+','+dy+' zoom\'='+zoomView.zoom+' sd='+sdx+','+sdy);
+		this.panView.center = new paper.Point(this.panView.center.x+dx, this.panView.center.y+dy);
+		//console.log('- center\'='+zoomView.center);
+	}
+};
+PanAndZoomTool.prototype.begin = function(point) {
+	// from Pan
+	this.panPoint = new paper.Point(point);
+	this.panView = this.project.view;
+	this.pannedFlag = false;
+	this.selectItem = getItemAtPoint(this.project, point);
+	if (this.selectItem) {
+		this.highlightItem = addHighlight(this.project, this.selectItem);
+	}
+};
+PanAndZoomTool.prototype.move = function(point) {
+	// from Pan
+	this.pan(point);
+};
+PanAndZoomTool.prototype.end = function(point) {
+	// from Pan
+	this.pan(point);
+	if (this.highlightItem) {
+		this.highlightItem.remove();
+		this.highlightIte = null;
+	}
+	var selectFlag = !this.pannedFlag;
+	var items = [];
+	if (selectFlag) {
+		if (this.selectItem) {
+			items.push(this.selectItem);
+		}
+	}
+
+	this.panView = null;
+	this.selectedItem = null;
+
+	// we'll use an action for this although it doesn't actually modify the sketchbook state!
+	if (selectFlag)
+		// select and zoom
+		return this.sketchbook.selectItemsAction(this.sketchId, items, this.project);
+	
+	return null;
+};
+
 /** order to back tool */
 function OrderToBackTool(project, sketchbook, sketchId) {
 	//SelectTool.call(this, project, sketchbook, sketchId);
@@ -511,7 +724,7 @@ CopyToSketchTool.prototype.end = function(point) {
 		delete this.group;
 	}
 	if (this.elements) {
-		var bounds = new paper.Rectangle(this.startPoint, point);		console.log("elements = ", this.elements);
+		var bounds = new paper.Rectangle(this.startPoint, point);
 		return this.sketchbook.addElementsAction(this.sketchId, this.elements, this.elementBounds, bounds);
 	}
 	return null;
@@ -522,6 +735,14 @@ function FrameTool(project, sketchbook, sketchId, description) {
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;	
 	this.description = description;
+	this.frameStyle = getProperty('frameStyle', 'border');
+	this.lineColor = getLineColor();
+	this.fillColor = getFillColor();
+	this.lineWidth = getProperty('lineWidth', 1);
+	this.showLabel = getProperty('showLabel', 'frame');
+	this.textColor = getTextColor();
+	this.textSize = getProperty('textSize', 12);
+	this.textVAlign = getProperty('textVAlign', 'middle');
 }
 FrameTool.prototype = new Tool();
 
@@ -544,7 +765,7 @@ FrameTool.prototype.end = function(point) {
 		delete this.path;
 	}
 	var bounds = new paper.Rectangle(this.startPoint, point);
-	return this.sketchbook.addFrameAction(this.sketchId, this.description, bounds);
+	return this.sketchbook.addFrameAction(this.sketchId, this.description, bounds, this.frameStyle, this.lineColor, this.lineWidth, this.fillColor, this.showLabel, this.textColor, this.textSize, this.textVAlign);
 };
 
 function TextTool(project, sketchbook, sketchId, content) {
