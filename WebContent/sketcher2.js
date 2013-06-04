@@ -943,20 +943,38 @@ function handlePropertiesShowSelected(id) {
 }
 
 function onPropertyEdit(event) {
-	console.log("Selections = ", currentSelections.length);
-	
 	for (var i=0; i<currentSelections.length; i++) {
 			var cs = currentSelections[i];
 			if (cs.record.selection.elements) {
 				for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
 					var el = cs.record.selection.elements[ei];
 					if (el.text) {
-						console.log("Double clicked text!");
+						//console.log("Double clicked text!");
 						var editText = $('#objectDetailTextarea');
 						editText.show();
 						editText.val(el.text.content);
 						editText.css('left', event.pageX);
 						editText.css('top', event.pageY);
+					}
+				}
+			}
+	}
+}
+
+function onDetailFinished(event) {
+	for (var i=0; i<currentSelections.length; i++) {
+			var cs = currentSelections[i];
+
+			if (cs.record.selection.elements) {
+				for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
+					var el = cs.record.selection.elements[ei];
+					if (el.text) {
+						var editText = $('#objectDetailTextarea');
+						//console.log("Text edited ", editText.val());
+						el.text.content = editText.val();
+						propertyEditors.text.setValue(el.text.content);
+						onSetText(el.text.content);
+						editText.hide();
 					}
 				}
 			}
@@ -1528,7 +1546,7 @@ function registerHighlightEvents() {
 		$(this).blur();
 		$('#orphanText').focus();
 	});
-
+	$(document).on('mouseout', '#objectDetailTextarea', onDetailFinished);
 }
 
 /** get paperjs project for event target iff it is a canvas.
@@ -1797,9 +1815,6 @@ function registerMouseEvents() {
 			toolUp(ev);
 		
 		// change tool?
-		
-		console.log("selections = ", currentSelections);
-		
 		if (ev.target.tagName && (ev.target.tagName=='TEXTAREA' || ev.target.tagName=='INPUT')) {
 			// no
 		} else {
@@ -1829,6 +1844,8 @@ function registerMouseEvents() {
 				handleActionSelected('copyAction');
 				handleActionSelected('placeAction');
 			}
+			else if (ev.which=='O'.charCodeAt(0))
+				handleActionSelected('addCircleAction');
 			else if (ev.which==KEY_DELETE)
 				handleActionSelected('deleteAction');
 			else if (ev.which==KEY_BACKSPACE)
@@ -2012,7 +2029,7 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 	var backgroundGroups = [];
 	if (sketch)
 		backgroundGroups = refreshBackground(sketch);
-
+	
 	var items = elementsToPaperjs(elements, sketchbook, images);
 	if (backgroundGroups.length>0) {
 		items = backgroundGroups.concat(items);
@@ -2450,6 +2467,7 @@ function clearCurrentSelection() {
 function handleSelections(selections) {
 	// selection may (currently) be sketch or element (with sketchId) or thing from selection history
 	// add to selection history
+	
 	var newSelectionRecordIds = new Array();
 	for (var si=0; si<selections.length; si++) {
 		var selection = selections[si];
@@ -2588,8 +2606,6 @@ function doAction(action) {
 	}
 	else if (action.type=='setProperties' || action.type=='orderToBack') {
 		var sketchIds = [];
-		
-		console.log("setProps");
 		
 		for (var ei=0; ei<action.elements.length; ei++) {
 			var element = action.elements[ei];
@@ -2951,7 +2967,6 @@ function onSetProperty(action) {
 		}
 	}
 	console.log('setting properties on current selection');
-	console.log("action = ", action);
 	doAction(action);
 }
 // property editor entry point

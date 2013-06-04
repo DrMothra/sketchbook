@@ -130,6 +130,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 	for (var ix=0; ix<elements.length; ix++) {
 		var element = elements[ix];
 		if (element.line!==undefined) {
+			
+			console.log("Got line");
+			
 			var path = new paper.Path();
 			// preserve id
 			path.sketchElementId = element.id;
@@ -160,6 +163,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		}
 		if (element.icon!==undefined) {
 			// copy sketch item(s)
+			
+			console.log("Got icon");
+			
 			var sketch = sketchbook.sketches[element.icon.sketchId];
 			var group = null;
 			var bounds = null;
@@ -272,6 +278,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.frame!==undefined) {
+			
+			console.log("Got frame");
+			
 			var outline = new paper.Path.Rectangle(new paper.Rectangle(element.frame.x, element.frame.y, element.frame.width, element.frame.height));
 			// default
 			if (element.frame.lineWidth)
@@ -333,6 +342,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.circle!==undefined) {
+			
+			console.log("Got circle");
+			
 			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
 			if (element.circle.lineWidth)
 				path.strokeWidth = element.circle.lineWidth;
@@ -347,6 +359,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(path);
 		}
 		if (element.image!==undefined) {
+			
+			console.log("Got image");
+			
 			var imageId = null;
 			for (var iid in images) {
 				if (images[iid].url==element.image.url) {
@@ -388,6 +403,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.text!==undefined) {
+			
+			console.log("Got text");
+			
 			var text = new paper.PointText(new paper.Point(element.text.x, element.text.y));
 			text.content = element.text.content;
 			text.characterStyle.fontSize = element.text.textSize;
@@ -1052,7 +1070,7 @@ SetPropertiesAction.prototype.setTextJustify = function(value) {
 	console.log("setTextJustify = ", value);
 };
 
-SetPropertiesAction.prototype.setRescale = function(text) {
+SetPropertiesAction.prototype.setRescale = function(rescale) {
 	this.rescale = rescale;
 };
 
