@@ -1673,11 +1673,11 @@ function getNewTool(project, view) {
 		}
 		else if ($('#addLineAction').hasClass('actionSelected')) {
 			if (currentSketch && currentSketch.id)
-				return new LineTool(project, sketchbook, currentSketch.id);
+				return new LineTool(project, sketchbook, currentSketch.id, false, isShifted);
 		}
 		else if ($('#addCurveAction').hasClass('actionSelected')) {
 			if (currentSketch && currentSketch.id)
-				return new LineTool(project, sketchbook, currentSketch.id, true);
+				return new LineTool(project, sketchbook, currentSketch.id, true, false);
 		}
 		else if ($('#addCircleAction').hasClass('actionSelected')) {
 			if (currentSketch && currentSketch.id)
@@ -1795,6 +1795,7 @@ function isSpecialKey(which) {
 
 var keyFiresTool = false;
 var mousePageX, mousePageY;
+var isShifted = false;
 
 /** register events for tool(s) */
 function registerMouseEvents() {
@@ -1850,6 +1851,8 @@ function registerMouseEvents() {
 				handleActionSelected('deleteAction');
 			else if (ev.which==KEY_BACKSPACE)
 				handleActionSelected('backAction');
+			else if (ev.which==KEY_SHIFT)
+				isShifted = true;
 			else
 				console.log('key has no action: '+ev.which);
 			// more?
@@ -1878,7 +1881,8 @@ function registerMouseEvents() {
 	$(document).keyup(function(ev) {
 		keyDown = undefined;
 		console.log('keyup: '+ev.which);
-
+		isShifted = false;
+		
 		if (keyFiresTool)
 			toolUp(ev);
 

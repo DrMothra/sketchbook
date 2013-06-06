@@ -24,12 +24,12 @@ function activateOverlay(project) {
 	project.layers[2].activate();
 }
 
-function LineTool(project, sketchbook, sketchId, curveFlag) {
+function LineTool(project, sketchbook, sketchId, curveFlag, straightFlag) {
 	// call super cons
 	Tool.call(this, 'line', project);
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;
-	this.curveFlag = curveFlag;
+	this.curveFlag = curveFlag;	this.straightFlag = straightFlag;
 }
 
 // inherit (apparently)
@@ -53,21 +53,20 @@ LineTool.prototype.begin = function(point) {
 	this.path.add(point);	
 };
 
-LineTool.prototype.move = function(point) {
-	if (this.path)
-		this.path.add(point);
+LineTool.prototype.move = function(point) {	//Simulate straight lines
+	if (this.path) {		if (this.straightFlag) {			if (this.path.length > 1)				this.path.removeSegment(1);		}
+		this.path.add(point);	}
 };
 
 LineTool.prototype.end = function(point) {
-	if (this.path) {
+	if (this.path) {		if (this.straightFlag)			this.path.add(point);
 		if (this.path.length==0) {
 			// TODO? replace with dot
 			this.path.remove();
 			console.log('zero length line');
 			//lineToolPath = new paper.Path.Circle(point, DOT_SIZE/toolView.zoom);
 			//lineToolPath.fillColor = 'black';
-		} else {
-			this.path.simplify();
+		} else {			if (!this.straightFlag)				this.path.simplify();
 			// TODO 
 			console.log('lineTool: '+this.path);
 			// create 
