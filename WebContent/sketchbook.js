@@ -131,8 +131,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		var element = elements[ix];
 		if (element.line!==undefined) {
 			
-			console.log("Got line");
-			
 			var path = new paper.Path();
 			// preserve id
 			path.sketchElementId = element.id;
@@ -163,8 +161,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		}
 		if (element.icon!==undefined) {
 			// copy sketch item(s)
-			
-			console.log("Got icon");
 			
 			var sketch = sketchbook.sketches[element.icon.sketchId];
 			var group = null;
@@ -279,8 +275,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		}
 		if (element.frame!==undefined) {
 			
-			console.log("Got frame");
-			
 			var outline = new paper.Path.Rectangle(new paper.Rectangle(element.frame.x, element.frame.y, element.frame.width, element.frame.height));
 			// default
 			if (element.frame.lineWidth)
@@ -342,9 +336,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.circle!==undefined) {
-			
-			console.log("Got circle");
-			
 			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
 			if (element.circle.lineWidth)
 				path.strokeWidth = element.circle.lineWidth;
@@ -359,8 +350,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(path);
 		}
 		if (element.image!==undefined) {
-			
-			console.log("Got image");
 			
 			var imageId = null;
 			for (var iid in images) {
@@ -383,7 +372,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			} else {
 				item = new paper.Raster(imageId);
 				if ((element.image.rescale && element.image.rescale=='stretch') || !item.image || !item.image.height || !element.image.height)
+				{
 					;
+				}
 				else {
 					// fit
 					var aspect = item.image.width/item.image.height;
@@ -403,9 +394,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.text!==undefined) {
-			
-			console.log("Got text");
-			
 			var text = new paper.PointText(new paper.Point(element.text.x, element.text.y));
 			text.content = element.text.content;
 			text.characterStyle.fontSize = element.text.textSize;
@@ -898,6 +886,19 @@ Sketchbook.prototype.selectItemsAction = function(defaultSketchId, items, zoomPr
 	return action;
 };
 
+/** return action to move a list of items - slightly different from selecting **/
+Sketchbook.prototype.moveItemsAction = function(defaultSketchId, elements, startPoint, endPoint) {
+	var action = new Action(this, 'move');
+	action.sketchId = defaultSketchId;
+	action.elements =  elements;
+	var delta = startPoint;
+	delta.x = endPoint.x - startPoint.x;
+	delta.y = endPoint.y - startPoint.y;
+	action.delta = delta;
+	
+	return action;
+};
+
 /** return action to move a list of items within a sketch to the back */
 Sketchbook.prototype.orderToBackItemsAction = function(defaultSketchId, items) {
 	var action = new Action(this, 'orderToBack');
@@ -1200,6 +1201,49 @@ Sketchbook.prototype.doAction = function(action) {
 	}
 	else if (action.type=='select') {
 		// no-op
+	}
+	else if (action.type=='move') {
+		var sketch = sketchbook.sketches[action.sketchId];
+		for (var ei=0; ei<action.elements.length; ei++) {
+			var id = action.elements[ei].id;
+			
+			console.log("element id = ", id);
+			
+			var elem = sketch.getElementById(id);
+			if (elem) {
+				if (elem.line) {
+					for (var si=0; si<elem.line.segments.length;si++) {
+						var seg = elem.line.segments[si];
+							seg.point.x += action.delta.x;
+							seg.point.y += action.delta.y;
+						}
+					}
+				if (elem.circle) {
+						elem.circle.centrePoint.x += action.delta.x;
+						elem.circle.centrePoint.y += action.delta.y;
+				
+						console.log("moved circle by ", action.delta);
+				}
+				if (elem.icon) {
+					elem.icon.x += action.delta.x;
+					elem.icon.y += action.delta.y;
+				}
+				if (elem.frame) {
+					elem.frame.x += action.delta.x;
+					elem.frame.y += action.delta.y;
+				}
+				if (elem.image) {
+					elem.image.x += action.delta.x;
+					elem.image.y += action.delta.y;
+				}
+				if (elem.text) {
+					elem.text.x += action.delta.x;
+					elem.text.y += action.delta.y;
+				}
+			}
+		}
+
+		this.changed = true;
 	}
 	else if (action.type=='setProperties') {
 		for (var ei=0; ei<action.elements.length; ei++) {

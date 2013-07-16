@@ -741,7 +741,10 @@ function getTextColor() {
 function handleActionSelected(id) {
 	var disabled = $('#'+id).hasClass('actionDisabled');
 	if (disabled)
+	{
+		console.log("action disabled for ", id);
 		return false;
+	}
 // instantaneous actions / no toggle
 	if (id=='setBackgroundAction') {
 		if (currentSelections.length>0 && currentSelections[0].record.selection.sketch && currentSelections[0].record.selection.sketch.id) {
@@ -1733,6 +1736,40 @@ function getNewTool(project, view) {
 			}
 			return new CopyToSketchTool(project, sketchbook, sketchId, elements, images);
 		}
+		else if ($('#moveAction').hasClass('actionSelected')) {
+			//Get list of selected elements
+			var sketchId = currentSketch ? currentSketch.id : undefined;
+			var elements = [];
+			// convert selection to elements to add
+			for (var si=0; si<currentSelections.length; si++) {
+				var cs = currentSelections[si];
+				if (cs.record.selection.sketch) {
+					// copy an entire sketch = icon/link ('place')
+					var icon = { icon: { sketchId: cs.record.selection.sketch.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
+						lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
+						showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize,
+						rescale : iconRescale } };
+					elements.push(icon);
+				} else if (cs.record.selection.elements) {
+					// copy elements into a new sketch
+					for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
+						// unless it is a frame from another sketch
+						var el = cs.record.selection.elements[ei];
+						if (el.frame && sketchId!==cs.record.selection.sketchId) {
+							var icon = { icon: { sketchId: cs.record.selection.sketchId, elementId: el.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
+								lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
+								showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize,
+								rescale : iconRescale } };
+							elements.push(icon);						
+						}
+						else
+							elements.push(cs.record.selection.elements[ei]);
+					}
+				}
+			}
+			
+			return new MoveTool(project, sketchbook, sketchId, elements);
+		}
 	}
 	console.log('current active tool unsupported in this project: '+$('.actionSelected').attr('id'));
 	return new Tool('unknown', project);
@@ -2251,8 +2288,8 @@ function updateActionsForCurrentSelection() {
 			// OK to edit
 			$('#editAction').removeClass('actionDisabled');
 	}
-	// TODO move 
-	$('#moveAction').addClass('actionDisabled');		
+	//Implement move action
+	//$('#moveAction').addClass('actionDisabled');		
 	// copy - any number of things?
 	// TODO copy in seqeuences
 	var canCopy = false;
@@ -2285,11 +2322,14 @@ function updateActionsForCurrentSelection() {
 		}		
 	}
 	if (canCopy) {
+		//Assume that copyable is movable for now
 		$('#copyAction').removeClass('actionDisabled');
 		$('#placeAction').addClass('actionDisabled');
+		$('#moveAction').removeClass('actionDisabled');
 	}
 	else {
-		$('#copyAction').addClass('actionDisabled');		
+		$('#copyAction').addClass('actionDisabled');
+		$('#moveAction').addClass('actionDisabled');
 		if (canPlace)
 			$('#placeAction').removeClass('actionDisabled');
 		else 
@@ -2495,6 +2535,7 @@ function handleSelections(selections) {
 			selectionRecords[selectionRecord.id] = selectionRecord;
 			newSelectionRecordIds.push(selectionRecord.id);
 			group.translate(new paper.Point(INDEX_CELL_SIZE/2-group.bounds.center.x, (INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT)/2-group.bounds.center.y));
+			
 			selectionRecord.item = group;
 		}
 	}
@@ -2679,6 +2720,9 @@ function doAction(action) {
 				}
 			}
 		}
+	}
+	else if (action.type=='move') {
+		refreshSketchViews(action.sketchId);
 	}
 	else if (action.type=='delete') {
 		var deletedCurrent = false;

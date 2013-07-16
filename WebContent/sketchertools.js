@@ -127,7 +127,41 @@ CircleTool.prototype.end = function(point) {
 	}
 	delete this.path;
 	return null;
-};
+};function getItemFromId(project, id) {	//Get item from given element id	var children = project.layers[1].children;	for (var ci=0; ci<children.length; ci++) {		var c = children[ci];				console.log("child id = ", c.sketchElementId);				if (c.sketchElementId === id) {			return c;		}	}		return null;}
+function getElementBounds(project, elements) {	//Get bounds of all elements	var bounds = null;	for (var el=0; el<elements.length; ++el) {		var elem = elements[el];		var id = elem.id;		var item = getItemFromId(project, id);		if (item) {			if (bounds==null)				bounds = item.bounds;			else				bounds = bounds.unite(item.bounds);		}	}		return bounds;}
+function MoveTool(project, sketchbook, sketchId, elements, images) {
+	// call super cons
+	Tool.call(this, 'move', project);
+	this.sketchbook = sketchbook;
+	this.sketchId = sketchId;
+	this.elements = elements;	this.images = images;
+}
+
+MoveTool.prototype = new Tool();
+
+MoveTool.prototype.begin = function(point) {	this.startPoint = point;	activateOverlay(this.project);	if (this.elements) {		this.bounds = getElementBounds(this.project, this.elements);		if (this.bounds != null) {			this.startPoint.x = this.bounds.x + this.bounds.width/2.0;			this.startPoint.y = this.bounds.y + this.bounds.height/2.0;			this.bounds.x = point.x - this.bounds.width/2.0;			this.bounds.y = point.y - this.bounds.height/2.0;			this.path = new paper.Path.Rectangle(this.bounds);			this.path.strokeColor = 'red';			this.path.strokeWidth = 1;			console.log('moving '+this.elements.length+' items');		}	}
+	else{		console.log("Nothing to move");	}
+}
+
+MoveTool.prototype.move = function(point) {
+	if (this.path)
+		this.path.remove();
+	
+	activateOverlay(this.project);
+	if (this.elements) {		this.bounds.x = point.x - this.bounds.width/2.0;		this.bounds.y = point.y - this.bounds.height/2.0;
+		this.path = new paper.Path.Rectangle(this.bounds);
+		
+		this.path.strokeColor = 'red';
+		this.path.strokeWidth = 1;
+	}
+}
+
+MoveTool.prototype.end = function(point) {	if (this.path) {		this.path.remove();		delete this.path;	}	
+	if (this.elements) {
+		return this.sketchbook.moveItemsAction(this.sketchId, this.elements, this.startPoint, point);
+	}
+	return null;
+}
 
 /** centre view tool */
 function ShowAllTool(project) {
@@ -634,7 +668,7 @@ PanAndZoomTool.prototype.end = function(point) {
 	this.pan(point);
 	if (this.highlightItem) {
 		this.highlightItem.remove();
-		this.highlightIte = null;
+		this.highlightItem = null;
 	}
 	var selectFlag = !this.pannedFlag;
 	var items = [];
