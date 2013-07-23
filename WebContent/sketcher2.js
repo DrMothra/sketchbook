@@ -1659,8 +1659,12 @@ function getNewTool(project, view) {
 		var sketchId = currentSketch ? currentSketch.id : undefined;
 		if (project==selectionProject)
 			return new SelectAreaTool(project, sketchbook, sketchId);
-		else
-			return new PanAndZoomTool(project, sketchbook, sketchId, keyPanDirection);
+		else{
+			if (keyZoomIn || keyZoomOut)
+				return new ZoomTool(project, true, keyZoomIn, keyZoomOut);
+			else
+				return new PanAndZoomTool(project, sketchbook, sketchId, keyPanDirection);
+		}
 	}
 	if (project!=selectionProject) {
 		if ($('#showAllAction').hasClass('actionSelected')) {
@@ -1905,8 +1909,10 @@ function registerMouseEvents() {
 				isShifted = true;
 			else if (ev.which=='1'.charCodeAt(0)) {
 				//Simulate zoom in
+				//Allow zoom whilst panning
 				if ($('#zoomInAction').hasClass('actionSelected') ||
-				    $('#zoomOutAction').hasClass('actionSelected')) {
+				    $('#zoomOutAction').hasClass('actionSelected') ||
+				    $('#panAction').hasClass('actionSelected')) {
 					keyZoomIn = true;
 					keyZoomOut = false;
 					if (canvasTarget) {
@@ -1926,8 +1932,10 @@ function registerMouseEvents() {
 			}
 			else if (ev.which=='2'.charCodeAt(0)) {
 				//Simulate zoom out
+				//Allow zoom whilst panning
 				if ($('#zoomOutAction').hasClass('actionSelected') ||
-				    $('#zoomInAction').hasClass('actionSelected')) {
+				    $('#zoomInAction').hasClass('actionSelected') ||
+				    $('#panAction').hasClass('actionSelected')) {
 					keyZoomIn = false;
 					keyZoomOut = true;
 					if (canvasTarget) {
@@ -1948,9 +1956,6 @@ function registerMouseEvents() {
 			else if (ev.which==KEY_RIGHT) {
 				//Simulate pan right
 				if ($('#panAction').hasClass('actionSelected')) {
-					
-					console.log('panning right');
-					
 					keyPanDirection = PAN_DIRECTION_RIGHT;
 					if (canvasTarget) {
 						var p = getProject(canvasTarget);
@@ -1971,9 +1976,6 @@ function registerMouseEvents() {
 			else if (ev.which==KEY_LEFT) {
 				//Simulate pan left
 				if ($('#panAction').hasClass('actionSelected')) {
-					
-					console.log('panning left');
-					
 					keyPanDirection = PAN_DIRECTION_LEFT;
 					if (canvasTarget) {
 						var p = getProject(canvasTarget);
@@ -1993,9 +1995,6 @@ function registerMouseEvents() {
 			else if (ev.which==KEY_UP) {
 				//Simulate pan up
 				if ($('#panAction').hasClass('actionSelected')) {
-					
-					console.log('panning up');
-					
 					keyPanDirection = PAN_DIRECTION_UP;
 					if (canvasTarget) {
 						var p = getProject(canvasTarget);
@@ -2014,11 +2013,8 @@ function registerMouseEvents() {
 				}
 			}
 			else if (ev.which==KEY_DOWN) {
-				//Simulate pan left
+				//Simulate pan down
 				if ($('#panAction').hasClass('actionSelected')) {
-					
-					console.log('panning down');
-					
 					keyPanDirection = PAN_DIRECTION_DOWN;
 					if (canvasTarget) {
 						var p = getProject(canvasTarget);
