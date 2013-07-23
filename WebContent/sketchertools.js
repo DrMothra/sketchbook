@@ -203,15 +203,16 @@ ShowAllTool.prototype.begin = function(point) {
 };
 
 /** common zoom tool */
-function ZoomTool(project, inFlag) {
+function ZoomTool(project, inFlag, keyZoomIn, keyZoomOut) {
 	Tool.call(this,'zoom', project);
-	this.inFlag = inFlag;
-
+	this.inFlag = keyZoomIn ? keyZoomIn : keyZoomOut ? false : inFlag;
 	this.ZOOM_INTERVAL = 20;
 	this.ZOOM_RATIO = 0.05;
 	this.zoomInterval = null;
 	this.zoomPoint = null;
 	this.zoomView = null;
+	this.keyZoomIn = keyZoomIn;
+	this.keyZoomOut = keyZoomOut;
 };
 
 ZoomTool.prototype.zoomIn = function() {
@@ -260,6 +261,9 @@ ZoomTool.prototype.begin = function(point) {
 	this.zoomIn();
 };
 ZoomTool.prototype.move = function(point) {
+	if (this.keyZoomIn || this.keyZoomOut)
+		return;
+	
 	this.zoomPoint = point;	
 };
 ZoomTool.prototype.end = function(point) {
@@ -627,7 +631,7 @@ SelectAreaTool.prototype.end = function(point) {
 };
 
 /** common zoom tool */
-function PanAndZoomTool(project, sketchbook, sketchId) {
+function PanAndZoomTool(project, sketchbook, sketchId, keyPanDirection) {
 	Tool.call(this,'panAndZoom', project);
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;	
@@ -635,6 +639,8 @@ function PanAndZoomTool(project, sketchbook, sketchId) {
 	this.panView = null;
 	this.pannedFlag = false;
 	this.highlightItem = null;
+	this.keyPanDirection = keyPanDirection;
+	this.PAN_INTERVAL = 20;
 };
 PanAndZoomTool.prototype.pan = function(point) {
 	// from Pan
@@ -652,7 +658,41 @@ PanAndZoomTool.prototype.pan = function(point) {
 PanAndZoomTool.prototype.begin = function(point) {
 	// from Pan
 	this.panPoint = new paper.Point(point);
+	this.lastPoint = new paper.Point(point);
+	
 	this.panView = this.project.view;
+	if (this.keyPanDirection > 0) {
+		
+		console.log('dir = '+this.keyPanDirection);
+		
+		this.pannedFlag = true;
+		this.selectedItem = null;
+		//Ensure we keep panning
+		var tool = this;
+		this.panInterval = setInterval(function() {
+			switch (tool.keyPanDirection) {
+				case PAN_DIRECTION_RIGHT:
+					tool.lastPoint.x += PAN_INCREMENT;
+					tool.pan(tool.lastPoint);
+					break;
+				case PAN_DIRECTION_LEFT:
+					tool.lastPoint.x -= PAN_INCREMENT;
+					tool.pan(tool.lastPoint);
+					break;
+				case PAN_DIRECTION_UP:
+					tool.lastPoint.y -= PAN_INCREMENT;
+					tool.pan(tool.lastPoint);
+					break;
+				case PAN_DIRECTION_DOWN:
+					tool.lastPoint.y += PAN_INCREMENT;
+					tool.pan(tool.lastPoint);
+					break;
+				default:
+					break;
+			}
+		}, this.PAN_INTERVAL);
+		return;
+	}
 	this.pannedFlag = false;
 	this.selectItem = getItemAtPoint(this.project, point);
 	if (this.selectItem) {
@@ -661,11 +701,17 @@ PanAndZoomTool.prototype.begin = function(point) {
 };
 PanAndZoomTool.prototype.move = function(point) {
 	// from Pan
-	this.pan(point);
+	if (this.keyPanDirection <= 0)
+		this.pan(point);
 };
 PanAndZoomTool.prototype.end = function(point) {
 	// from Pan
-	this.pan(point);
+	if (this.keyPanDirection > 0){
+		clearInterval(this.panInterval);
+	}
+	else
+		this.pan(point);
+		
 	if (this.highlightItem) {
 		this.highlightItem.remove();
 		this.highlightItem = null;

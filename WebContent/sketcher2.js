@@ -1464,6 +1464,8 @@ function setupPaperjs() {
 	sequencesViewProject = setupCanvas('sequencesViewCanvas');
 }
 
+var canvasTarget = null;
+
 // register mouse-related events
 function registerHighlightEvents() {
 	$(document).on('mouseover', 'div .tab', function() {
@@ -1533,10 +1535,12 @@ function registerHighlightEvents() {
 		$(this).blur();
 		$('#orphanText').focus();
 	});
-	$(document).on('mouseenter', 'canvas',function() {
+	$(document).on('mouseenter', 'canvas',function(event) {
+		canvasTarget = event.target;
 		$('#orphanText').blur();
 	});
-	$(document).on('mouseout', 'canvas',function() {
+	$(document).on('mouseout', 'canvas',function(event) {
+		canvasTarget = null;
 		$('#orphanText').focus();
 	});
 	$(document).on('mouseenter', 'body',function() {
@@ -1656,17 +1660,17 @@ function getNewTool(project, view) {
 		if (project==selectionProject)
 			return new SelectAreaTool(project, sketchbook, sketchId);
 		else
-			return new PanAndZoomTool(project, sketchbook, sketchId);
+			return new PanAndZoomTool(project, sketchbook, sketchId, keyPanDirection);
 	}
 	if (project!=selectionProject) {
 		if ($('#showAllAction').hasClass('actionSelected')) {
 			return new ShowAllTool(project);
 		}
 		else if ($('#zoomInAction').hasClass('actionSelected')) {
-			return new ZoomTool(project, true);
+			return new ZoomTool(project, true, keyZoomIn, keyZoomOut);
 		}
 		else if ($('#zoomOutAction').hasClass('actionSelected')) {
-			return new ZoomTool(project, false);
+			return new ZoomTool(project, false, keyZoomIn, keyZoomOut);
 		}
 	}
 	if (project==objectOverviewProject || project==objectDetailProject) {
@@ -1833,6 +1837,14 @@ function isSpecialKey(which) {
 var keyFiresTool = false;
 var mousePageX, mousePageY;
 var isShifted = false;
+var keyZoomIn = false;
+var keyZoomOut = false;
+var keyPanDirection = 0;
+var PAN_INCREMENT = 1;
+var PAN_DIRECTION_RIGHT = 1;
+var PAN_DIRECTION_LEFT = 2;
+var PAN_DIRECTION_UP = 3;
+var PAN_DIRECTION_DOWN = 4;
 
 /** register events for tool(s) */
 function registerMouseEvents() {
@@ -1848,6 +1860,7 @@ function registerMouseEvents() {
 		// it is being, so that will need some filtering
 		//console.log('keydown: '+ev.which+' ctrlKey='+ev.ctrlKey+' special='+isSpecialKey(ev.which));
 		console.log('keydown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
+		
 		
 		if (keyFiresTool)
 			toolUp(ev);
@@ -1890,6 +1903,138 @@ function registerMouseEvents() {
 				handleActionSelected('backAction');
 			else if (ev.which==KEY_SHIFT)
 				isShifted = true;
+			else if (ev.which=='1'.charCodeAt(0)) {
+				//Simulate zoom in
+				if ($('#zoomInAction').hasClass('actionSelected') ||
+				    $('#zoomOutAction').hasClass('actionSelected')) {
+					keyZoomIn = true;
+					keyZoomOut = false;
+					if (canvasTarget) {
+						var p = getProject(canvasTarget);
+						if (p && p.view) {
+							var v = p.view;			
+							p.activate();
+							tool = getNewTool(p, v);
+							toolView = v;
+							toolProject = p;
+							if (tool)
+								tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/3));
+							redraw(paper);
+						}
+					}
+				}
+			}
+			else if (ev.which=='2'.charCodeAt(0)) {
+				//Simulate zoom out
+				if ($('#zoomOutAction').hasClass('actionSelected') ||
+				    $('#zoomInAction').hasClass('actionSelected')) {
+					keyZoomIn = false;
+					keyZoomOut = true;
+					if (canvasTarget) {
+						var p = getProject(canvasTarget);
+						if (p && p.view) {
+							var v = p.view;			
+							p.activate();
+							tool = getNewTool(p, v);
+							toolView = v;
+							toolProject = p;
+							if (tool)
+								tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/3));
+							redraw(paper);
+						}
+					}
+				}
+			}
+			else if (ev.which==KEY_RIGHT) {
+				//Simulate pan right
+				if ($('#panAction').hasClass('actionSelected')) {
+					
+					console.log('panning right');
+					
+					keyPanDirection = PAN_DIRECTION_RIGHT;
+					if (canvasTarget) {
+						var p = getProject(canvasTarget);
+						if (p && p.view) {
+							var v = p.view;			
+							p.activate();
+							tool = getNewTool(p, v);
+							toolView = v;
+							toolProject = p;
+							if (tool){
+								tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/2));
+							}
+							redraw(paper);
+						}
+					}
+				}
+			}
+			else if (ev.which==KEY_LEFT) {
+				//Simulate pan left
+				if ($('#panAction').hasClass('actionSelected')) {
+					
+					console.log('panning left');
+					
+					keyPanDirection = PAN_DIRECTION_LEFT;
+					if (canvasTarget) {
+						var p = getProject(canvasTarget);
+						if (p && p.view) {
+							var v = p.view;			
+							p.activate();
+							tool = getNewTool(p, v);
+							toolView = v;
+							toolProject = p;
+							if (tool)
+								tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/2));
+							redraw(paper);
+						}
+					}
+				}
+			}
+			else if (ev.which==KEY_UP) {
+				//Simulate pan up
+				if ($('#panAction').hasClass('actionSelected')) {
+					
+					console.log('panning up');
+					
+					keyPanDirection = PAN_DIRECTION_UP;
+					if (canvasTarget) {
+						var p = getProject(canvasTarget);
+						if (p && p.view) {
+							var v = p.view;			
+							p.activate();
+							tool = getNewTool(p, v);
+							toolView = v;
+							toolProject = p;
+							if (tool){
+								tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/2));
+							}
+							redraw(paper);
+						}
+					}
+				}
+			}
+			else if (ev.which==KEY_DOWN) {
+				//Simulate pan left
+				if ($('#panAction').hasClass('actionSelected')) {
+					
+					console.log('panning down');
+					
+					keyPanDirection = PAN_DIRECTION_DOWN;
+					if (canvasTarget) {
+						var p = getProject(canvasTarget);
+						if (p && p.view) {
+							var v = p.view;			
+							p.activate();
+							tool = getNewTool(p, v);
+							toolView = v;
+							toolProject = p;
+							if (tool)
+								tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/2));
+							redraw(paper);
+						}
+					}
+				}
+			}
 			else
 				console.log('key has no action: '+ev.which);
 			// more?
@@ -1934,6 +2079,20 @@ function registerMouseEvents() {
 			}
 			ev.stopPropagation();
 			return false;
+		}
+		//Handle keys that trigger actions/tools
+		if (keyZoomIn || keyZoomOut) {
+			ev.pageX = $(window).width()/2;
+			ev.pageY = $(window).height()/3;
+			toolUp(ev);
+			keyZoomIn = false;
+			keyZoomOut = false;
+		}
+		if (keyPanDirection > 0) {
+			ev.pageX = $(window).width()/2;
+			ev.pageY = $(window).height()/2;
+			toolUp(ev);
+			keyPanDirection = 0;
 		}
 	});
 	$(document).mousedown(function(ev) {
