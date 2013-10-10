@@ -94,6 +94,16 @@ Sketch.prototype.getElementById = function(id) {
 	return null;
 };
 
+Sketch.prototype.getCanvasByName = function(name) {
+	for (var i=0; i<this.elements.length; i++) {
+		var element = this.elements[i];
+		if (element.canvas.name == name)
+			return element;
+	}
+	
+	return null;
+}
+
 /** convert color to paper js color */
 function colorToPaperjs(color) {
 	return new paper.RgbColor(color.red, color.green, color.blue);
@@ -404,6 +414,14 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			text.characterStyle.fillColor = colorToPaperjs(element.text.textColor);
 			text.sketchElementId = element.id;
 			items.push(text);
+		}
+		if (element.canvas!==undefined) {
+			//Not really a paperjs element but treat as one as far as we can
+			//Need to change canvas color directly
+			var canvas = element.canvas;
+			$('.'+canvas.name).css('background-color', '#'+canvas.backgroundColor);
+			console.log('canvas name='+canvas.name + "canvas color=" + canvas.backgroundColor);
+			//$('.detailCanvas').css('background-color', '#ff0000');
 		}
 	}
 	return items;
@@ -733,6 +751,14 @@ Sketchbook.prototype.addCurveAction = function(sketchId, path, lineColor) {
 	return action;
 };
 
+Sketchbook.prototype.addCanvasAction = function(sketchId, color, name) {
+	var action = new Action(this, 'addElements');
+	action.sketchId = sketchId;
+	var canvas = { backgroundColor : color, name : name };
+	action.elements =  [{ canvas : canvas }];
+	return action;
+};
+
 Sketchbook.prototype.addCircleAction = function(sketchId, centre, rad, strokewidth, frameStyle, lineColor, fillColor) {
 	var action = new Action(this, 'addElements');
 	action.sketchId = sketchId;
@@ -1021,6 +1047,9 @@ SetPropertiesAction.prototype.setLineColor = function(color) {
 	this.lineColor = color;
 };
 
+SetPropertiesAction.prototype.setBackgroundColor = function(color) {
+	this.backgroundColor = color;
+}
 SetPropertiesAction.prototype.setTextColor = function(color) {
 	this.textColor = color;
 };
@@ -1406,6 +1435,14 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.lineWidth= action.lineWidth;
 						if (action.frameStyle)
 							elval.frameStyle= action.frameStyle;
+					}
+					else if (element.canvas) {
+						var elval = element.canvas;
+						el.undo = {};
+						el.undo.backgroundColor = elval.backgroundColor;
+						if (action.backgroundColor) {
+							elval.backgroundColor = action.backgroundColor;
+						}
 					}
 					else {
 						console.log('setProperties cannot handle element '+elementId+' in sketch '+sketchId);

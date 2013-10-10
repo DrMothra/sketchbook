@@ -3,8 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Sketcher2</title>
-<link rel="StyleSheet" href="sketcher2.css" type="text/css"> <!-- media=screen,print, -->
-<script type="text/javascript" src="jquery-1.7.2.min.js"></script> 
+<link rel="Stylesheet" type="text/css" href="css/jpicker-1.1.6.min.css" />
+<link rel="Stylesheet" type="text/css" href="css/jPicker.css" />
+<link href="css/smoothness/jquery-ui-1.10.3.custom.css" rel="stylesheet" type="text/css">
+<link rel="StyleSheet" href="css/sketcher2.css" type="text/css"> <!-- media=screen,print, -->
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.js"></script>
+<!--<script type="text/javascript" src="jquery-1.7.2.min.js"></script> -->
 <!-- from https://raw.github.com/desandro/imagesloaded/master/jquery.imagesloaded.min.js -->
 <script type="text/javascript" src="jquery.imagesloaded.min.js"></script>
 <script type="text/javascript" src="paper-weiser.js"></script>
@@ -15,6 +20,7 @@
 <script type="text/javascript" src="sketcher2.js"></script>
 <script type="text/javascript" src="BlobBuilder.js"></script>
 <script type="text/javascript" src="FileSaver.js"></script>
+<script src="jpicker-1.1.6.min.js" type="text/javascript"></script>
 </head>
 <body>
 <div id="page" class="page">
@@ -117,18 +123,13 @@
     		<table class="sketchPropertiesTable">
 				<tr class="sketchProperty"><td>Background</td>
 					<td>
-						<div class="action" id="setBackgroundAction">Set</div>
-						<div class="action" id="clearBackgroundAction">Clear</div>
+						<div class="action" id="setBackgroundAction">Sketch</div>
+						<span class="action picker" id="setBackgroundColorProperty"></div>
 					</td>
 				</tr>
 				<tr class="sketchProperty" id="backgroundAlphaProperty"><td>Fade</td>
 					<td>
-						<div class="alpha" style="background-color:#000000"></div>
-						<div class="alpha" style="background-color:#404040"></div>
-						<div class="alpha" style="background-color:#808080"></div>
-						<div class="alpha" style="background-color:#a0a0a0"></div>
-						<div class="alpha" style="background-color:#c0c0c0"></div>
-						<div class="alpha" style="background-color:#e0e0e0"></div>
+						<div class="slider" id="slider"></div>
 					</td>
 				</tr>
     		</table>
@@ -154,7 +155,7 @@
 					<div class="propertiesShow" id="propertiesShowNew">New Items</div>					
 				</td></tr>
 				<tr class="property" id="textProperty"><td>Text</td>
-					<td><textarea id="orphanText" rows="5" cols="20"></textarea></td>
+					<td><textarea id="orphanText" rows="5" cols="18"></textarea></td>
 					
 				</tr>
 				<tr class="property propertyDisabled" id="textJustifyProperty"><td>Justify</td>
@@ -249,28 +250,61 @@
 				</tr>
 			</table>
 		</div>
-		<div style="width:80%;float:left">
-			<div class="actions">
-				<div class="action actionSelected" id="selectAction">Select[Q]</div>
-				<div class="action" id="backAction">Back[Backspace]</div>
-				<p class="actionLabel label">Sketch:</p>
-				<div class="action" id="panAction">Select&Pan[C]</div>
-				<div class="action" id="showAllAction">Show all[V]</div>
-				<div class="action" id="zoomInAction">Zoom-in[Z]</div>
-				<div class="action" id="zoomOutAction">Zoom-out[X]</div>
-				<div class="action actionDisabled" id="orderToBackAction">To
-					back[W]</div>
-				<div class="action actionDisabled" id="addLineAction">Line[A]</div>
+		<div class="iconGroup">
+			<p class="actionLabel label">Actions</p>
+			<div class="actions clear">
+				<div class="action actionSelected" id="selectAction">
+					<img src="images/select.png" title="Select[Q]">
+				</div>
+				<div class="action" id="backAction">
+					<img src="images/back.png" title="Go Back[Backspace]">
+				</div>
+				<div class="action" id="panAction">
+					<img src="images/panSelect.png" title="Select & Pan[C]">
+				</div>
+				<div class="action" id="showAllAction">
+					<img src="images/showAll.png" title="Show All[V]">
+				</div>
+				<div class="action" id="zoomInAction">
+					<img src="images/zoomIn.png" title="Zoom In[Z]">
+				</div>
+				<div class="action" id="zoomOutAction">
+					<img src="images/zoomOut.png" title="Zoom Out[X]">
+				</div>
+				<div class="action actionDisabled" id="orderToBackAction">
+					<img src="images/toBack.png" title="Send to Back[W]">
+				</div>
+				<div class="action actionDisabled" id="addLineAction">
+					<img src="images/lineAction.png" title="Draw Line[A]">
+				</div>
 				<div class="action actionDisabled" id="addCurveAction" style='display:none'>Curve</div><!-- Todo fix and make visible -->
-				<div class="action actionDisabled" id="addCircleAction">Circle[O]</div>
-				<div class="action actionDisabled" id="addTextAction">Text[S]</div>
-				<div class="action actionDisabled" id="addFrameAction">Frame[F]</div>
-				<p class="actionLabel label">Selection:</p>
-				<div class="action" id="editAction">Open[E]</div>
-				<div class="action" id="moveAction">Move[E]</div>
-				<div class="action" id="copyAction">Copy[D]</div>
-				<div class="action" id="placeAction">Link[D]</div>
-				<div class="action" id="deleteAction">[Delete]</div>
+				<div class="action actionDisabled" id="addCircleAction">
+					<img src="images/circleAction.png" title="Draw Circle[O]">
+				</div>
+				<div class="action actionDisabled" id="addTextAction">
+					<img src="images/textAction.png" title="Add Text[S]">
+				</div>
+				<div class="action actionDisabled" id="addFrameAction">
+					<img src="images/frameAction.png" title="Add Frame[F]">
+				</div>
+			</div>
+			<p class="actionLabel label clear">Selection</p>
+			<div class="actions clear">
+				<div class="action" id="editAction">
+					<img src="images/openAction.png" title="Open Sketch[E]">
+				</div>
+				<div class="action" id="moveAction">
+					<img src="images/moveAction.png" title="Move[M]">
+				</div>
+				<div class="action" id="copyAction">
+					<img src="images/copyAction.png" title="Copy[D]">
+				</div>
+				<div class="action" id="placeAction">
+					<img src="images/linkAction.png" title="Link[D]">
+				</div>
+				<div class="action" id="deleteAction">
+					<img src="images/deleteAction.png" title="Delete[Del]">
+				</div>
 			</div>
 
 			<div class="selectionHistory">
@@ -279,9 +313,10 @@
 					<div class="headerItem">
 						<span class="label">Selection history</span>
 					</div>
-					<div class="headerItem">
-						Load image:<input type="button" class="button" value="From URL" onclick="javascript:onLoadImageFromURL()"/>
-						<input type="file" id="loadImage" name="imageFiles[]" accept="image/*" class="button"/>
+					<div class="headerItem clear">
+						<input type="button" value="Load Image" id="loadImage" name="imageFiles[]" accept="image/*"/>
+						<input type="button" class="button" value="From URL" onclick="javascript:onLoadImageFromURL()"/>
+						<input type="text" value="URL text" id="urlImageText"/> 
 					</div>
 					<div class="footer"></div>
 				</div>

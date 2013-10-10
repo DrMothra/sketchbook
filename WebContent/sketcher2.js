@@ -106,7 +106,7 @@ var animateToInfo;
 
 //property name -> PropertySelect
 var propertyEditors = new Object();
-
+var CANVAS_ELEMENT_ID = -1;
 //==============================================================================
 // display constants
 
@@ -2336,11 +2336,11 @@ function createIndexItem(sketchId, indexProject) {
 }
 
 function refreshBackgroundRecursive(sketch, stopSketchIds, alpha, groups) {
-	if (sketch!=null && alpha>0) {
+	if (sketch!=null && alpha>=0) {
 		stopSketchIds.push(sketch.id);
 		if (sketch.background && sketch.background.alpha)
 			alpha *= sketch.background.alpha;
-		if (!sketch.background || !sketch.background.sketchId || alpha<=0)
+		if (!sketch.background || !sketch.background.sketchId || alpha<0)
 			return;
 		
 		var sketchId = sketch.background.sketchId;
@@ -2400,11 +2400,18 @@ function refreshSketchViews(sketchId) {
 	}
 }
 function updateActionsForCurrentSketch() {
-	// clear background
-	if (currentSketch && currentSketch.background && currentSketch.background.sketchId)
-		$('#clearBackgroundAction').removeClass('actionDisabled');
-	else
-		$('#clearBackgroundAction').addClass('actionDisabled');
+	// clear/set background
+	//Toggle the functionality of background sketch button
+	if (currentSketch && currentSketch.background && currentSketch.background.sketchId) {
+		$('#setBackgroundAction').html('Clear');
+		//Allow toggle behaviour
+		$('#setBackgroundAction').attr('id', 'clearBackgroundAction');
+		console.log('set sketch button to clear');
+	} else {
+		//Allow toggle behaviour
+		$('#clearBackgroundAction').html('Sketch');
+		$('#clearBackgroundAction').attr('id', 'setBackgroundAction');
+	}
 }
 function updateActionsForCurrentSelection() {
 	if (breadcrumbs.length>1)
@@ -2708,6 +2715,7 @@ function handleSelections(selections) {
 			continue;
 		}
 		var currentSelection = { id: id, record: selectionRecord };
+		
 		currentSelections.push(currentSelection);
 		// highlight current selection in selection history
 		// addHighlight is from sketchertools.js
@@ -2942,12 +2950,16 @@ function loadImageAndSelect(url) {
 // - onShowSequences() - show sequences tab
 // - onObjectFilterChanges() - change to any of several object filter text fields
 
+var DEFAULT_CANVAS_COLOUR = "e6e6e6";
 // GUI entry point
 function onNewObject() {
 	$('.tabview').hide();
 
 	var action = sketchbook.newSketchAction();
 	doAction(action);
+	//Need a canvas elememt representation so that we can change properties of it
+	var canvasAction = sketchbook.addCanvasAction(action.sketch.id, DEFAULT_CANVAS_COLOUR, 'detailCanvas');
+	doAction(canvasAction);
 }
 
 //GUI entry point
@@ -3185,6 +3197,27 @@ function onSetLineColor(value) {
 		onSetProperty(action);
 	}
 }
+function onSetBackgroundColor(color) {
+	if (!color) return;
+	
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setBackgroundColor(color);
+		
+		//Bypass selection mechanism as there isn't one for the canvas itself
+		var sketchId = currentSketch ? currentSketch.id : undefined;
+		if (sketchId) {
+			var element = currentSketch.getCanvasByName('detailCanvas');
+			
+			console.log('canvas id='+element.id);
+			
+			if (element.id) {
+				action.addElement(sketchId, element.id);
+				onSetProperty(action);
+			}
+		}
+	}
+}
 //property editor entry point
 function onSetFillColor(value) {
 	var color = parseHexColor(value);
@@ -3292,16 +3325,13 @@ function onSetTextJustify(value) {
 	}
 }
 
-function onAlphaSelected(event) {
+function onAlphaSelected(alpha) {
 	$('.alpha').removeClass('alphaSelected');
 	$(this).addClass('alphaSelected');
-	var color = $(this).css('background-color');
-	console.log('Selected alpha '+color);
-	// this does /255
-	color = parseCssColor(color);
-	if (!color)
-		return;
-	var alpha = 1-(color.red*255/256);
+	
+	//Alpha scale goes to 100 - check for max
+	if (alpha < 1) alpha = 1;
+	alpha /= 100;
 	if (currentSketch) {
 		var background = (currentSketch.background) ? currentSketch.background : { };
 		var action = sketchbook.setBackgroundAction(currentSketch.id, background.sketchId, alpha);
@@ -3336,7 +3366,7 @@ $(document).ready(function() {
 	$('.action').on('click', onActionSelected);
 	$('.propertiesShow').on('click', onPropertiesShowSelected);
 	//$('#colorProperty .option').on('click', onColorSelected);
-	$('.alpha').on('click', onAlphaSelected);
+	//$('.alpha').on('click', onAlphaSelected);
 	$('#objectDetailCanvas').on('dblclick', onPropertyEdit);
 	$(document).on('mousedown', '#sequences1Div .sequenceFrame', onSequenceFrameSelected);
 	$(document).on('mousedown', '#sequences1Div .sequenceObject', onSequenceFrameSelected);
@@ -3369,8 +3399,48 @@ $(document).ready(function() {
 	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
 	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
 	propertyEditors.rescale.onSetValue = onSetRescale;
+	propertyEditors.backgroundColor = new PropertySelect('backgroundColor', 'backgroundColorProperty');
+	propertyEditors.backgroundColor.onSetValue = onSetBackgroundColor;
 
 	onShowIndex();
+	
+	//Colour picker handling
+	$.fn.jPicker.defaults.images.clientPath='images/';
+	$('#setBackgroundColorProperty').jPicker(
+	  {
+	    window:
+	    {
+	      position:{x:400,y:400},
+	      expandable:true,
+	      title:'Choose a colour'
+	    },
+	    color:
+	    {
+		active: new $.jPicker.Color({ hex: 'e6e6e6' })
+	    }
+	  },
+	  function(color, context) {
+		//User has changed bg colour
+		//Ensure nothing else selected
+		clearCurrentSelection();
+		//Need to select appropriate canvas
+		propertiesShowSelectionFlag = true;
+		var hexColor = color.val('hex');
+		
+		onSetBackgroundColor(hexColor);
+	  });
+	
+	//UI handling
+	$( "#slider" ).slider({
+			min: 0,
+                        max: 100,
+                        value: 100
+		},
+		{change : function(event, ui) {
+			console.log('value=' +ui.value);
+			onAlphaSelected(ui.value);
+		}
+	});
 	
     $(window).resize(handleResize);
     handleResize();
