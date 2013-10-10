@@ -314,7 +314,8 @@
 						<span class="label">Selection history</span>
 					</div>
 					<div class="headerItem clear">
-						<input type="button" value="Load Image" id="loadImage" name="imageFiles[]" accept="image/*"/>
+						<input type="button" value="Load Image" id="loadImageDummy" onclick="javascript:onLoadImageDummy()"/>
+						<input type="file" id="loadImage" name="imageFiles[]" accept="image/*" class="button" style='display:none'/>
 						<input type="button" class="button" value="From URL" onclick="javascript:onLoadImageFromURL()"/>
 						<input type="text" value="URL text" id="urlImageText"/> 
 					</div>

@@ -743,7 +743,7 @@ function handleActionSelected(id) {
 	if (disabled)
 	{
 		console.log("action disabled for ", id);
-		return false;
+		return;
 	}
 // instantaneous actions / no toggle
 	if (id=='setBackgroundAction') {
@@ -3119,6 +3119,11 @@ function onObjectFilterTag(tag) {
 }
 
 // GUI Entry point
+function onLoadImageDummy() {
+	//Simulate button press for file chooser
+	$('#loadImage').click();
+}
+
 function onLoadImage(evt) {
 	// note - uses html5 apis
 	if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -3149,8 +3154,10 @@ function onLoadImage(evt) {
 
 // GUI Entry point
 function onLoadImageFromURL() {
-	var url = takeOrphanText();
-	if (url.length==0) {
+	var defaultText = 'URL text';
+	var url = $('#urlImageText').val();
+	$('#urlImageText').val(defaultText);
+	if (url == defaultText || url.length==0) {
 		alert('Enter URL in New Text first');
 		return;
 	}
