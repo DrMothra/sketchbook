@@ -3348,7 +3348,7 @@ function onAlphaSelected(alpha) {
 
 //Only executed our code once the DOM is ready.
 $(document).ready(function() {
-
+	
 	// trap close/exit
 	jQuery(window).bind(
 		    "beforeunload", 
@@ -3435,6 +3435,30 @@ $(document).ready(function() {
 		var hexColor = color.val('hex');
 		
 		onSetBackgroundColor(hexColor);
+	  });
+	
+	$('#setStyleColorProperty').jPicker(
+	  {
+	    window:
+	    {
+	      position:{x:400,y:-400},
+	      expandable:true,
+	      title:'Choose a colour'
+	    },
+	    color:
+	    {
+		active: new $.jPicker.Color({ hex: 'e6e6e6' })
+	    }
+	  },
+	  function(color, context) {
+		//User has changed bg colour
+		//Ensure nothing else selected
+		//clearCurrentSelection();
+		//Need to select appropriate canvas
+		//propertiesShowSelectionFlag = true;
+		//var hexColor = color.val('hex');
+		
+		//onSetBackgroundColor(hexColor);
 	  });
 	
 	//UI handling

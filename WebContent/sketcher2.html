@@ -124,7 +124,7 @@
 				<tr class="sketchProperty"><td>Background</td>
 					<td>
 						<div class="action" id="setBackgroundAction">Sketch</div>
-						<span class="action picker" id="setBackgroundColorProperty"></div>
+						<span class="action picker" id="setBackgroundColorProperty"></span>
 					</td>
 				</tr>
 				<tr class="sketchProperty" id="backgroundAlphaProperty"><td>Fade</td>
@@ -138,196 +138,159 @@
 		<div class="editorDetail">
 			<p class="label">Detail (zoomable)</p>
 	    	<canvas id="objectDetailCanvas" class="detailCanvas" ></canvas>
-		<textarea id="objectDetailTextarea" class="detailText" cols="5" rows="5"></textarea>
+		<!-- <textarea id="objectDetailTextarea" class="detailText" cols="5" rows="5"></textarea> -->
 		</div>
 		<div class="footer"></div>
 	</div>
 	<!-- common facilities -->
-	<div class="commonFacilities">
-	
-		<div class="properties">
-			<table class="propertiesTable">
-				<!-- <tr class="" id="orphanTextProperty"><td>New text</td>
-					<td><input type="text" width="20" id="orphanText"/></td>
-				</tr> -->
-				<tr class="propertyTitle" ><td>Properties</td><td><!-- Value -->
-					<div class="propertiesShow" id="propertiesShowSelection">Selection</div>
-					<div class="propertiesShow" id="propertiesShowNew">New Items</div>					
-				</td></tr>
-				<tr class="property" id="textProperty"><td>Text</td>
-					<td><textarea id="orphanText" rows="5" cols="18"></textarea></td>
-					
-				</tr>
-				<tr class="property propertyDisabled" id="textJustifyProperty"><td>Justify</td>
-					<td>
-						<div class="option" id="textJustify_left">Left</div>
-						<div class="option optionDefault optionSelected" id="textJustify_center">Centre</div>
-						<div class="option" id="textJustify_right">Right</div>
-					</td>
-				</tr>
-				</tr>
-				<tr class="property propertyDisabled" id="showLabelProperty"><td>Show Label</td>
-					<td>
-						<div class="option optionDefault optionSelected" id="showLabel_">None</div>
-						<div class="option" id="showLabel_sketch">Sketch</div>
-						<div class="option" id="showLabel_frame">Frame</div>
-						<div class="option" id="showLabel_sketch_frame">Both</div>
-					</td>
-				</tr>
-				<!-- font size -->
-				<tr class="property propertyDisabled" id="textSizeProperty"><td>Font Size</td>
-					<td>
-						<div class="option optionDefault optionSelected" id="textSize_12">12</div>
-						<div class="option" id="textSize_24">24</div>
-						<div class="option" id="textSize_48">48</div>
-						<div class="option" id="textSize_96">96</div>
-					</td>
-				</tr>
-				<tr class="property propertyDisabled" id="textColorProperty"><td>Text Color</td>
-					<td>
-						<div class="option optionDefault optionSelected" style="background-color:#000000" id="textColor_000000"></div>
-						<div class="option" style="background-color:#ffffff" id="textColor_ffffff"></div>
-						<div class="option" style="background-color:#808080" id="textColor_808080"></div>
-						<div class="option" style="background-color:#ff0000" id="textColor_ff0000"></div>
-						<div class="option" style="background-color:#00ff00" id="textColor_00ff00"></div>
-						<div class="option" style="background-color:#0000ff" id="textColor_0000ff"></div>
-						<div class="option" style="background-color:#ffff00" id="textColor_ffff00"></div>
-					</td>
-				</tr>
-				<tr class="property propertyDisabled" id="textVAlignProperty"><td>Text Align</td>
-					<td>
-						<div class="option optionDefault optionSelected" id="textVAlign_above">Above</div>
-						<div class="option" id="textVAlign_top">Top</div>
-						<div class="option" id="textVAlign_middle">Mid</div>
-						<div class="option" id="textVAlign_bottom">Bottom</div>
-						<div class="option" id="textVAlign_below">Below</div>
-					</td>
-				</tr>
-				<tr class="property propertyDisabled" id="frameStyleProperty"><td>Style</td>
-					<td>
-						<div class="option optionDefault optionSelected" id="frameStyle_">None</div>
-						<div class="option" id="frameStyle_border">Border</div>
-						<div class="option" id="frameStyle_fill">Fill</div>
-						<div class="option" id="frameStyle_border_fill">Both</div>
-					</td>
-				</tr>
-				<tr class="property propertyDisabled" id="lineColorProperty"><td>Line Color</td>
-					<td>
-						<div class="option optionDefault optionSelected" style="background-color:#000000" id="lineColor_000000"></div>
-						<div class="option" style="background-color:#ffffff" id="lineColor_ffffff"></div>
-						<div class="option" style="background-color:#808080" id="lineColor_808080"></div>
-						<div class="option" style="background-color:#ff0000" id="lineColor_ff0000"></div>
-						<div class="option" style="background-color:#00ff00" id="lineColor_00ff00"></div>
-						<div class="option" style="background-color:#0000ff" id="lineColor_0000ff"></div>
-						<div class="option" style="background-color:#ffff00" id="lineColor_ffff00"></div>
-					</td>
-				</tr>
-				<!--  line width -->
-				<tr class="property propertyDisabled" id="lineWidthProperty"><td>Line Width</td>
-					<td>
-						<div class="option optionDefault optionSelected" id="lineWidth_1">1</div>
-						<div class="option" id="lineWidth_2">2</div>
-						<div class="option" id="lineWidth_4">4</div>
-						<div class="option" id="lineWidth_8">8</div>
-					</td>
-				</tr>
-				<tr class="property propertyDisabled" id="fillColorProperty"><td>Fill Color</td>
-					<td>
-						<div class="option optionDefault optionSelected" style="background-color:#000000" id="fillColor_000000"></div>
-						<div class="option" style="background-color:#ffffff" id="fillColor_ffffff"></div>
-						<div class="option" style="background-color:#808080" id="fillColor_808080"></div>
-						<div class="option" style="background-color:#ff0000" id="fillColor_ff0000"></div>
-						<div class="option" style="background-color:#00ff00" id="fillColor_00ff00"></div>
-						<div class="option" style="background-color:#0000ff" id="fillColor_0000ff"></div>
-						<div class="option" style="background-color:#ffff00" id="fillColor_ffff00"></div>
-					</td>
-				</tr>
-				<tr class="property propertyDisabled" id="rescaleProperty"><td>Rescale</td>
-					<td>
-						<div class="option optionDefault optionSelected" id="rescale_fit">Fit</div>
-						<div class="option" id="rescale_stretch">Stretch</div>
-					</td>
-				</tr>
-			</table>
+	<div class="properties">
+		<h2>Properties</h2>
+		<form class="textForm" action="">
+			<span class="attributeLabel">Attribute:</span>
+			<select name="attribute">
+				<option value="color">Colour</option>
+				<option value="width">Width</option>
+				<option value="style">Style</option>
+			</select>
+		</form>
+		<div class="textAttributes">
+			<textarea id="textInput" cols="20" rows="3"></textarea>
+			<form class="textForm" action="">
+				<span class="attributeLabel">Font-family:</span>
+				<select name="fontFamily">
+					<option value="serif">Serif</option>
+					<option value="times">Times</option>
+					<option value="copper">Copper</option>
+				</select>
+			</form>
+			<form class="textForm" action="">
+				<span class="attributeLabel">Font-size:</span>
+				<select name="fontSize">
+					<option value="size10">10</option>
+					<option value="size11">11</option>
+					<option value="size12">12</option>
+				</select>
+			</form>
+			<div class="propertyIcons">
+				<span class="attributeLabel">Align:</span>
+				<img src="images/textAlignLeft.png" id="alignLeft" title="Align left">
+				<img src="images/textAlignCenter.png" id="alignCenter" title="Align center">
+				<img src="images/textAlignRight.png" id="alignRight" title="Align right">
+			</div>
 		</div>
-		<div class="iconGroup">
-			<p class="actionLabel label">Actions</p>
-			<div class="actions clear">
-				<div class="action actionSelected" id="selectAction">
-					<img src="images/select.png" title="Select[Q]">
-				</div>
-				<div class="action" id="backAction">
-					<img src="images/back.png" title="Go Back[Backspace]">
-				</div>
-				<div class="action" id="panAction">
-					<img src="images/panSelect.png" title="Select & Pan[C]">
-				</div>
-				<div class="action" id="showAllAction">
-					<img src="images/showAll.png" title="Show All[V]">
-				</div>
-				<div class="action" id="zoomInAction">
-					<img src="images/zoomIn.png" title="Zoom In[Z]">
-				</div>
-				<div class="action" id="zoomOutAction">
-					<img src="images/zoomOut.png" title="Zoom Out[X]">
-				</div>
-				<div class="action actionDisabled" id="orderToBackAction">
-					<img src="images/toBack.png" title="Send to Back[W]">
-				</div>
-				<div class="action actionDisabled" id="addLineAction">
-					<img src="images/lineAction.png" title="Draw Line[A]">
-				</div>
-				<div class="action actionDisabled" id="addCurveAction" style='display:none'>Curve</div><!-- Todo fix and make visible -->
-				<div class="action actionDisabled" id="addCircleAction">
-					<img src="images/circleAction.png" title="Draw Circle[O]">
-				</div>
-				<div class="action actionDisabled" id="addTextAction">
-					<img src="images/textAction.png" title="Add Text[S]">
-				</div>
-				<div class="action actionDisabled" id="addFrameAction">
-					<img src="images/frameAction.png" title="Add Frame[F]">
-				</div>
+		<div class="styleAttributes">
+			<form id="styleSelect" action="">
+				<span class="attributeLabel">Style:</span>
+				<select name="style">
+					<option value="line">Line</option>
+					<option value="border">Border</option>
+					<option value="both">Both</option>
+				</select>
+			</form>
+			<div class="colourStyle">
+				<span class="styleLabel">Colour:</span>
+				<span class="picker" id="setStyleColorProperty"></span>
 			</div>
-			<p class="actionLabel label clear">Selection</p>
-			<div class="actions clear">
-				<div class="action" id="editAction">
-					<img src="images/openAction.png" title="Open Sketch[E]">
-				</div>
-				<div class="action" id="moveAction">
-					<img src="images/moveAction.png" title="Move[M]">
-				</div>
-				<div class="action" id="copyAction">
-					<img src="images/copyAction.png" title="Copy[D]">
-				</div>
-				<div class="action" id="placeAction">
-					<img src="images/linkAction.png" title="Link[D]">
-				</div>
-				<div class="action" id="deleteAction">
-					<img src="images/deleteAction.png" title="Delete[Del]">
-				</div>
-			</div>
-
-			<div class="selectionHistory">
-				<!-- selection history -->
-				<div class="indexHeader">
-					<div class="headerItem">
-						<span class="label">Selection history</span>
-					</div>
-					<div class="headerItem clear">
-						<input type="button" value="Load Image" id="loadImageDummy" onclick="javascript:onLoadImageDummy()"/>
-						<input type="file" id="loadImage" name="imageFiles[]" accept="image/*" class="button" style='display:none'/>
-						<input type="button" class="button" value="From URL" onclick="javascript:onLoadImageFromURL()"/>
-						<input type="text" value="URL text" id="urlImageText"/> 
-					</div>
-					<div class="footer"></div>
-				</div>
-				<canvas id="selectionCanvas" class="selectionCanvas" ></canvas>	
-			</div>
-		<div class="footer"></div>
+			<form class="styleForm" action="">
+				<span class="styleLabel">Width:</span>
+				<select name="width">
+					<option value="width_10">10</option>
+					<option value="width_11">11</option>
+					<option value="width_12">12</option>
+				</select>
+			</form>
+		</div>
+		<div class="styleConfirm">
+			<button>Apply</button>
+			<button>Reset</button>
+		</div>
 	</div>
+	<div class="iconGroup">
+		<p class="actionLabel label">Actions</p>
+		<div class="actions clear">
+			<div class="action actionSelected" id="selectAction">
+				<img src="images/select.png" title="Select[Q]">
+			</div>
+			<div class="action" id="backAction">
+				<img src="images/back.png" title="Go Back[Backspace]">
+			</div>
+			<div class="action" id="panAction">
+				<img src="images/panSelect.png" title="Select & Pan[C]">
+			</div>
+			<div class="action" id="showAllAction">
+				<img src="images/showAll.png" title="Show All[V]">
+			</div>
+			<div class="action" id="zoomInAction">
+				<img src="images/zoomIn.png" title="Zoom In[Z]">
+			</div>
+			<div class="action" id="zoomOutAction">
+				<img src="images/zoomOut.png" title="Zoom Out[X]">
+			</div>
+			<div class="action actionDisabled" id="orderToBackAction">
+				<img src="images/toBack.png" title="Send to Back[W]">
+			</div>
+			<div class="action actionDisabled" id="addLineAction">
+				<img src="images/lineAction.png" title="Draw Line[A]">
+			</div>
+			<div class="action actionDisabled" id="addCurveAction" style='display:none'>Curve</div><!-- Todo fix and make visible -->
+			<div class="action actionDisabled" id="addCircleAction">
+				<img src="images/circleAction.png" title="Draw Circle[O]">
+			</div>
+			<div class="action actionDisabled" id="addTextAction">
+				<img src="images/textAction.png" title="Add Text[S]">
+			</div>
+			<div class="action actionDisabled" id="addFrameAction">
+				<img src="images/frameAction.png" title="Add Frame[F]">
+			</div>
+		</div>
+		<p class="actionLabel label clear">Selection</p>
+		<div class="actions clear">
+			<div class="action" id="editAction">
+				<img src="images/openAction.png" title="Open Sketch[E]">
+			</div>
+			<div class="action" id="moveAction">
+				<img src="images/moveAction.png" title="Move[M]">
+			</div>
+			<div class="action" id="copyAction">
+				<img src="images/copyAction.png" title="Copy[D]">
+			</div>
+			<div class="action" id="placeAction">
+				<img src="images/linkAction.png" title="Link[D]">
+			</div>
+			<div class="action" id="deleteAction">
+				<img src="images/deleteAction.png" title="Delete[Del]">
+			</div>
+		</div>
+
+		<div class="selectionHistory">
+			<!-- selection history -->
+			<div class="indexHeader">
+				<div class="headerItem">
+					<span class="label">Selection history</span>
+				</div>
+				<div class="headerItem clear">
+					<input type="button" value="Load Image" id="loadImageDummy" onclick="javascript:onLoadImageDummy()"/>
+					<input type="file" id="loadImage" name="imageFiles[]" accept="image/*" class="button" style='display:none'/>
+					<input type="button" class="button" value="From URL" onclick="javascript:onLoadImageFromURL()"/>
+					<input type="text" value="URL text" id="urlImageText"/> 
+				</div>
+				<div class="footer"></div>
+			</div>
+			<canvas id="selectionCanvas" class="selectionCanvas" ></canvas>	
+		</div>
+		<div class="selectionInfo">
+			<span class="label">Selection Info</span>
+			<div class="infoPane">
+				Element :<br>
+				Style : <br>
+				Colour : <br>
+				Width : <br>
+			</div>
+		</div>
+	</div>
+	<div class="footer"></div>
 </div>
 </div>
-<div id="ppitest" style="width:1in;visible:hidden;padding:0px"></div>
 <div id="hiddenimages" style="display:none"></div>
 </body>
 </html>

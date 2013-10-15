@@ -3,6 +3,10 @@ h1 {
 	font-family: sans-serif;
 	font-size: medium;
 }
+h2 {
+	font-family: sans-serif;
+	font-size: small;
+}
 canvas {
 	border:1px solid grey;
 }
@@ -119,11 +123,7 @@ textarea.detailText {
 	left: 1000px;
 	top: 200px;
 }
-div.commonFacilities {
-	clear:both;
-	position:relative;
-	/*height: 20%;*/
-}
+
 div.selectionHistory {
 	/*background-color:#ff0;*/
 	width:100%; /* could be 50% if no border */
@@ -131,6 +131,15 @@ div.selectionHistory {
 	left:50%;
 	top:0%;*/
 	float:left;
+}
+div.infoPane {
+	width: 30%;
+	border: 1px solid gray;
+	border-radius: 5px;
+}
+div.selectionInfo {
+	width: 100%;
+	float: left;
 }
 canvas.selectionCanvas {
 	height: 100px;
@@ -162,7 +171,7 @@ canvas.sequencesViewCanvas {
     clear: both;
 }
 div.iconGroup {
-	width:80%;
+	width:79%;
 	float:left;
 }
 div.actions {
@@ -179,6 +188,7 @@ div.actions img {
 	padding: 1px;
 	display:block;
 }
+
 div.action {
 	border: 1px solid black;
 	border-radius: 5px;
@@ -222,23 +232,90 @@ div.propertiesShowDisabled {
 	background-color:#ffffff;
 	color: gray;
 }
+/* Property attributes */
 div.properties {
-	/* under orphan text, next to selection history */
+	margin: 1px;
 	width: 20%;
 	float: left;
-	height: 100px;
 }
-table.propertiesTable {
-	/*border: 1px solid gray;*/
-	width:100%;
+div.attributes {
+	width: 100%;
+	float: left;
 }
-tr.propertyDisabled td {
-	opacity: 0.5;
-	/*color: gray;*/
+div.textAttributes {
+	/*
+	border: 1px solid gray;
+	border-radius: 5px;
+	width: auto;
+	padding: 5px;*/
 }
-table.sketchPropertiesTable {
-	/*border: 1px solid gray;*/
-	width:100%;
+.attributeLabel {
+	width: 25%;
+	float: left;
+	margin-top: 3px;
+}
+.styleAttributes {
+	clear: both;
+	
+}
+.styleSelector {
+	clear: both;
+}
+.styleConfirm {
+	clear: both;
+}
+div.propertyIcons {
+	clear: both;
+	float: left;
+	width: 80%;
+	margin: 3px 10px 3px 10px;
+}
+div.propertyIcons img {
+	height: 22px;
+	width: 22px;
+	padding: 1px;
+	border: 1px solid black;
+	border-radius: 5px;
+	margin: 3px;
+}
+div.fontSize {
+	clear: both;
+	margin: 3px 10px 3px 10px;
+}
+div.fontFamily {
+	clear: both;
+	margin: 3px 10px 3px 10px;
+}
+#textInput {
+	clear: both;
+}
+.textForm {
+	/*clear: both;*/
+	margin: 3px 10px 3px 10px;
+}
+.styleForm {
+	/*clear: both;*/
+	margin: 10px 3px 20px 10px;
+	/*float: left;*/
+}
+.colourStyle {
+	float: left;
+	margin: 10px 20px 10px 10px;
+}
+.styleConfirm {
+	width: 50%;
+	margin-left: 50px;
+}
+#styleSelect {
+	/*width: 100%;*/
+	margin: 3px 10px 3px 10px;
+}
+#widthForm {
+	display: inline;
+}
+.styleLabel {
+	width: 20%;
+	margin-top: 3px;
 }
 #lineColorProperty div.option {
 	width: 1em;
@@ -328,15 +405,23 @@ div.channelActive {
 	background-color: #808080;
 }
 .picker {
-	margin-left: 15px;
+	margin-left: 5px;
+	/*float: left;*/
+}
+#setBackgroundColorProperty {
+	margin-left: 30px;
 }
 div.slider {
     width: 150px;
     margin: 5px;
     height: 7px;
 }
-
 .ui-slider .ui-slider-handle {
     width: 15px;
     height: 15px;
+}
+
+div.format {
+	float: left;
+	display: inline;
 }
