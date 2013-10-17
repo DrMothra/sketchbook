@@ -38,10 +38,10 @@ LineTool.prototype = new Tool();
 LineTool.prototype.begin = function(point) {
 	// activate overlay layer
 	activateOverlay(this.project);
-	this.frameStyle = getProperty('frameStyle', 'border');
+	this.frameStyle = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
-	this.lineWidth = getProperty('lineWidth', 1);
+	this.lineWidth = getWidth();
 	this.path = new paper.Path();	
 	if (this.frameStyle.indexOf('border')>=0 || !this.frameStyle)
 		this.path.strokeColor = this.lineColor;

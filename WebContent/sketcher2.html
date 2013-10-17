@@ -147,10 +147,9 @@
 		<h2>Properties</h2>
 		<form class="textForm" action="">
 			<span class="attributeLabel">Attribute:</span>
-			<select name="attribute">
-				<option value="color">Colour</option>
-				<option value="width">Width</option>
-				<option value="style">Style</option>
+			<select id="attributeSelect">
+				<option value="lineColor">Line Color</option>
+				<option value="fillColor">Fill Color</option>
 			</select>
 		</form>
 		<div class="textAttributes">
@@ -179,12 +178,13 @@
 			</div>
 		</div>
 		<div class="styleAttributes">
-			<form id="styleSelect" action="">
+			<form action="">
 				<span class="attributeLabel">Style:</span>
-				<select name="style">
-					<option value="line">Line</option>
-					<option value="border">Border</option>
-					<option value="both">Both</option>
+				<select id="styleSelect" name="style">
+					<option value="style">None</option>
+					<option value="styleborder">Border</option>
+					<option value="stylefill">Fill</option>
+					<option value="styleborder_fill">Both</option>
 				</select>
 			</form>
 			<div class="colourStyle">
@@ -193,10 +193,11 @@
 			</div>
 			<form class="styleForm" action="">
 				<span class="styleLabel">Width:</span>
-				<select name="width">
-					<option value="width_10">10</option>
-					<option value="width_11">11</option>
-					<option value="width_12">12</option>
+				<select id="widthSelect" name="width">
+					<option value="width1">1</option>
+					<option value="width2">2</option>
+					<option value="width4">4</option>
+					<option value="width8">8</option>
 				</select>
 			</form>
 		</div>

@@ -131,6 +131,7 @@ function PropertySelect(name, propertyId) {
 	this.propertyId = propertyId;
 	this.lastSelectedElem = $('#'+propertyId+' .optionDefault');
 	var self = this;
+	this.currentValue = 0x000000;
 	$('#'+propertyId+' .option').on('click', function(ev) { self.onPropertyOptionSelected($(this), ev); });
 }
 
@@ -158,7 +159,10 @@ PropertySelect.prototype.resetValue = function() {
 };
 
 PropertySelect.prototype.getValue = function() {
-	var id = $('#'+this.propertyId+' .optionSelected').attr('id');
+	//Get current value
+	return this.currentValue;
+
+	/*var id = $('#'+this.propertyId+' .optionSelected').attr('id');
 	if (!id) {
 		console.log('no '+this.name+' selected');
 		return null;
@@ -166,11 +170,15 @@ PropertySelect.prototype.getValue = function() {
 	var ix = id.indexOf('_');
 	if (ix>0)
 		id = id.substring(ix+1);
-	return id;
+	return id;*/
 };
 
 PropertySelect.prototype.setValue = function(value) {
-	value = String(value).replace(/\,/g, '_');
+	//Store selected value
+	this.currentValue = value;
+	console.log('Stored value', value);
+	
+	/*value = String(value).replace(/\,/g, '_');
 	$('#'+this.propertyId+' .option').removeClass('optionSelected');
 	var sel = $('#'+this.name+'_'+value);
 	if (sel.size()>0) {
@@ -179,7 +187,7 @@ PropertySelect.prototype.setValue = function(value) {
 	}
 	else {
 		console.log('could not find '+this.name+' value '+value);
-	}
+	}*/
 };
 
 PropertySelect.prototype.setEnabled = function(enabled) {
@@ -454,6 +462,8 @@ function hexForColor(color) {
 var DEFAULT_FILL_COLOR = '000000';
 //black
 var DEFAULT_LINE_COLOR = '000000';
+var BACKGROUND_PICKER = 0;
+var STYLE_PICKER = 1;
 function updatePropertiesForCurrentSelection() {
 	var actionId = $('.actionSelected').attr('id');
 
@@ -465,7 +475,10 @@ function updatePropertiesForCurrentSelection() {
 		}
 	}
 	else if (!propertiesShowSelection()) {
-		// update color to last selected
+		//Update attribute selector
+		var enableSelector = (actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
+							     actionId=='addFrameAction');
+		$('#attributeSelect').prop('disabled', !enableSelector);
 		var add = actionId.substring(0, 3)=='add' || actionId.substr(0,5)=='place';
 		for (var pname in propertyEditors) {
 			var propertyEditor = propertyEditors[pname];
@@ -487,7 +500,6 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.text.setEnabled(actionId=='addFrameAction' || actionId=='addTextAction');
 			propertyEditors.textJustify.setEnabled(actionId=='addTextAction');
 			propertyEditors.showLabel.setEnabled(actionId=='placeAction' || actionId=='addFrameAction');
-			propertyEditors.textVAlign.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.rescale.setEnabled(actionId=='placeAction');
 		}
 	} else {
@@ -727,17 +739,33 @@ function getProperty(name, defaultValue) {
 }
 /** called by sketchertools */
 function getLineColor() {
-	return '#'+getProperty('lineColor', '000000');
+	//Get current value of property
+	return '#'+propertyEditors['lineColor'].getValue();
 }
 /** called by sketchertools */
 function getFillColor() {
-	return '#'+getProperty('fillColor', '000000');
+	//Get current value of color picker
+	return '#'+propertyEditors['fillColor'].getValue();
 }
 /** called by sketchertools */
 function getTextColor() {
-	return '#'+getProperty('textColor', '000000');
+	//Get current value of color picker
+	return '#'+$.jPicker.List[STYLE_PICKER].color.active.val('hex');
 }
-
+function getStyle() {
+	//Get value from control
+	var style = $('#styleSelect').val();
+	//Take "style" off
+	style = style.substring(5);
+	return style;
+}
+function getWidth() {
+	//Get value from control
+	var width = $('#widthSelect').val();
+	//Take "width" off
+	width = width.substring(5);
+	return width;
+}
 function handleActionSelected(id) {
 	var disabled = $('#'+id).hasClass('actionDisabled');
 	if (disabled)
@@ -3332,6 +3360,12 @@ function onSetTextJustify(value) {
 	}
 }
 
+function onAttributeChange() {
+	//Set color picker to associated value
+	var lastColor = propertyEditors[$('#attributeSelect').val()].getValue();
+	console.log('lastColor=', lastColor);
+	$.jPicker.List[STYLE_PICKER].color.active.val( 'hex', lastColor);
+}
 function onAlphaSelected(alpha) {
 	$('.alpha').removeClass('alphaSelected');
 	$(this).addClass('alphaSelected');
@@ -3364,52 +3398,6 @@ $(document).ready(function() {
 
 	// setup paperjs
 	setupPaperjs();
-	
-	// register more GUI callbacks
-	$('#loadFile').on('change', onChooseFile);
-	$('#loadImage').on('change', onLoadImage);
-	$('#objectTextArea').change(onObjectTextChange);
-	
-	$('.action').on('click', onActionSelected);
-	$('.propertiesShow').on('click', onPropertiesShowSelected);
-	//$('#colorProperty .option').on('click', onColorSelected);
-	//$('.alpha').on('click', onAlphaSelected);
-	$('#objectDetailCanvas').on('dblclick', onPropertyEdit);
-	$(document).on('mousedown', '#sequences1Div .sequenceFrame', onSequenceFrameSelected);
-	$(document).on('mousedown', '#sequences1Div .sequenceObject', onSequenceFrameSelected);
-	$(document).on('mousedown', '#sequences2Div .sequenceSequence', onSequenceItemSelected);
-	$(document).on('mousedown', '#sequences2Div .sequenceItem', onSequenceItemSelected);
-
-	registerHighlightEvents();
-	
-	registerMouseEvents();
-	
-	propertyEditors.lineColor = new PropertySelect('lineColor', 'lineColorProperty');
-	propertyEditors.lineColor.onSetValue = onSetLineColor;
-	propertyEditors.textColor = new PropertySelect('textColor', 'textColorProperty');
-	propertyEditors.textColor.onSetValue = onSetTextColor;
-	propertyEditors.fillColor = new PropertySelect('fillColor', 'fillColorProperty');
-	propertyEditors.fillColor.onSetValue = onSetFillColor;
-	propertyEditors.lineWidth = new PropertySelect('lineWidth', 'lineWidthProperty');
-	propertyEditors.lineWidth.onSetValue = onSetLineWidth;
-	propertyEditors.textSize = new PropertySelect('textSize', 'textSizeProperty');
-	propertyEditors.textSize.onSetValue = onSetTextSize;
-	propertyEditors.text = new PropertyText('text', 'textProperty');
-	propertyEditors.text.onSetValue = onSetText;
-	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
-	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
-	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
-	propertyEditors.textJustify.onSetValue = onSetTextJustify;
-	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
-	propertyEditors.showLabel.onSetValue = onSetShowLabel;
-	propertyEditors.textVAlign = new PropertySelect('textVAlign', 'textVAlignProperty');
-	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
-	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
-	propertyEditors.rescale.onSetValue = onSetRescale;
-	propertyEditors.backgroundColor = new PropertySelect('backgroundColor', 'backgroundColorProperty');
-	propertyEditors.backgroundColor.onSetValue = onSetBackgroundColor;
-
-	onShowIndex();
 	
 	//Colour picker handling
 	$.fn.jPicker.defaults.images.clientPath='images/';
@@ -3447,18 +3435,18 @@ $(document).ready(function() {
 	    },
 	    color:
 	    {
-		active: new $.jPicker.Color({ hex: 'e6e6e6' })
+		active: new $.jPicker.Color({ hex: '000000' })
 	    }
 	  },
 	  function(color, context) {
-		//User has changed bg colour
-		//Ensure nothing else selected
-		//clearCurrentSelection();
-		//Need to select appropriate canvas
-		//propertiesShowSelectionFlag = true;
-		//var hexColor = color.val('hex');
-		
-		//onSetBackgroundColor(hexColor);
+		//User has changed colour
+		//Determine what to change by looking at attribute selector
+		if(!$('#attributeSelect').prop('disabled')) {
+			//See what attribute has been set
+			console.log('attrib=', $('#attributeSelect').val());
+			propertiesShowSelectionFlag = false;
+			propertyEditors[$('#attributeSelect').val()].setValue(color.val('hex'));
+		}
 	  });
 	
 	//UI handling
@@ -3472,6 +3460,59 @@ $(document).ready(function() {
 			onAlphaSelected(ui.value);
 		}
 	});
+	
+	// register more GUI callbacks
+	$('#loadFile').on('change', onChooseFile);
+	$('#loadImage').on('change', onLoadImage);
+	$('#objectTextArea').change(onObjectTextChange);
+	$('#attributeSelect').change(onAttributeChange);
+	
+	$('.action').on('click', onActionSelected);
+	$('.propertiesShow').on('click', onPropertiesShowSelected);
+	//$('#colorProperty .option').on('click', onColorSelected);
+	//$('.alpha').on('click', onAlphaSelected);
+	$('#objectDetailCanvas').on('dblclick', onPropertyEdit);
+	$(document).on('mousedown', '#sequences1Div .sequenceFrame', onSequenceFrameSelected);
+	$(document).on('mousedown', '#sequences1Div .sequenceObject', onSequenceFrameSelected);
+	$(document).on('mousedown', '#sequences2Div .sequenceSequence', onSequenceItemSelected);
+	$(document).on('mousedown', '#sequences2Div .sequenceItem', onSequenceItemSelected);
+
+	registerHighlightEvents();
+	
+	registerMouseEvents();
+	
+	propertyEditors.lineColor = new PropertySelect('lineColor', 'lineColorProperty');
+	propertyEditors.lineColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
+	//propertyEditors.lineColor.onSetValue = onSetLineColor;
+	propertyEditors.textColor = new PropertySelect('textColor', 'textColorProperty');
+	propertyEditors.textColor.onSetValue = onSetTextColor;
+	propertyEditors.fillColor = new PropertySelect('fillColor', 'fillColorProperty');
+	propertyEditors.fillColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
+	//propertyEditors.fillColor.onSetValue = onSetFillColor;
+	propertyEditors.lineWidth = new PropertySelect('lineWidth', 'lineWidthProperty');
+	propertyEditors.lineWidth.onSetValue = onSetLineWidth;
+	propertyEditors.textSize = new PropertySelect('textSize', 'textSizeProperty');
+	propertyEditors.textSize.onSetValue = onSetTextSize;
+	propertyEditors.text = new PropertyText('text', 'textProperty');
+	propertyEditors.text.onSetValue = onSetText;
+	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
+	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
+	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
+	propertyEditors.textJustify.onSetValue = onSetTextJustify;
+	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
+	propertyEditors.showLabel.onSetValue = onSetShowLabel;
+	propertyEditors.textVAlign = new PropertySelect('textVAlign', 'textVAlignProperty');
+	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
+	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
+	propertyEditors.rescale.onSetValue = onSetRescale;
+	propertyEditors.backgroundColor = new PropertySelect('backgroundColor', 'backgroundColorProperty');
+	propertyEditors.backgroundColor.onSetValue = onSetBackgroundColor;
+
+	//Disable controls
+	document.getElementById("attributeSelect").disabled = true;
+	
+	onShowIndex();
+	
 	
     $(window).resize(handleResize);
     handleResize();
