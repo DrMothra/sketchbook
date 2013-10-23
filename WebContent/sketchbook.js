@@ -147,8 +147,9 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(path);
 			if (element.line.lineWidth)
 				path.strokeWidth = element.line.lineWidth;
-			if (element.line.lineColor && (!element.line.frameStyle)) 
+			if (element.line.lineColor && element.line.frameStyle && element.line.frameStyle.indexOf('none')>=0) {
 				path.strokeColor = colorToPaperjs(element.line.lineColor);
+			}
 			if (element.line.lineColor && element.line.frameStyle && element.line.frameStyle.indexOf('border')>=0) {
 				path.strokeColor = colorToPaperjs(element.line.lineColor);
 				path.closed = true;
@@ -349,8 +350,11 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
 			if (element.circle.lineWidth)
 				path.strokeWidth = element.circle.lineWidth;
-			if (element.circle.lineColor && (!element.circle.frameStyle || element.circle.frameStyle.indexOf('border')>=0))
+			
+			if (element.circle.lineColor && (element.circle.frameStyle.indexOf('border')>=0 ||
+							element.circle.frameStyle.indexOf('none')>=0)) {
 				path.strokeColor = colorToPaperjs(element.circle.lineColor);
+			}
 			if (element.circle.fillColor && element.circle.frameStyle && element.circle.frameStyle.indexOf('fill')>=0) {
 				path.fillColor = colorToPaperjs(element.circle.fillColor);
 				path.closed = true;
@@ -420,8 +424,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			//Need to change canvas color directly
 			var canvas = element.canvas;
 			$('.'+canvas.name).css('background-color', '#'+canvas.backgroundColor);
-			console.log('canvas name='+canvas.name + "canvas color=" + canvas.backgroundColor);
-			//$('.detailCanvas').css('background-color', '#ff0000');
 		}
 	}
 	return items;
@@ -1287,6 +1289,7 @@ Sketchbook.prototype.doAction = function(action) {
 				}
 				else {
 					if (element.line) {
+						console.log('set props line color=', action.lineColor);
 						var elval = element.line;
 						el.undo = {};
 						el.undo.lineColor = elval.lineColor;

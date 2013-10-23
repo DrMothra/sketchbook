@@ -176,7 +176,7 @@ PropertySelect.prototype.getValue = function() {
 PropertySelect.prototype.setValue = function(value) {
 	//Store selected value
 	this.currentValue = value;
-	console.log('Stored value', value);
+	console.log('PropSelect val=', value);
 	
 	/*value = String(value).replace(/\,/g, '_');
 	$('#'+this.propertyId+' .option').removeClass('optionSelected');
@@ -204,12 +204,102 @@ PropertySelect.prototype.onSetValue = function(value) {
 	// no op
 };
 
+
+function ColorPropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	this.name = name;
+	this.colorId = propertyId;
+}
+ColorPropertySelect.prototype = new PropertySelect();
+
+ColorPropertySelect.prototype.setValue = function(color) {
+	console.log('color =', color);
+	this.currentValue = color;
+	//Update picker for selected attribute
+	if ($('#attributeSelect').val()==this.name)
+		$.jPicker.List[this.colorId].color.active.val('hex', color);
+}
+ColorPropertySelect.prototype.onSetValue = function(value) {
+	this.currentValue = value;
+	var color = parseHexColor('#'+value);
+	if (!color)
+		return;
+	
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		console.log('set '+this.name+' color=', color);
+		switch (this.name) {
+			case 'lineColor':
+				action.setLineColor(color);
+				break;
+			case 'fillColor':
+				action.setFillColor(color);
+				break;
+			case 'textColor':
+				action.setTextColor(color);
+				break;
+			default:
+				console.log('invalid color operation');
+				return;
+				break;
+		}
+		onSetProperty(action);
+	}
+}
+function WidthPropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	this.name = name;
+}
+WidthPropertySelect.prototype = new PropertySelect();
+
+WidthPropertySelect.prototype.setValue = function(width) {
+	console.log('width =', width);
+	this.currentValue = width;
+	//Update spinner
+	$('#widthSelect').spinner("value", width);
+}
+WidthPropertySelect.prototype.onSetValue = function(width) {
+	this.currentValue = width;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setLineWidth(width);
+		onSetProperty(action);
+	}
+}
+function StylePropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	this.name = name;
+}
+StylePropertySelect.prototype = new PropertySelect();
+
+StylePropertySelect.prototype.setValue = function(style) {
+	if (!style)
+		return;
+	
+	this.currentValue = style;
+	//Update menu
+	$('#styleSelect').val('style'+style);
+}
+StylePropertySelect.prototype.onSetValue = function(style) {
+	//Remove "style"
+	if (style)
+		style = style.substring(5);
+	
+	console.log('style =', style);
+	
+	this.currentValue = style;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setFrameStyle(style);
+		onSetProperty(action);
+	}
+}
 // Text as a Property object
 function PropertyText(name, propertyId) {
 	this.name = name;
 	this.propertyId = propertyId;
-	this.orphanText = '';
-	this.isOrphan = true;
+	//this.orphanText = '';
+	//this.isOrphan = true;
 	this.value = '';
 	var self = this;
 	// (could do on keyup but that might be too much
@@ -221,33 +311,35 @@ function PropertyText(name, propertyId) {
 			self.onSetValue(value);
 		}
 	};
-	$('#'+this.propertyId+' textarea').on('change', checkfn);
-	$('#'+this.propertyId+' textarea').on('blur', checkfn);	
+	//$('#'+this.propertyId+' textarea').on('change', checkfn);
+	//$('#'+this.propertyId+' textarea').on('blur', checkfn);
+	$('#'+this.propertyId).on('change', checkfn);
+	$('#'+this.propertyId).on('blur', checkfn);	
 }
 
 //called when no longer showing selection value, i.e. new value
 PropertyText.prototype.resetValue = function() {
-	console.log('text reset, isOrphan='+this.isOrphan+', orphanText='+this.orphanText);
-	if (!this.isOrphan) {
-		$('#'+this.propertyId+' textarea').val(this.orphanText);
-		this.isOrphan = true;
-	}
+	//console.log('text reset, isOrphan='+this.isOrphan+', orphanText='+this.orphanText);
+	//if (!this.isOrphan) {
+	//	$('#'+this.propertyId+' textarea').val(this.orphanText);
+	//	this.isOrphan = true;
+	//}
 };
 	
 PropertyText.prototype.getValue = function() {
-	return $('#'+this.propertyId+' textarea').val();
+	return $('#'+this.propertyId).val();
 };
 
 PropertyText.prototype.setValue = function(value) {
-	console.log('text set('+value+'), isOrphan='+this.isOrphan+', orphanText='+this.orphanText);
-	if (this.isOrphan) {
-		this.isOrphan = false;
-		this.orphanText = this.getValue();
-	}
+	//console.log('text set('+value+'), isOrphan='+this.isOrphan+', orphanText='+this.orphanText);
+	//if (this.isOrphan) {
+	//	this.isOrphan = false;
+	//	this.orphanText = this.getValue();
+	//}
 	this.value = value;
-	$('#'+this.propertyId+' textarea').val(value);
+	$('#'+this.propertyId).val(value);
 	
-	console.log("textSetValue = ", '#'+this.propertyId+' textarea');
+	console.log("textSetValue = ", '#'+this.propertyId);
 };
 
 PropertyText.prototype.setEnabled = function(enabled) {
@@ -265,7 +357,10 @@ PropertyText.prototype.onSetValue = function(value) {
 };
 
 function takeOrphanText() {
-	if (propertyEditors.text.isOrphan) {
+	var text = $('#textProperty').val();
+	$('#textProperty').val('');
+	return text;
+	/*if (propertyEditors.text.isOrphan) {
 		var text = $('#orphanText').val();
 		$('#orphanText').val('');
 		return text;
@@ -273,7 +368,7 @@ function takeOrphanText() {
 		var text = propertyEditors.text.orphanText;
 		propertyEditors.text.orphanText = '';
 		return text;
-	}
+	}*/
 }
 
 //==============================================================================
@@ -477,7 +572,7 @@ function updatePropertiesForCurrentSelection() {
 	else if (!propertiesShowSelection()) {
 		//Update attribute selector
 		var enableSelector = (actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
-							     actionId=='addFrameAction');
+							     actionId=='addFrameAction' || actionId=='addTextAction');
 		$('#attributeSelect').prop('disabled', !enableSelector);
 		var add = actionId.substring(0, 3)=='add' || actionId.substr(0,5)=='place';
 		for (var pname in propertyEditors) {
@@ -534,7 +629,7 @@ function updatePropertiesForCurrentSelection() {
 						if (el.line.frameStyle)
 							frameStyle = el.line.frameStyle;
 						else
-							frameStyle = 'border';
+							frameStyle = 'none';
 					}
 					else if (el.text) {
 						if (el.text.textColor) 
@@ -606,7 +701,7 @@ function updatePropertiesForCurrentSelection() {
 						if (el.circle.frameStyle)
 							frameStyle = el.circle.frameStyle;
 						else
-							frameStyle = 'border';
+							frameStyle = 'none';
 					}
 					else if (el.icon) {
 						if (el.icon.lineColor) 
@@ -654,7 +749,9 @@ function updatePropertiesForCurrentSelection() {
 			}
 		}
 		if (lineColor) {
+			//Update colour picker
 			propertyEditors.lineColor.setEnabled(true);
+			console.log('line color selected=', lineColor);
 			propertyEditors.lineColor.setValue(hexForColor(lineColor));
 		}
 		else 
@@ -692,6 +789,7 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.textSize.setEnabled(false);
 		if (text) {
 			propertyEditors.text.setEnabled(true);
+			console.log('text =', text);
 			propertyEditors.text.setValue(text);
 		}
 		else
@@ -749,8 +847,8 @@ function getFillColor() {
 }
 /** called by sketchertools */
 function getTextColor() {
-	//Get current value of color picker
-	return '#'+$.jPicker.List[STYLE_PICKER].color.active.val('hex');
+	//Use current value of color picker
+	return '#'+propertyEditors['textColor'].getValue();
 }
 function getStyle() {
 	//Get value from control
@@ -759,12 +857,27 @@ function getStyle() {
 	style = style.substring(5);
 	return style;
 }
+function getFrameStyle() {
+	//Get value from menu
+	var style = $('#frameSelect').val();
+	//Take "style" off
+	style = style.substring(5);
+	return style;
+}
 function getWidth() {
 	//Get value from control
-	var width = $('#widthSelect').val();
-	//Take "width" off
-	width = width.substring(5);
-	return width;
+	return $('#widthSelect').spinner("value");
+}
+function getFontSize() {
+	//Get value from control
+	var size = $('#fontSize').val();
+	//Take "size" off
+	size = size.substring(4);
+	return size;
+}
+function getJustification() {
+	//Get value from control
+	return 'center';
 }
 function handleActionSelected(id) {
 	var disabled = $('#'+id).hasClass('actionDisabled');
@@ -957,19 +1070,11 @@ function onActionSelected(event) {
 }
 function handlePropertiesShowSelected(id) {
 	if (id=='propertiesShowSelection') {
-		if (!$('#propertiesShowSelection').hasClass('propertiesShowDisabled')) {
-			$('.propertiesShow').removeClass('propertiesShowSelected');
-			$('#propertiesShowSelection').addClass('propertiesShowSelected');
-			propertiesShowSelectionFlag = true;
-			updatePropertiesForCurrentSelection();
-		}
+		propertiesShowSelectionFlag = true;
+		updatePropertiesForCurrentSelection();
 	} else {
-		if (!$('#propertiesShowNew').hasClass('propertiesShowDisabled')) {
-			$('.propertiesShow').removeClass('propertiesShowSelected');
-			$('#propertiesShowNew').addClass('propertiesShowSelected');
-			propertiesShowSelectionFlag = false;
-			updatePropertiesForCurrentSelection();
-		}		
+		propertiesShowSelectionFlag = false;
+		updatePropertiesForCurrentSelection();	
 	}
 }
 
@@ -1561,25 +1666,25 @@ function registerHighlightEvents() {
 	});
 	$(document).on('mouseout', 'textarea',function() {
 		$(this).blur();
-		$('#orphanText').focus();
+		$('#textProperty').focus();
 	});
 	$(document).on('mouseenter', 'canvas',function(event) {
 		canvasTarget = event.target;
-		$('#orphanText').blur();
+		$('#textProperty').blur();
 	});
 	$(document).on('mouseout', 'canvas',function(event) {
 		canvasTarget = null;
-		$('#orphanText').focus();
+		$('#textProperty').focus();
 	});
 	$(document).on('mouseenter', 'body',function() {
-		$('#orphanText').focus();
+		$('#textProperty').focus();
 	});
 	$(document).on('mouseenter', 'input[type=text]',function() {
 		$(this).focus();
 	});
 	$(document).on('mouseout', 'input[type=text]',function() {
 		$(this).blur();
-		$('#orphanText').focus();
+		$('#textProperty').focus();
 	});
 	$(document).on('mouseout', '#objectDetailTextarea', onDetailFinished);
 }
@@ -3220,12 +3325,11 @@ function onSetProperty(action) {
 	doAction(action);
 }
 // property editor entry point
-function onSetLineColor(value) {
-	var color = parseHexColor(value);
+function onSetLineColor(color) {
+	//Update colour picker
 	if (!color)
 		return;
-	// TODO immediate action?
-	// set color of currentSelection?
+	
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
 		action.setLineColor(color);
@@ -3441,11 +3545,14 @@ $(document).ready(function() {
 	  function(color, context) {
 		//User has changed colour
 		//Determine what to change by looking at attribute selector
-		if(!$('#attributeSelect').prop('disabled')) {
+		//if(!$('#attributeSelect').prop('disabled')) {
+		if (true) {
 			//See what attribute has been set
-			console.log('attrib=', $('#attributeSelect').val());
-			propertiesShowSelectionFlag = false;
-			propertyEditors[$('#attributeSelect').val()].setValue(color.val('hex'));
+			if(propertiesShowSelectionFlag) {
+				propertyEditors[$('#attributeSelect').val()].onSetValue(color.val('hex'));
+			} else {
+				propertyEditors[$('#attributeSelect').val()].setValue(color.val('hex'));
+			}
 		}
 	  });
 	
@@ -3460,12 +3567,21 @@ $(document).ready(function() {
 			onAlphaSelected(ui.value);
 		}
 	});
-	
+	$('#widthSelect').spinner({
+		min:1,
+		max:30
+		},
+		{spin : function(event, ui) {
+			console.log('spinner = '+ui.value);
+			propertyEditors.lineWidth.onSetValue(ui.value);
+		}
+	});
 	// register more GUI callbacks
 	$('#loadFile').on('change', onChooseFile);
 	$('#loadImage').on('change', onLoadImage);
 	$('#objectTextArea').change(onObjectTextChange);
 	$('#attributeSelect').change(onAttributeChange);
+	
 	
 	$('.action').on('click', onActionSelected);
 	$('.propertiesShow').on('click', onPropertiesShowSelected);
@@ -3481,22 +3597,18 @@ $(document).ready(function() {
 	
 	registerMouseEvents();
 	
-	propertyEditors.lineColor = new PropertySelect('lineColor', 'lineColorProperty');
+	propertyEditors.lineColor = new ColorPropertySelect('lineColor', STYLE_PICKER);
 	propertyEditors.lineColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
-	//propertyEditors.lineColor.onSetValue = onSetLineColor;
-	propertyEditors.textColor = new PropertySelect('textColor', 'textColorProperty');
-	propertyEditors.textColor.onSetValue = onSetTextColor;
-	propertyEditors.fillColor = new PropertySelect('fillColor', 'fillColorProperty');
+	propertyEditors.textColor = new ColorPropertySelect('textColor', STYLE_PICKER);
+	propertyEditors.textColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
+	propertyEditors.fillColor = new ColorPropertySelect('fillColor', STYLE_PICKER);
 	propertyEditors.fillColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
-	//propertyEditors.fillColor.onSetValue = onSetFillColor;
-	propertyEditors.lineWidth = new PropertySelect('lineWidth', 'lineWidthProperty');
-	propertyEditors.lineWidth.onSetValue = onSetLineWidth;
+	propertyEditors.lineWidth = new WidthPropertySelect('lineWidth', 'lineWidthProperty');
 	propertyEditors.textSize = new PropertySelect('textSize', 'textSizeProperty');
 	propertyEditors.textSize.onSetValue = onSetTextSize;
 	propertyEditors.text = new PropertyText('text', 'textProperty');
 	propertyEditors.text.onSetValue = onSetText;
-	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
-	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
+	propertyEditors.frameStyle = new StylePropertySelect('frameStyle', 'frameStyleProperty');
 	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
 	propertyEditors.textJustify.onSetValue = onSetTextJustify;
 	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
@@ -3510,6 +3622,11 @@ $(document).ready(function() {
 
 	//Disable controls
 	document.getElementById("attributeSelect").disabled = true;
+	
+	$('#styleSelect').change(function() {
+		if(propertiesShowSelectionFlag)
+			propertyEditors.frameStyle.onSetValue($('#styleSelect').val());
+	});
 	
 	onShowIndex();
 	

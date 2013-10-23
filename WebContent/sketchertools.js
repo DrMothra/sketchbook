@@ -39,11 +39,12 @@ LineTool.prototype.begin = function(point) {
 	// activate overlay layer
 	activateOverlay(this.project);
 	this.frameStyle = getStyle();
+	console.log('linetool style =', this.frameStyle);
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
 	this.lineWidth = getWidth();
 	this.path = new paper.Path();	
-	if (this.frameStyle.indexOf('border')>=0 || !this.frameStyle)
+	if (this.frameStyle.indexOf('border')>=0 || this.frameStyle.indexOf('none')>=0)
 		this.path.strokeColor = this.lineColor;
 	if(this.frameStyle.indexOf('fill')>=0) {
 		this.path.closed = true;
@@ -94,10 +95,10 @@ CircleTool.prototype = new Tool();
 CircleTool.prototype.begin = function(point) {
 	// activate overlay layer
 	activateOverlay(this.project);
-	this.frameStyle = getProperty('frameStyle', 'border');
+	this.frameStyle = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
-	this.lineWidth = getProperty('lineWidth', 1);
+	this.lineWidth = getWidth();
 	this.startPoint = point;
 	this.path = new paper.Path.Circle(this.startPoint, this.radius);	
 	if (this.frameStyle.indexOf('border')>=0 || !this.frameStyle)
@@ -814,13 +815,13 @@ function FrameTool(project, sketchbook, sketchId, description) {
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;	
 	this.description = description;
-	this.frameStyle = getProperty('frameStyle', 'border');
+	this.frameStyle = getFrameStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
-	this.lineWidth = getProperty('lineWidth', 1);
-	this.showLabel = getProperty('showLabel', 'frame');
+	this.lineWidth = getWidth();
+	this.showLabel = 'frame';
 	this.textColor = getTextColor();
-	this.textSize = getProperty('textSize', 12);
+	this.textSize = getFontSize();
 	this.textVAlign = getProperty('textVAlign', 'middle');
 }
 FrameTool.prototype = new Tool();
@@ -863,8 +864,8 @@ TextTool.prototype.begin = function(point) {
 	activateOverlay(this.project);
 	this.text = new paper.PointText(point);
 	this.text.characterStyle.fillColor = getTextColor();
-	this.text.paragraphStyle.justification = getProperty('textJustify', 'center');
-	this.text.characterStyle.fontSize = getProperty('textSize', 12); //default
+	this.text.paragraphStyle.justification = getJustification();
+	this.text.characterStyle.fontSize = getFontSize();
 	this.text.content = this.content;	
 };
 

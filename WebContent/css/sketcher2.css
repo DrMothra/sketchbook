@@ -250,7 +250,7 @@ div.textAttributes {
 	padding: 5px;*/
 }
 .attributeLabel {
-	width: 25%;
+	width: 35%;
 	float: left;
 	margin-top: 3px;
 }
@@ -300,7 +300,7 @@ div.fontFamily {
 }
 .colourStyle {
 	float: left;
-	margin: 10px 20px 10px 10px;
+	margin: 1px 20px 10px 10px;
 }
 .styleConfirm {
 	width: 50%;
@@ -420,8 +420,17 @@ div.slider {
     width: 15px;
     height: 15px;
 }
-
 div.format {
 	float: left;
 	display: inline;
+}
+.spinner {
+	width: 25px;
+	font-size: small;
+}
+.ui-spinner-input {
+	text-align: right;
+}
+.ui-widget {
+	font-size: small;
 }

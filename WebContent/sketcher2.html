@@ -150,10 +150,11 @@
 			<select id="attributeSelect">
 				<option value="lineColor">Line Color</option>
 				<option value="fillColor">Fill Color</option>
+				<option value="textColor">Text Color</option>
 			</select>
 		</form>
 		<div class="textAttributes">
-			<textarea id="textInput" cols="20" rows="3"></textarea>
+			<textarea id="textProperty" cols="20" rows="3"></textarea>
 			<form class="textForm" action="">
 				<span class="attributeLabel">Font-family:</span>
 				<select name="fontFamily">
@@ -164,24 +165,55 @@
 			</form>
 			<form class="textForm" action="">
 				<span class="attributeLabel">Font-size:</span>
-				<select name="fontSize">
+				<select id="fontSize" name="">
+					<option value="size8">8</option>
+					<option value="size9">9</option>
 					<option value="size10">10</option>
 					<option value="size11">11</option>
-					<option value="size12">12</option>
+					<option value="size12" selected>12</option>
+					<option value="size14">14</option>
+					<option value="size16">16</option>
+					<option value="size18">18</option>
+					<option value="size20">20</option>
+					<option value="size22">22</option>
+					<option value="size24">24</option>
+					<option value="size26">26</option>
+					<option value="size28">28</option>
+					<option value="size36">36</option>
+					<option value="size48">48</option>
+					<option value="size72">72</option>
+					<option value="size96">96</option>
 				</select>
 			</form>
 			<div class="propertyIcons">
 				<span class="attributeLabel">Align:</span>
-				<img src="images/textAlignLeft.png" id="alignLeft" title="Align left">
-				<img src="images/textAlignCenter.png" id="alignCenter" title="Align center">
-				<img src="images/textAlignRight.png" id="alignRight" title="Align right">
+				<img src="images/textAlignLeft.png" id="alignleft" title="Align left">
+				<img src="images/textAlignCenter.png" id="aligncenter" title="Align center">
+				<img src="images/textAlignRight.png" id="alignright" title="Align right">
+			</div>
+		</div>
+		<div class="frameAttributes">
+			<form class="frameForm" action="">
+				<span class="attributeLabel">Frame style:</span>
+				<select id="frameSelect" name="style">
+					<option value="stylenone">None</option>
+					<option value="stylesketch">Sketch</option>
+					<option value="styleframe">Frame</option>
+					<option value="stylesketch_frame">Both</option>
+				</select>
+			</form>
+			<div class="frameIcons">
+				<span class="attributeLabel">Align:</span>
+				<img src="images/textAlignLeft.png" id="alignleft" title="Align left">
+				<img src="images/textAlignCenter.png" id="aligncenter" title="Align center">
+				<img src="images/textAlignRight.png" id="alignright" title="Align right">
 			</div>
 		</div>
 		<div class="styleAttributes">
-			<form action="">
+			<form class="styleForm" action="">
 				<span class="attributeLabel">Style:</span>
 				<select id="styleSelect" name="style">
-					<option value="style">None</option>
+					<option value="stylenone">None</option>
 					<option value="styleborder">Border</option>
 					<option value="stylefill">Fill</option>
 					<option value="styleborder_fill">Both</option>
@@ -191,19 +223,10 @@
 				<span class="styleLabel">Colour:</span>
 				<span class="picker" id="setStyleColorProperty"></span>
 			</div>
-			<form class="styleForm" action="">
+			<div class="styleForm" >
 				<span class="styleLabel">Width:</span>
-				<select id="widthSelect" name="width">
-					<option value="width1">1</option>
-					<option value="width2">2</option>
-					<option value="width4">4</option>
-					<option value="width8">8</option>
-				</select>
-			</form>
-		</div>
-		<div class="styleConfirm">
-			<button>Apply</button>
-			<button>Reset</button>
+				<input type="text" class="spinner" id="widthSelect" name="width" value="1" />
+			</div>
 		</div>
 	</div>
 	<div class="iconGroup">
