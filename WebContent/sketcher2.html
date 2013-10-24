@@ -157,10 +157,13 @@
 			<textarea id="textProperty" cols="20" rows="3"></textarea>
 			<form class="textForm" action="">
 				<span class="attributeLabel">Font-family:</span>
-				<select name="fontFamily">
-					<option value="serif">Serif</option>
-					<option value="times">Times</option>
-					<option value="copper">Copper</option>
+				<select id="fontFamily">
+					<option value="fontarial">Arial</option>
+					<option value="fontcalibri">Calibri</option>
+					<option value="fontcopperplate gothic bold">Copper</option>
+					<option value="fontlucida">Lucida</option>
+					<option value="fonttimes new roman">Times</option>
+					<option value="fontverdana">Verdana</option>
 				</select>
 			</form>
 			<form class="textForm" action="">
@@ -185,11 +188,17 @@
 					<option value="size96">96</option>
 				</select>
 			</form>
-			<div class="propertyIcons">
+			<div class="textIcons" id="textJustifyProperty">
 				<span class="attributeLabel">Align:</span>
-				<img src="images/textAlignLeft.png" id="alignleft" title="Align left">
-				<img src="images/textAlignCenter.png" id="aligncenter" title="Align center">
-				<img src="images/textAlignRight.png" id="alignright" title="Align right">
+				<div class="selection" id="align_left">
+					<img src="images/textAlignLeft.png" title="Align left">
+				</div>
+				<div class="selection selected" id="align_center">
+					<img src="images/textAlignCenter.png" title="Align center">
+				</div>
+				<div class="selection" id="align_right">
+					<img src="images/textAlignRight.png" title="Align right">
+				</div>
 			</div>
 		</div>
 		<div class="frameAttributes">
@@ -202,11 +211,23 @@
 					<option value="stylesketch_frame">Both</option>
 				</select>
 			</form>
-			<div class="frameIcons">
-				<span class="attributeLabel">Align:</span>
-				<img src="images/textAlignLeft.png" id="alignleft" title="Align left">
-				<img src="images/textAlignCenter.png" id="aligncenter" title="Align center">
-				<img src="images/textAlignRight.png" id="alignright" title="Align right">
+			<div class="frameIcons clear" id="textVAlignProperty">
+				<span class="attributeLabel">Frame text:</span>
+				<div class="selection selected" id="frame_below">
+					<img src="images/frameBelow.png" title="Frame Below">
+				</div>
+				<div class="selection" id="frame_bottom">
+					<img src="images/frameBottom.png" title="Frame Bottom">
+				</div>
+				<div class="selection" id="frame_middle">
+					<img src="images/frameMiddle.png" title="Frame Middle">
+				</div>
+				<div class="selection" id="frame_top">
+					<img src="images/frameTop.png" title="Frame Top">
+				</div>
+				<div class="selection" id="frame_above">
+					<img src="images/frameAbove.png" title="Frame Above">
+				</div>
 			</div>
 		</div>
 		<div class="styleAttributes">

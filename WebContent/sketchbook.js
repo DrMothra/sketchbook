@@ -297,6 +297,8 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 					outline.strokeColor = 'black';
 			}
 			if (element.frame.frameStyle && element.frame.frameStyle.indexOf('fill')>=0) {
+				console.log('fill color =', element.frame.fillColor);
+				
 				if (element.frame.fillColor)
 					outline.fillColor = colorToPaperjs(element.frame.fillColor);
 				else
@@ -410,6 +412,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		if (element.text!==undefined) {
 			var text = new paper.PointText(new paper.Point(element.text.x, element.text.y));
 			text.content = element.text.content;
+			text.characterStyle.font = element.text.textFont;
 			text.characterStyle.fontSize = element.text.textSize;
 			text.paragraphStyle.justification = element.text.textJustify;
 			
@@ -777,8 +780,9 @@ Sketchbook.prototype.addTextAction = function(sketchId, text) {
 	var color = { red: text.fillColor.red, green: text.fillColor.green, blue: text.fillColor.blue };
 	// TODO width, height, etc.
 	// Add support for text justification
-	var textel = { textColor: color, textSize: text.characterStyle.fontSize, content: text.content, textJustify: text.paragraphStyle.justification, x: text.point.x, y: text.point.y };
-	action.elements =  [{ text : textel }]; 
+	var textel = { textColor: color, textSize: text.characterStyle.fontSize, textFont: text.characterStyle.font, content: text.content,
+		textJustify: text.paragraphStyle.justification, x: text.point.x, y: text.point.y };
+	action.elements =  [{ text : textel }];
 	return action;
 };
 

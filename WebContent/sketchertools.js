@@ -815,14 +815,14 @@ function FrameTool(project, sketchbook, sketchId, description) {
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;	
 	this.description = description;
-	this.frameStyle = getFrameStyle();
+	this.frameStyle = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
 	this.lineWidth = getWidth();
-	this.showLabel = 'frame';
+	this.showLabel = getLabelStyle();
 	this.textColor = getTextColor();
 	this.textSize = getFontSize();
-	this.textVAlign = getProperty('textVAlign', 'middle');
+	this.textVAlign = getTextVAlign();
 }
 FrameTool.prototype = new Tool();
 
@@ -866,6 +866,7 @@ TextTool.prototype.begin = function(point) {
 	this.text.characterStyle.fillColor = getTextColor();
 	this.text.paragraphStyle.justification = getJustification();
 	this.text.characterStyle.fontSize = getFontSize();
+	this.text.characterStyle.font = getFont();
 	this.text.content = this.content;	
 };
 

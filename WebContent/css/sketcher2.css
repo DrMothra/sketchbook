@@ -175,7 +175,6 @@ div.iconGroup {
 	float:left;
 }
 div.actions {
-	/* next to orphan text */
 	width:auto; 
 	float:left;
 	border: 1px solid black;
@@ -196,6 +195,17 @@ div.action {
 	background-color:#eeeeee;
 	margin: 0px 3px 3px 3px;
 	cursor: default;
+}
+div.selection {
+	border: 1px solid black;
+	border-radius: 5px;
+	float: left;
+	background-color:#eeeeee;
+	margin: 2px;
+	padding: 0px;
+}
+div.selected {
+	background-color:#808080;
 }
 p.actionLabel {
 	float: left;
@@ -234,7 +244,7 @@ div.propertiesShowDisabled {
 }
 /* Property attributes */
 div.properties {
-	margin: 1px;
+	margin: 0px;
 	width: 20%;
 	float: left;
 }
@@ -256,7 +266,14 @@ div.textAttributes {
 }
 .styleAttributes {
 	clear: both;
-	
+	margin-top: 50px;
+}
+div.frameIcons img {
+	margin: 2px;
+	height: 20px;
+	width: 20px;
+	padding: 1px;
+	display: block;
 }
 .styleSelector {
 	clear: both;
@@ -264,19 +281,23 @@ div.textAttributes {
 .styleConfirm {
 	clear: both;
 }
-div.propertyIcons {
+div.textIcons {
+	clear: both;
+	float: left;
+	width: 80%;
+	margin: 10px;
+}
+div.textIcons img {
+	height: 22px;
+	width: 22px;
+	padding: 1px;
+	display: block;
+}
+div.frameIcons {
 	clear: both;
 	float: left;
 	width: 80%;
 	margin: 3px 10px 3px 10px;
-}
-div.propertyIcons img {
-	height: 22px;
-	width: 22px;
-	padding: 1px;
-	border: 1px solid black;
-	border-radius: 5px;
-	margin: 3px;
 }
 div.fontSize {
 	clear: both;
@@ -289,14 +310,20 @@ div.fontFamily {
 #textInput {
 	clear: both;
 }
+#textProperty {
+	margin-left: 30px;
+}
 .textForm {
 	/*clear: both;*/
 	margin: 3px 10px 3px 10px;
 }
 .styleForm {
 	/*clear: both;*/
-	margin: 10px 3px 20px 10px;
+	margin: 10px 3px 15px 10px;
 	/*float: left;*/
+}
+.frameForm {
+	margin: 3px 10px 3px 10px;
 }
 .colourStyle {
 	float: left;

@@ -132,7 +132,7 @@ function PropertySelect(name, propertyId) {
 	this.lastSelectedElem = $('#'+propertyId+' .optionDefault');
 	var self = this;
 	this.currentValue = 0x000000;
-	$('#'+propertyId+' .option').on('click', function(ev) { self.onPropertyOptionSelected($(this), ev); });
+	$('#'+propertyId+' .selection').on('click', function(ev) { self.onPropertyOptionSelected($(this), ev); });
 }
 
 PropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
@@ -140,8 +140,8 @@ PropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 	console.log('onPropertyOptionSelected '+this.name+' '+id);
 	if (!id)
 		return;
-	$('#'+this.propertyId+' .option').removeClass('optionSelected');
-	elem.addClass('optionSelected');
+	$('.selected').removeClass('selected');
+	elem.addClass('selected');
 	this.lastSelectedElem = elem;
 	var ix = id.indexOf('_');
 	if (ix>0)
@@ -149,13 +149,14 @@ PropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 	id = String(id).replace(/_/g, ',');
 	console.log('Selected '+this.name+' '+id);
 	// override...
+	this.currentValue = id;
 	this.onSetValue(id);
 };
 
 // called when no longer showing selection value, i.e. new value
 PropertySelect.prototype.resetValue = function() {
-	$('#'+this.propertyId+' .option').removeClass('optionSelected');
-	this.lastSelectedElem.addClass('optionSelected');
+	//$('#'+this.propertyId+' .option').removeClass('optionSelected');
+	//this.lastSelectedElem.addClass('optionSelected');
 };
 
 PropertySelect.prototype.getValue = function() {
@@ -294,6 +295,33 @@ StylePropertySelect.prototype.onSetValue = function(style) {
 		onSetProperty(action);
 	}
 }
+function SizePropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	this.name = name;
+}
+SizePropertySelect.prototype = new PropertySelect();
+
+SizePropertySelect.prototype.setValue = function(size) {
+	if (!size)
+		return;
+	
+	this.currentValue = size;
+	//Update menu
+	$('#fontSize').val('size'+size);
+}
+SizePropertySelect.prototype.onSetValue = function(size) {
+	//Remove "size"
+	if (size)
+		size = size.substring(4);
+	
+	this.currentValue = size;
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setTextSize(size);
+		onSetProperty(action);
+	}
+}
+
 // Text as a Property object
 function PropertyText(name, propertyId) {
 	this.name = name;
@@ -857,7 +885,7 @@ function getStyle() {
 	style = style.substring(5);
 	return style;
 }
-function getFrameStyle() {
+function getLabelStyle() {
 	//Get value from menu
 	var style = $('#frameSelect').val();
 	//Take "style" off
@@ -868,6 +896,13 @@ function getWidth() {
 	//Get value from control
 	return $('#widthSelect').spinner("value");
 }
+function getFont() {
+	//Get from control
+	var font = $('#fontFamily').val();
+	//Take "font" off
+	font = font.substring(4);
+	return font;
+}
 function getFontSize() {
 	//Get value from control
 	var size = $('#fontSize').val();
@@ -877,7 +912,10 @@ function getFontSize() {
 }
 function getJustification() {
 	//Get value from control
-	return 'center';
+	return propertyEditors['textJustify'].getValue();
+}
+function getTextVAlign() {
+	return propertyEditors['textVAlign'].getValue();
 }
 function handleActionSelected(id) {
 	var disabled = $('#'+id).hasClass('actionDisabled');
@@ -1077,7 +1115,6 @@ function handlePropertiesShowSelected(id) {
 		updatePropertiesForCurrentSelection();	
 	}
 }
-
 function onPropertyEdit(event) {
 	for (var i=0; i<currentSelections.length; i++) {
 			var cs = currentSelections[i];
@@ -3604,8 +3641,8 @@ $(document).ready(function() {
 	propertyEditors.fillColor = new ColorPropertySelect('fillColor', STYLE_PICKER);
 	propertyEditors.fillColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
 	propertyEditors.lineWidth = new WidthPropertySelect('lineWidth', 'lineWidthProperty');
-	propertyEditors.textSize = new PropertySelect('textSize', 'textSizeProperty');
-	propertyEditors.textSize.onSetValue = onSetTextSize;
+	propertyEditors.textSize = new SizePropertySelect('textSize', 'textSizeProperty');
+	propertyEditors.textSize.setValue(12);
 	propertyEditors.text = new PropertyText('text', 'textProperty');
 	propertyEditors.text.onSetValue = onSetText;
 	propertyEditors.frameStyle = new StylePropertySelect('frameStyle', 'frameStyleProperty');
@@ -3614,6 +3651,7 @@ $(document).ready(function() {
 	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
 	propertyEditors.showLabel.onSetValue = onSetShowLabel;
 	propertyEditors.textVAlign = new PropertySelect('textVAlign', 'textVAlignProperty');
+	propertyEditors.textVAlign.setValue('below');
 	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
 	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
 	propertyEditors.rescale.onSetValue = onSetRescale;
@@ -3626,6 +3664,10 @@ $(document).ready(function() {
 	$('#styleSelect').change(function() {
 		if(propertiesShowSelectionFlag)
 			propertyEditors.frameStyle.onSetValue($('#styleSelect').val());
+	});
+	$('#fontSize').change(function() {
+		if(propertiesShowSelectionFlag)
+			propertyEditors.textSize.onSetValue($('#fontSize').val());
 	});
 	
 	onShowIndex();
