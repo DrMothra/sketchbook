@@ -1100,6 +1100,10 @@ SetPropertiesAction.prototype.setText = function(text) {
 	this.text = text;
 };
 
+SetPropertiesAction.prototype.setTextFont = function(font) {
+	this.textFont = font;
+};
+
 SetPropertiesAction.prototype.setTextJustify = function(value) {
 	this.textJustify = value;
 	
@@ -1316,6 +1320,7 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.textSize = elval.textSize;
 						el.undo.textJustify = elval.textJustify;
 						el.undo.textColor = elval.textColor;
+						el.undo.textFont = elval.textFont;
 						el.undo.frameStyle = elval.frameStyle;
 						el.undo.lineColor = elval.lineColor;
 						el.undo.lineWidth = elval.lineWidth;
@@ -1329,6 +1334,8 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.textSize = action.textSize;
 						if (action.textJustify)
 							elval.textJustify = action.textJustify;
+						if (action.textFont)
+							elval.textFont = action.textFont;
 						if (action.textColor)
 							elval.textColor = action.textColor;
 						if (action.frameStyle!==undefined)

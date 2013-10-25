@@ -352,6 +352,8 @@ PropertyText.prototype.resetValue = function() {
 	//	$('#'+this.propertyId+' textarea').val(this.orphanText);
 	//	this.isOrphan = true;
 	//}
+	console.log('reset text', '#'+this.propertyId);
+	$('#'+this.propertyId).val('');
 };
 	
 PropertyText.prototype.getValue = function() {
@@ -397,6 +399,35 @@ function takeOrphanText() {
 		propertyEditors.text.orphanText = '';
 		return text;
 	}*/
+}
+
+function FontPropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	this.name = name;
+}
+
+FontPropertySelect.prototype = new PropertySelect();
+
+FontPropertySelect.prototype.setValue = function(font) {
+	if (!font)
+		return;
+	
+	this.currentValue = font;
+	//Update menu
+	$('#fontFamily').val('font'+font);
+}
+FontPropertySelect.prototype.onSetValue = function(font) {
+	//Remove "font"
+	if (font)
+		font = font.substring(4);
+	
+	this.currentValue = font;
+	
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setTextFont(font);
+		onSetProperty(action);
+	}
 }
 
 //==============================================================================
@@ -633,6 +664,7 @@ function updatePropertiesForCurrentSelection() {
 		var textColor = null;
 		var lineWidth = null;
 		var textSize = null;
+		var textFont = null;
 		var showLabel = null;
 		var textVAlign = null;
 		var rescale = null;
@@ -666,6 +698,8 @@ function updatePropertiesForCurrentSelection() {
 							textSize = el.text.textSize;
 						if (el.text.content)
 							text = el.text.content;
+						if (el.text.textFont)
+							textFont = el.text.textFont;
 						if (el.text.textVAlign)
 							textVAlign = el.text.textVAlign;
 						else
@@ -822,6 +856,12 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.text.setEnabled(false);
+		if (textFont) {
+			propertyEditors.textFont.setEnabled(true);
+			propertyEditors.textFont.setValue(textFont);
+		}
+		else
+			propertyEditors.textFont.setEnabled(false);
 		if (textJustify) {
 			propertyEditors.textJustify.setEnabled(true);
 			propertyEditors.textJustify.setValue(textJustify);
@@ -2289,7 +2329,7 @@ function registerMouseEvents() {
 			// suppress unless ACTUALLY moved...
 			if (ev.pageX!==mousePageX || ev.pageY!==mousePageY) {
 				console.log('blur orphan text on mousemove');
-				$('#orphanText').blur();
+				//$('#orphanText').blur();
 			}
 		}
 		mousePageX = ev.pageX; mousePageY = ev.pageY;
@@ -2748,6 +2788,7 @@ function showEditor(sketchId, noBreadcrumb, elementId) {
 
 	// update actions & properties
 	$('.property').addClass('propertyDisabled');
+	$('.selection').addClass('selectionDisabled');
 
 	$('.action').addClass('actionDisabled');
 	$('#showAllAction').removeClass('actionDisabled');
@@ -3645,8 +3686,11 @@ $(document).ready(function() {
 	propertyEditors.textSize.setValue(12);
 	propertyEditors.text = new PropertyText('text', 'textProperty');
 	propertyEditors.text.onSetValue = onSetText;
+	propertyEditors.textFont = new FontPropertySelect('textFont', 'textFontProperty');
+	propertyEditors.textFont.setValue('arial');
 	propertyEditors.frameStyle = new StylePropertySelect('frameStyle', 'frameStyleProperty');
 	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
+	propertyEditors.textJustify.setValue('center');
 	propertyEditors.textJustify.onSetValue = onSetTextJustify;
 	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
 	propertyEditors.showLabel.onSetValue = onSetShowLabel;
@@ -3659,7 +3703,13 @@ $(document).ready(function() {
 	propertyEditors.backgroundColor.onSetValue = onSetBackgroundColor;
 
 	//Disable controls
-	document.getElementById("attributeSelect").disabled = true;
+	$('#attributeSelect').prop('disabled', true);
+	$('#textProperty').prop('disabled', true);
+	$('#fontFamily').prop('disabled', true);
+	$('#fontSize').prop('disabled', true);
+	$('#frameSelect').prop('disabled', true);
+	$('#styleSelect').prop('disabled', true);
+	$('#familyLabel').addClass('textDisabled');
 	
 	$('#styleSelect').change(function() {
 		if(propertiesShowSelectionFlag)
@@ -3669,9 +3719,11 @@ $(document).ready(function() {
 		if(propertiesShowSelectionFlag)
 			propertyEditors.textSize.onSetValue($('#fontSize').val());
 	});
-	
+	$('#fontFamily').change(function() {
+		if(propertiesShowSelectionFlag)
+			propertyEditors.textFont.onSetValue($('#fontFamily').val());
+	});
 	onShowIndex();
-	
 	
     $(window).resize(handleResize);
     handleResize();

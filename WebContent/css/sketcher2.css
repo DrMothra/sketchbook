@@ -223,6 +223,10 @@ div.actionDisabled {
 	background-color:#ffffff;
 	color: gray;
 }
+.selectionDisabled {
+	background-color:#ffffff;
+	color: gray;
+}
 div.propertiesShow {
 	border: 1px solid gray;
 	float: left;
@@ -269,7 +273,6 @@ div.textAttributes {
 	margin-top: 50px;
 }
 div.frameIcons img {
-	margin: 2px;
 	height: 20px;
 	width: 20px;
 	padding: 1px;
@@ -293,10 +296,12 @@ div.textIcons img {
 	padding: 1px;
 	display: block;
 }
+div.frameAttributes {
+	width: 100%;
+}
 div.frameIcons {
-	clear: both;
 	float: left;
-	width: 80%;
+	width: 100%;
 	margin: 3px 10px 3px 10px;
 }
 div.fontSize {
@@ -319,7 +324,7 @@ div.fontFamily {
 }
 .styleForm {
 	/*clear: both;*/
-	margin: 10px 3px 15px 10px;
+	margin: 3px 10px 3px 10px;
 	/*float: left;*/
 }
 .frameForm {
@@ -460,4 +465,7 @@ div.format {
 }
 .ui-widget {
 	font-size: small;
+}
+.textDisabled {
+	color: gray;
 }
