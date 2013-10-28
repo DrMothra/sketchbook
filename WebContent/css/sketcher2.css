@@ -466,6 +466,9 @@ div.format {
 .ui-widget {
 	font-size: small;
 }
+.textEnabled {
+	color: rgb(0,0,0);
+}
 .textDisabled {
 	color: gray;
 }

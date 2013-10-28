@@ -132,6 +132,11 @@ function PropertySelect(name, propertyId) {
 	this.lastSelectedElem = $('#'+propertyId+' .optionDefault');
 	var self = this;
 	this.currentValue = 0x000000;
+	this.baseId = '';
+	if (propertyId) {
+		var delimiter = 'Property';
+		this.baseId = propertyId.substring(0, propertyId.length - delimiter.length);
+	}
 	$('#'+propertyId+' .selection').on('click', function(ev) { self.onPropertyOptionSelected($(this), ev); });
 }
 
@@ -176,8 +181,13 @@ PropertySelect.prototype.getValue = function() {
 
 PropertySelect.prototype.setValue = function(value) {
 	//Store selected value
+	console.log('set property '+this.name+' to '+value);
+	if (!value)
+		return;
+	
 	this.currentValue = value;
-	console.log('PropSelect val=', value);
+	//Update control
+	$('#'+this.propertyId).val(this.baseId+value);
 	
 	/*value = String(value).replace(/\,/g, '_');
 	$('#'+this.propertyId+' .option').removeClass('optionSelected');
@@ -192,24 +202,28 @@ PropertySelect.prototype.setValue = function(value) {
 };
 
 PropertySelect.prototype.setEnabled = function(enabled) {
-	if (enabled)
-		$('#'+this.propertyId).removeClass('propertyDisabled');
+	//Update control
+	$('#'+this.propertyId).prop('disabled', !enabled);
+	//Update label
+	if (enabled) {
+		$('#'+this.baseId+'Label').removeClass('textDisabled');
+		$('#'+this.baseId+'Label').addClass('textEnabled');
+	}
 	else {
-		$('#'+this.propertyId).addClass('propertyDisabled');
-		this.resetValue();
+		$('#'+this.baseId+'Label').removeClass('textEnabled');
+		$('#'+this.baseId+'Label').addClass('textDisabled');
 	}
 };
 
 PropertySelect.prototype.onSetValue = function(value) {
-	console.log('set property '+this.name+' to '+value);
-	// no op
+	console.log('onSetValue base function');
 };
-
 
 function ColorPropertySelect(name, propertyId) {
 	PropertySelect.call(this, name, propertyId);
 	this.name = name;
-	this.colorId = propertyId;
+	this.propertyId = propertyId;
+	this.colorId = STYLE_PICKER;
 }
 ColorPropertySelect.prototype = new PropertySelect();
 
@@ -247,6 +261,12 @@ ColorPropertySelect.prototype.onSetValue = function(value) {
 		onSetProperty(action);
 	}
 }
+
+ColorPropertySelect.prototype.setEnabled = function(enabled) {
+	$('#'+this.propertyId).prop('disabled', !enabled);
+	if (enabled)
+		$('#colorStyleLabel').removeClass('textDisabled');
+}
 function WidthPropertySelect(name, propertyId) {
 	PropertySelect.call(this, name, propertyId);
 	this.name = name;
@@ -267,6 +287,19 @@ WidthPropertySelect.prototype.onSetValue = function(width) {
 		onSetProperty(action);
 	}
 }
+WidthPropertySelect.prototype.setEnabled = function(enabled) {
+	if (enabled) {
+		$('#'+this.propertyId).spinner("enable");
+		$('#'+this.baseId+'Label').removeClass('textDisabled');
+		$('#'+this.baseId+'Label').addClass('textEnabled');
+	}
+	else {
+		$('#'+this.propertyId).spinner("disable");
+		$('#'+this.baseId+'Label').removeClass('textEnabled');
+		$('#'+this.baseId+'Label').addClass('textDisabled');
+	}
+}
+
 function StylePropertySelect(name, propertyId) {
 	PropertySelect.call(this, name, propertyId);
 	this.name = name;
@@ -352,7 +385,6 @@ PropertyText.prototype.resetValue = function() {
 	//	$('#'+this.propertyId+' textarea').val(this.orphanText);
 	//	this.isOrphan = true;
 	//}
-	console.log('reset text', '#'+this.propertyId);
 	$('#'+this.propertyId).val('');
 };
 	
@@ -404,30 +436,6 @@ function takeOrphanText() {
 function FontPropertySelect(name, propertyId) {
 	PropertySelect.call(this, name, propertyId);
 	this.name = name;
-}
-
-FontPropertySelect.prototype = new PropertySelect();
-
-FontPropertySelect.prototype.setValue = function(font) {
-	if (!font)
-		return;
-	
-	this.currentValue = font;
-	//Update menu
-	$('#fontFamily').val('font'+font);
-}
-FontPropertySelect.prototype.onSetValue = function(font) {
-	//Remove "font"
-	if (font)
-		font = font.substring(4);
-	
-	this.currentValue = font;
-	
-	if (propertiesShowSelection()) {
-		var action = sketchbook.setPropertiesAction();
-		action.setTextFont(font);
-		onSetProperty(action);
-	}
 }
 
 //==============================================================================
@@ -633,6 +641,9 @@ function updatePropertiesForCurrentSelection() {
 		var enableSelector = (actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
 							     actionId=='addFrameAction' || actionId=='addTextAction');
 		$('#attributeSelect').prop('disabled', !enableSelector);
+		console.log('update props =', enableSelector);
+		$('#colorStyleLabel').removeClass('textDisabled');
+			
 		var add = actionId.substring(0, 3)=='add' || actionId.substr(0,5)=='place';
 		for (var pname in propertyEditors) {
 			var propertyEditor = propertyEditors[pname];
@@ -645,15 +656,15 @@ function updatePropertiesForCurrentSelection() {
 							     actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.fillColor.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
 							     actionId=='addFrameAction');
-			propertyEditors.frameStyle.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
-							      actionId=='addFrameAction');
+			propertyEditors.frameStyle.setEnabled(actionId=='addFrameAction');
+			propertyEditors.style.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction');
 			propertyEditors.textColor.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.lineWidth.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction'||
 							     actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.textSize.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.text.setEnabled(actionId=='addFrameAction' || actionId=='addTextAction');
 			propertyEditors.textJustify.setEnabled(actionId=='addTextAction');
-			propertyEditors.showLabel.setEnabled(actionId=='placeAction' || actionId=='addFrameAction');
+			propertyEditors.textFont.setEnabled(actionId=='addTextAction');
 			propertyEditors.rescale.setEnabled(actionId=='placeAction');
 		}
 	} else {
@@ -665,7 +676,7 @@ function updatePropertiesForCurrentSelection() {
 		var lineWidth = null;
 		var textSize = null;
 		var textFont = null;
-		var showLabel = null;
+		var style = null;
 		var textVAlign = null;
 		var rescale = null;
 		var text = null;
@@ -686,10 +697,10 @@ function updatePropertiesForCurrentSelection() {
 							fillColor = el.line.fillColor;
 						else
 							fillColor = DEFAULT_FILL_COLOR;
-						if (el.line.frameStyle)
-							frameStyle = el.line.frameStyle;
+						if (el.line.style)
+							style = el.line.style;
 						else
-							frameStyle = 'none';
+							style = 'none';
 					}
 					else if (el.text) {
 						if (el.text.textColor) 
@@ -720,10 +731,10 @@ function updatePropertiesForCurrentSelection() {
 							fillColor = el.frame.fillColor;
 						else
 							fillColor = DEFAULT_FILL_COLOR;
-						if (el.frame.frameStyle)
-							frameStyle = el.frame.frameStyle;
+						if (el.frame.style)
+							style = el.frame.style;
 						else
-							frameStyle = '';
+							style = 'none';
 						if (el.frame.textColor) 
 							textColor = el.frame.textColor;
 						else
@@ -736,10 +747,10 @@ function updatePropertiesForCurrentSelection() {
 							textVAlign = el.frame.textVAlign;
 						else
 							textVAlign = 'middle';
-						if (el.frame.showLabel)
-							showLabel = el.frame.showLabel;
+						if (el.frame.frameStyle)
+							frameStyle = el.frame.frameStyle;
 						else
-							showLabel = 'frame';
+							frameStyle = 'frame';
 					}
 					else if (el.sequence) {
 						if (el.sequence.description)
@@ -760,10 +771,10 @@ function updatePropertiesForCurrentSelection() {
 							fillColor = el.circle.fillColor;
 						else
 							fillColor = DEFAULT_FILL_COLOR;
-						if (el.circle.frameStyle)
-							frameStyle = el.circle.frameStyle;
+						if (el.circle.style)
+							style = el.circle.style;
 						else
-							frameStyle = 'none';
+							style = 'none';
 					}
 					else if (el.icon) {
 						if (el.icon.lineColor) 
@@ -776,10 +787,10 @@ function updatePropertiesForCurrentSelection() {
 							fillColor = el.icon.fillColor;
 						else
 							fillColor = DEFAULT_FILL_COLOR;
-						if (el.icon.frameStyle)
-							frameStyle = el.icon.frameStyle;
+						if (el.icon.style)
+							style = el.icon.style;
 						else
-							frameStyle = '';
+							style = 'none';
 						if (el.icon.textColor) 
 							textColor = el.icon.textColor;
 						else
@@ -792,10 +803,10 @@ function updatePropertiesForCurrentSelection() {
 							textVAlign = el.icon.textVAlign;
 						else
 							textVAlign = 'middle';
-						if (el.icon.showLabel)
-							showLabel = el.icon.showLabel;
+						if (el.icon.frameStyle)
+							frameStyle = el.icon.frameStyle;
 						else
-							showLabel = '';
+							frameStyle = 'none';
 						if (el.icon.rescale)
 							rescale = el.icon.rescale;
 						else
@@ -810,10 +821,10 @@ function updatePropertiesForCurrentSelection() {
 				}
 			}
 		}
+		$('#colorStyleLabel').addClass('textDisabled');
 		if (lineColor) {
 			//Update colour picker
 			propertyEditors.lineColor.setEnabled(true);
-			console.log('line color selected=', lineColor);
 			propertyEditors.lineColor.setValue(hexForColor(lineColor));
 		}
 		else 
@@ -830,7 +841,13 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.frameStyle.setEnabled(false);
-			
+		if(style) {
+			propertyEditors.style.setEnabled(true);
+			console.log('style =', style);
+			propertyEditors.style.setValue(style);
+		}
+		else
+			propertyEditors.style.setEnabled(false);
 		if (textColor) {
 			propertyEditors.textColor.setEnabled(true);
 			propertyEditors.textColor.setValue(hexForColor(textColor));
@@ -874,12 +891,6 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.textVAlign.setEnabled(false);
-		if (showLabel!==null) {
-			propertyEditors.showLabel.setEnabled(true);
-			propertyEditors.showLabel.setValue(showLabel);
-		}
-		else
-			propertyEditors.showLabel.setEnabled(false);
 		if (rescale!==null) {
 			propertyEditors.rescale.setEnabled(true);
 			propertyEditors.rescale.setValue(rescale);
@@ -920,34 +931,34 @@ function getTextColor() {
 }
 function getStyle() {
 	//Get value from control
-	var style = $('#styleSelect').val();
+	var style = $('#styleProperty').val();
 	//Take "style" off
 	style = style.substring(5);
 	return style;
 }
 function getLabelStyle() {
 	//Get value from menu
-	var style = $('#frameSelect').val();
+	var style = $('#frameStyleProperty').val();
 	//Take "style" off
 	style = style.substring(5);
 	return style;
 }
 function getWidth() {
 	//Get value from control
-	return $('#widthSelect').spinner("value");
+	return $('#lineWidthProperty').spinner("value");
 }
 function getFont() {
 	//Get from control
-	var font = $('#fontFamily').val();
+	var font = $('#textFontProperty').val();
 	//Take "font" off
 	font = font.substring(4);
 	return font;
 }
 function getFontSize() {
 	//Get value from control
-	var size = $('#fontSize').val();
-	//Take "size" off
-	size = size.substring(4);
+	var size = $('#textSizeProperty').val();
+	//Take "textSize" off
+	size = size.substring(8);
 	return size;
 }
 function getJustification() {
@@ -3462,12 +3473,15 @@ function onSetTextColor(value) {
 	}
 }
 //property editor entry point
-function onSetFrameStyle(value) {
-	if (value===undefined || value===null)
+function onSetFrameStyle(style) {
+	if (!style)
 		return;
+	
+	style = style.substring(this.baseId.length);
+		
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
-		action.setFrameStyle(value);
+		action.setFrameStyle(style);
 		onSetProperty(action);
 	}
 }
@@ -3482,12 +3496,14 @@ function onSetShowLabel(value) {
 	}
 }
 //property editor entry point
-function onSetTextVAlign(value) {
-	if (value===undefined || value===null)
+function onSetTextVAlign(align) {
+	if (!align)
 		return;
+	
+	align = align.substring(this.baseId.length);
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
-		action.setTextVAlign(value);
+		action.setTextVAlign(align);
 		onSetProperty(action);
 	}
 }
@@ -3509,16 +3525,31 @@ function onSetRescale(value) {
 		onSetProperty(action);
 	}
 }
-function onSetTextSize(value) {
-	if (!value)
+function onSetTextSize(size) {
+	if (!size)
 		return;
+	
+	size = size.substring(this.baseId.length);
+		
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
-		action.setTextSize(value);
+		action.setTextSize(size);
 		onSetProperty(action);
 	}
 }
-
+function onSetTextFont(font) {
+	if (!font)
+		return;
+	
+	font = font.substring(this.baseId.length);
+	this.currentValue = font;
+	
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setTextFont(font);
+		onSetProperty(action);
+	}
+}
 function onSetText(value) {
 	if (!value)
 		return;
@@ -3538,6 +3569,20 @@ function onSetTextJustify(value) {
 		
 		console.log("onSetTextJustify action = ", action);
 		
+		onSetProperty(action);
+	}
+}
+
+function onSetStyle(style) {
+	if (!style)
+		return;
+	
+	style = style.substring(this.baseId.length);
+	this.currentValue = style;
+	
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setStyle(style);
 		onSetProperty(action);
 	}
 }
@@ -3645,7 +3690,7 @@ $(document).ready(function() {
 			onAlphaSelected(ui.value);
 		}
 	});
-	$('#widthSelect').spinner({
+	$('#lineWidthProperty').spinner({
 		min:1,
 		max:30
 		},
@@ -3654,6 +3699,7 @@ $(document).ready(function() {
 			propertyEditors.lineWidth.onSetValue(ui.value);
 		}
 	});
+	
 	// register more GUI callbacks
 	$('#loadFile').on('change', onChooseFile);
 	$('#loadImage').on('change', onLoadImage);
@@ -3675,45 +3721,54 @@ $(document).ready(function() {
 	
 	registerMouseEvents();
 	
-	propertyEditors.lineColor = new ColorPropertySelect('lineColor', STYLE_PICKER);
+	propertyEditors.lineColor = new ColorPropertySelect('lineColor', 'lineColorProperty');
 	propertyEditors.lineColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
-	propertyEditors.textColor = new ColorPropertySelect('textColor', STYLE_PICKER);
+	propertyEditors.lineColor.setEnabled(false);
+	propertyEditors.textColor = new ColorPropertySelect('textColor', 'textColorProperty');
 	propertyEditors.textColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
-	propertyEditors.fillColor = new ColorPropertySelect('fillColor', STYLE_PICKER);
+	propertyEditors.textColor.setEnabled(false);
+	propertyEditors.fillColor = new ColorPropertySelect('fillColor', 'fillColorProperty');
 	propertyEditors.fillColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
+	propertyEditors.fillColor.setEnabled(false);
 	propertyEditors.lineWidth = new WidthPropertySelect('lineWidth', 'lineWidthProperty');
-	propertyEditors.textSize = new SizePropertySelect('textSize', 'textSizeProperty');
+	//propertyEditors.lineWidth.setEnabled(false);
+	propertyEditors.textSize = new PropertySelect('textSize', 'textSizeProperty');
+	propertyEditors.textSize.onSetValue = onSetTextSize;
 	propertyEditors.textSize.setValue(12);
+	propertyEditors.textSize.setEnabled(false);
 	propertyEditors.text = new PropertyText('text', 'textProperty');
 	propertyEditors.text.onSetValue = onSetText;
-	propertyEditors.textFont = new FontPropertySelect('textFont', 'textFontProperty');
+	propertyEditors.textFont = new PropertySelect('textFont', 'textFontProperty');
+	propertyEditors.textFont.onSetValue = onSetTextFont;
 	propertyEditors.textFont.setValue('arial');
-	propertyEditors.frameStyle = new StylePropertySelect('frameStyle', 'frameStyleProperty');
+	propertyEditors.textFont.setEnabled(false);
+	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
+	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
+	propertyEditors.frameStyle.setValue('none');
+	propertyEditors.frameStyle.setEnabled(false);
 	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
 	propertyEditors.textJustify.setValue('center');
 	propertyEditors.textJustify.onSetValue = onSetTextJustify;
-	propertyEditors.showLabel = new PropertySelect('showLabel', 'showLabelProperty');
-	propertyEditors.showLabel.onSetValue = onSetShowLabel;
 	propertyEditors.textVAlign = new PropertySelect('textVAlign', 'textVAlignProperty');
 	propertyEditors.textVAlign.setValue('below');
 	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
+	propertyEditors.textVAlign.setEnabled(false);
+	propertyEditors.style = new PropertySelect('style', 'styleProperty');
+	propertyEditors.style.onSetValue = onSetStyle;
+	propertyEditors.style.setValue('none');
+	propertyEditors.style.setEnabled(false);
 	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
 	propertyEditors.rescale.onSetValue = onSetRescale;
 	propertyEditors.backgroundColor = new PropertySelect('backgroundColor', 'backgroundColorProperty');
 	propertyEditors.backgroundColor.onSetValue = onSetBackgroundColor;
-
-	//Disable controls
-	$('#attributeSelect').prop('disabled', true);
-	$('#textProperty').prop('disabled', true);
-	$('#fontFamily').prop('disabled', true);
-	$('#fontSize').prop('disabled', true);
-	$('#frameSelect').prop('disabled', true);
-	$('#styleSelect').prop('disabled', true);
-	$('#familyLabel').addClass('textDisabled');
 	
-	$('#styleSelect').change(function() {
+	//Disable any controls
+	$('#attributeSelect').prop('disabled', true);
+	$('#colorStyleLabel').addClass('textDisabled');
+	
+	$('#styleProperty').change(function() {
 		if(propertiesShowSelectionFlag)
-			propertyEditors.frameStyle.onSetValue($('#styleSelect').val());
+			propertyEditors.style.onSetValue($('#styleProperty').val());
 	});
 	$('#fontSize').change(function() {
 		if(propertiesShowSelectionFlag)

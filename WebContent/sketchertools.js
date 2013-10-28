@@ -38,15 +38,15 @@ LineTool.prototype = new Tool();
 LineTool.prototype.begin = function(point) {
 	// activate overlay layer
 	activateOverlay(this.project);
-	this.frameStyle = getStyle();
-	console.log('linetool style =', this.frameStyle);
+	this.style = getStyle();
+	console.log('linetool style =', this.style);
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
 	this.lineWidth = getWidth();
 	this.path = new paper.Path();	
-	if (this.frameStyle.indexOf('border')>=0 || this.frameStyle.indexOf('none')>=0)
+	if (this.style.indexOf('border')>=0 || this.style.indexOf('none')>=0)
 		this.path.strokeColor = this.lineColor;
-	if(this.frameStyle.indexOf('fill')>=0) {
+	if(this.style.indexOf('fill')>=0) {
 		this.path.closed = true;
 		this.path.fillColor = this.fillColor;
 	}
@@ -73,7 +73,7 @@ LineTool.prototype.end = function(point) {
 			// create 
 			var action = this.curveFlag ? 
 					this.sketchbook.addCurveAction(this.sketchId, this.path, this.lineColor) :
-					this.sketchbook.addLineAction(this.sketchId, this.path, this.frameStyle, this.lineColor, this.fillColor);
+					this.sketchbook.addLineAction(this.sketchId, this.path, this.style, this.lineColor, this.fillColor);
 			this.path.remove();
 			return action;
 		}

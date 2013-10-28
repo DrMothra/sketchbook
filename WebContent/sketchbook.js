@@ -147,14 +147,14 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(path);
 			if (element.line.lineWidth)
 				path.strokeWidth = element.line.lineWidth;
-			if (element.line.lineColor && element.line.frameStyle && element.line.frameStyle.indexOf('none')>=0) {
+			if (element.line.lineColor && element.line.style && element.line.style.indexOf('none')>=0) {
 				path.strokeColor = colorToPaperjs(element.line.lineColor);
 			}
-			if (element.line.lineColor && element.line.frameStyle && element.line.frameStyle.indexOf('border')>=0) {
+			if (element.line.lineColor && element.line.style && element.line.style.indexOf('border')>=0) {
 				path.strokeColor = colorToPaperjs(element.line.lineColor);
 				path.closed = true;
 			}
-			if (element.line.fillColor && element.line.frameStyle && element.line.frameStyle.indexOf('fill')>=0) {
+			if (element.line.fillColor && element.line.style && element.line.style.indexOf('fill')>=0) {
 				path.fillColor = colorToPaperjs(element.line.fillColor);
 				path.closed = true;
 			}
@@ -692,13 +692,13 @@ Sketchbook.prototype.setSketchDescriptionAction = function(sketchId, description
 };
 
 /** return action to add a new line to a sketch, from provided paperjs Path */
-Sketchbook.prototype.addLineAction = function(sketchId, path, frameStyle, lineColor, fillColor) {
+Sketchbook.prototype.addLineAction = function(sketchId, path, style, lineColor, fillColor) {
 	var action = new Action(this, 'addElements');
 	action.sketchId = sketchId;
 	var lineColor2 = parseHexColor(lineColor);
 	var fillColor2 = parseHexColor(fillColor);
 	//{ red: path.strokeColor.red, green: path.strokeColor.green, blue: path.strokeColor.blue };
-	var line = { lineColor: lineColor2, fillColor : fillColor2, lineWidth: path.strokeWidth, frameStyle: frameStyle, segments: [] };
+	var line = { lineColor: lineColor2, fillColor : fillColor2, lineWidth: path.strokeWidth, style: style, segments: [] };
 	action.elements =  [{ line : line }]; // id?
 	for (var six=0; six<path.segments.length; six++) {
 		var psegment = path.segments[six];
@@ -1118,6 +1118,10 @@ SetPropertiesAction.prototype.setFrameStyle = function(value) {
 	this.frameStyle = value;
 };
 
+SetPropertiesAction.prototype.setStyle = function(style) {
+	this.style = style;
+};
+
 SetPropertiesAction.prototype.setShowLabel = function(value) {
 	this.showLabel = value;
 };
@@ -1303,15 +1307,15 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.lineColor = elval.lineColor;
 						el.undo.fillColor = elval.fillColor;
 						el.undo.lineWidth = elval.lineWidth;
-						el.undo.frameStyle = elval.frameStyle;
+						el.undo.style = elval.style;
 						if (action.lineColor)
 							elval.lineColor = action.lineColor;
 						if (action.fillColor)
 							elval.fillColor = action.fillColor;
 						if (action.lineWidth)
 							elval.lineWidth= action.lineWidth;
-						if (action.frameStyle!==undefined)
-							elval.frameStyle= action.frameStyle;
+						if (action.style!==undefined)
+							elval.style= action.style;
 					}
 					else if (element.text) {
 						var elval = element.text;
@@ -1321,7 +1325,6 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.textJustify = elval.textJustify;
 						el.undo.textColor = elval.textColor;
 						el.undo.textFont = elval.textFont;
-						el.undo.frameStyle = elval.frameStyle;
 						el.undo.lineColor = elval.lineColor;
 						el.undo.lineWidth = elval.lineWidth;
 						el.undo.fillColor = elval.fillColor;
@@ -1338,8 +1341,6 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.textFont = action.textFont;
 						if (action.textColor)
 							elval.textColor = action.textColor;
-						if (action.frameStyle!==undefined)
-							elval.frameStyle = action.frameStyle;
 						if (action.lineColor)
 							elval.lineColor = action.lineColor;
 						if (action.lineWidth)
@@ -1368,14 +1369,14 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.lineWidth = elval.lineWidth;
 						el.undo.fillColor = elval.fillColor;
 						el.undo.rescale = elval.rescale;
-						el.undo.showLabel = elval.showLabel;
+						el.undo.frameStyle = elval.frameStyle;
 						el.undo.textSize = elval.textSize;
 						el.undo.textColor = elval.textColor;
 						el.undo.textVAlign = elval.textVAlign;
 						el.undo.textHAlign = elval.textHAlign;
 						el.undo.textHFit = elval.textHFit;
-						if (action.frameStyle!==undefined)
-							elval.frameStyle = action.frameStyle;
+						if (action.style!==undefined)
+							elval.style = action.style;
 						if (action.lineColor)
 							elval.lineColor = action.lineColor;
 						if (action.lineWidth)
@@ -1384,8 +1385,8 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.fillColor = action.fillColor;
 						if (action.rescale)
 							elval.rescale = action.rescale;
-						if (action.showLabel!==undefined)
-							elval.showLabel = action.showLabel;
+						if (action.frameStyle!==undefined)
+							elval.frameStyle = action.frameStyle;
 						if (action.textSize)
 							elval.textSize = action.textSize;
 						if (action.textColor)
@@ -1401,11 +1402,11 @@ Sketchbook.prototype.doAction = function(action) {
 						var elval = element.frame;
 						el.undo = {};
 						el.undo.description = elval.description;
-						el.undo.frameStyle = elval.frameStyle;
+						el.undo.style = elval.style;
 						el.undo.lineColor = elval.lineColor;
 						el.undo.lineWidth = elval.lineWidth;
 						el.undo.fillColor = elval.fillColor;
-						el.undo.showLabel = elval.showLabel;
+						el.undo.frameStyle = elval.frameStyle;
 						el.undo.textSize = elval.textSize;
 						el.undo.textColor = elval.textColor;
 						el.undo.textVAlign = elval.textVAlign;
@@ -1413,16 +1414,16 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.textHFit = elval.textHFit;
 						if (action.text)
 							elval.description = action.text;
-						if (action.frameStyle!==undefined)
-							elval.frameStyle = action.frameStyle;
+						if (action.style!==undefined)
+							elval.style = action.style;
 						if (action.lineColor)
 							elval.lineColor = action.lineColor;
 						if (action.lineWidth)
 							elval.lineWidth = action.lineWidth;
 						if (action.fillColor)
 							elval.fillColor = action.fillColor;
-						if (action.showLabel!==undefined)
-							elval.showLabel = action.showLabel;
+						if (action.frameStyle!==undefined)
+							elval.frameStyle = action.frameStyle;
 						if (action.textSize)
 							elval.textSize = action.textSize;
 						if (action.textColor)
@@ -1440,15 +1441,15 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.lineColor = elval.lineColor;
 						el.undo.fillColor = elval.fillColor;
 						el.undo.lineWidth = elval.lineWidth;
-						el.undo.frameStyle = elval.frameStyle;
+						el.undo.style = elval.style;
 						if (action.lineColor)
 							elval.lineColor = action.lineColor;
 						if (action.fillColor)
 							elval.fillColor = action.fillColor;
 						if (action.lineWidth)
 							elval.lineWidth= action.lineWidth;
-						if (action.frameStyle)
-							elval.frameStyle= action.frameStyle;
+						if (action.style)
+							elval.style= action.style;
 					}
 					else if (element.canvas) {
 						var elval = element.canvas;

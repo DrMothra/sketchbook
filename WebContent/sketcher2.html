@@ -148,16 +148,16 @@
 		<form class="textForm" action="">
 			<span class="attributeLabel">Attribute:</span>
 			<select id="attributeSelect">
-				<option value="lineColor">Line Color</option>
-				<option value="fillColor">Fill Color</option>
-				<option value="textColor">Text Color</option>
+				<option value="lineColor" id="lineColorProperty">Line Color</option>
+				<option value="fillColor" id="fillColorProperty">Fill Color</option>
+				<option value="textColor" id="textColorProperty">Text Color</option>
 			</select>
 		</form>
 		<div class="textAttributes">
 			<textarea id="textProperty" cols="20" rows="3"></textarea>
 			<form class="textForm" action="">
-				<span class="attributeLabel" id="familyLabel">Font-family:</span>
-				<select id="fontFamily">
+				<span class="attributeLabel" id="textFontLabel">Font-family:</span>
+				<select id="textFontProperty">
 					<option value="fontarial">Arial</option>
 					<option value="fontcalibri">Calibri</option>
 					<option value="fontcopperplate gothic bold">Copper</option>
@@ -167,29 +167,29 @@
 				</select>
 			</form>
 			<form class="textForm" action="">
-				<span class="attributeLabel">Font-size:</span>
-				<select id="fontSize" name="">
-					<option value="size8">8</option>
-					<option value="size9">9</option>
-					<option value="size10">10</option>
-					<option value="size11">11</option>
-					<option value="size12" selected>12</option>
-					<option value="size14">14</option>
-					<option value="size16">16</option>
-					<option value="size18">18</option>
-					<option value="size20">20</option>
-					<option value="size22">22</option>
-					<option value="size24">24</option>
-					<option value="size26">26</option>
-					<option value="size28">28</option>
-					<option value="size36">36</option>
-					<option value="size48">48</option>
-					<option value="size72">72</option>
-					<option value="size96">96</option>
+				<span class="attributeLabel" id="textSizeLabel">Font-size:</span>
+				<select id="textSizeProperty" name="">
+					<option value="textSize8">8</option>
+					<option value="textSize9">9</option>
+					<option value="textSize10">10</option>
+					<option value="textSize11">11</option>
+					<option value="textSize12" selected>12</option>
+					<option value="textSize14">14</option>
+					<option value="textSize16">16</option>
+					<option value="textSize18">18</option>
+					<option value="textSize20">20</option>
+					<option value="textSize22">22</option>
+					<option value="textSize24">24</option>
+					<option value="textSize26">26</option>
+					<option value="textSize28">28</option>
+					<option value="textSize36">36</option>
+					<option value="textSize48">48</option>
+					<option value="textSize72">72</option>
+					<option value="textSize96">96</option>
 				</select>
 			</form>
 			<div class="textIcons" id="textJustifyProperty">
-				<span class="attributeLabel">Align:</span>
+				<span class="attributeLabel" id="textJustifyLabel">Align:</span>
 				<div class="selection" id="align_left">
 					<img src="images/textAlignLeft.png" title="Align left">
 				</div>
@@ -203,8 +203,8 @@
 		</div>
 		<div class="frameAttributes">
 			<form class="frameForm" action="">
-				<span class="attributeLabel">Frame style:</span>
-				<select id="frameSelect" name="style">
+				<span class="attributeLabel" id="frameStyleLabel">Frame style:</span>
+				<select id="frameStyleProperty" name="style">
 					<option value="stylenone">None</option>
 					<option value="stylesketch">Sketch</option>
 					<option value="styleframe">Frame</option>
@@ -212,7 +212,7 @@
 				</select>
 			</form>
 			<div class="frameIcons" id="textVAlignProperty">
-				<span class="attributeLabel">Frame text:</span>
+				<span class="attributeLabel" id="textVAlignLabel">Frame text:</span>
 				<div class="selection" id="frame_below">
 					<img src="images/frameBelow.png" title="Frame Below">
 				</div>
@@ -232,8 +232,8 @@
 		</div>
 		<div class="styleAttributes">
 			<form class="styleForm" action="">
-				<span class="attributeLabel">Style:</span>
-				<select id="styleSelect" name="style">
+				<span class="attributeLabel" id="styleLabel">Style:</span>
+				<select id="styleProperty" name="style">
 					<option value="stylenone">None</option>
 					<option value="styleborder">Border</option>
 					<option value="stylefill">Fill</option>
@@ -241,12 +241,12 @@
 				</select>
 			</form>
 			<div class="colourStyle">
-				<span class="styleLabel">Colour:</span>
+				<span class="styleLabel" id="colorStyleLabel">Colour:</span>
 				<span class="picker" id="setStyleColorProperty"></span>
 			</div>
 			<div class="styleForm" >
-				<span class="styleLabel">Width:</span>
-				<input type="text" class="spinner" id="widthSelect" name="width" value="1" />
+				<span class="styleLabel" id="lineWidthLabel">Width:</span>
+				<input type="text" class="spinner" id="lineWidthProperty" name="width" value="1" />
 			</div>
 		</div>
 	</div>
@@ -323,7 +323,7 @@
 			</div>
 			<canvas id="selectionCanvas" class="selectionCanvas" ></canvas>	
 		</div>
-		<div class="selectionInfo">
+		<!-- <div class="selectionInfo">
 			<span class="label">Selection Info</span>
 			<div class="infoPane">
 				Element :<br>
@@ -331,7 +331,7 @@
 				Colour : <br>
 				Width : <br>
 			</div>
-		</div>
+		</div> -->
 	</div>
 	<div class="footer"></div>
 </div>
