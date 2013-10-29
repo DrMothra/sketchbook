@@ -130,33 +130,13 @@ function PropertySelect(name, propertyId) {
 	this.name = name;
 	this.propertyId = propertyId;
 	this.lastSelectedElem = $('#'+propertyId+' .optionDefault');
-	var self = this;
 	this.currentValue = 0x000000;
 	this.baseId = '';
 	if (propertyId) {
 		var delimiter = 'Property';
 		this.baseId = propertyId.substring(0, propertyId.length - delimiter.length);
 	}
-	$('#'+propertyId+' .selection').on('click', function(ev) { self.onPropertyOptionSelected($(this), ev); });
 }
-
-PropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
-	var id = elem.attr('id');
-	console.log('onPropertyOptionSelected '+this.name+' '+id);
-	if (!id)
-		return;
-	$('.selected').removeClass('selected');
-	elem.addClass('selected');
-	this.lastSelectedElem = elem;
-	var ix = id.indexOf('_');
-	if (ix>0)
-		id = id.substring(ix+1);
-	id = String(id).replace(/_/g, ',');
-	console.log('Selected '+this.name+' '+id);
-	// override...
-	this.currentValue = id;
-	this.onSetValue(id);
-};
 
 // called when no longer showing selection value, i.e. new value
 PropertySelect.prototype.resetValue = function() {
@@ -181,24 +161,13 @@ PropertySelect.prototype.getValue = function() {
 
 PropertySelect.prototype.setValue = function(value) {
 	//Store selected value
-	console.log('set property '+this.name+' to '+value);
+	//console.log('set property '+this.name+' to '+value);
 	if (!value)
 		return;
 	
 	this.currentValue = value;
 	//Update control
 	$('#'+this.propertyId).val(this.baseId+value);
-	
-	/*value = String(value).replace(/\,/g, '_');
-	$('#'+this.propertyId+' .option').removeClass('optionSelected');
-	var sel = $('#'+this.name+'_'+value);
-	if (sel.size()>0) {
-		console.log('select option '+'#'+this.name+'_'+value);
-		sel.addClass('optionSelected');
-	}
-	else {
-		console.log('could not find '+this.name+' value '+value);
-	}*/
 };
 
 PropertySelect.prototype.setEnabled = function(enabled) {
@@ -218,7 +187,58 @@ PropertySelect.prototype.setEnabled = function(enabled) {
 PropertySelect.prototype.onSetValue = function(value) {
 	console.log('onSetValue base function');
 };
+function AlignPropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	var self = this;
+	$('#'+propertyId+' .selection').on('click', function(ev) { self.onPropertyOptionSelected($(this), ev); });
+};
+AlignPropertySelect.prototype = new PropertySelect();
 
+AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
+	var id = elem.attr('id');
+	console.log('onPropertyOptionSelected '+this.name+' '+id);
+	if (!id)
+		return;
+	$('.selection').removeClass('selected');
+	elem.addClass('selected');
+	this.lastSelectedElem = elem;
+	var ix = id.indexOf('_');
+	if (ix>0)
+		id = id.substring(ix+1);
+	id = String(id).replace(/_/g, ',');
+	console.log('Selected '+this.name+' '+id);
+	// override...
+	this.currentValue = id;
+	this.onSetValue(id);
+};
+
+AlignPropertySelect.prototype.setValue = function(value) {
+	console.log('baseid = ', this.baseId);
+	if (!value)
+		return;
+	
+	this.currentValue = value;
+	
+	console.log('elem = ', '#'+this.baseId+'_'+value);
+	$('.selection').removeClass('selected');
+	$('#'+this.baseId+'_'+this.currentValue).addClass('selected');
+};
+
+AlignPropertySelect.prototype.onSetValue = function(value) {
+	console.log('onSetValue base function');
+}
+
+AlignPropertySelect.prototype.setEnabled = function(enabled) {
+	if (enabled) {
+		$('.selection').removeClass('selectionDisabled');
+		$('.selection').removeClass('selected');
+		$('#'+this.baseId+'_'+this.currentValue).addClass('selected');
+	}
+	else {
+		$('#'+this.baseId+'_'+this.currentValue).removeClass('selected');
+		$('.selection').addClass('selectionDisabled');
+	}
+}
 function ColorPropertySelect(name, propertyId) {
 	PropertySelect.call(this, name, propertyId);
 	this.name = name;
@@ -228,7 +248,6 @@ function ColorPropertySelect(name, propertyId) {
 ColorPropertySelect.prototype = new PropertySelect();
 
 ColorPropertySelect.prototype.setValue = function(color) {
-	console.log('color =', color);
 	this.currentValue = color;
 	//Update picker for selected attribute
 	if ($('#attributeSelect').val()==this.name)
@@ -277,7 +296,7 @@ WidthPropertySelect.prototype.setValue = function(width) {
 	console.log('width =', width);
 	this.currentValue = width;
 	//Update spinner
-	$('#widthSelect').spinner("value", width);
+	$('#lineWidthProperty').spinner("value", width);
 }
 WidthPropertySelect.prototype.onSetValue = function(width) {
 	this.currentValue = width;
@@ -400,8 +419,6 @@ PropertyText.prototype.setValue = function(value) {
 	//}
 	this.value = value;
 	$('#'+this.propertyId).val(value);
-	
-	console.log("textSetValue = ", '#'+this.propertyId);
 };
 
 PropertyText.prototype.setEnabled = function(enabled) {
@@ -641,7 +658,6 @@ function updatePropertiesForCurrentSelection() {
 		var enableSelector = (actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
 							     actionId=='addFrameAction' || actionId=='addTextAction');
 		$('#attributeSelect').prop('disabled', !enableSelector);
-		console.log('update props =', enableSelector);
 		$('#colorStyleLabel').removeClass('textDisabled');
 			
 		var add = actionId.substring(0, 3)=='add' || actionId.substr(0,5)=='place';
@@ -657,7 +673,7 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.fillColor.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
 							     actionId=='addFrameAction');
 			propertyEditors.frameStyle.setEnabled(actionId=='addFrameAction');
-			propertyEditors.style.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction');
+			propertyEditors.style.setEnabled(actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='addFrameAction');
 			propertyEditors.textColor.setEnabled(actionId=='addTextAction' || actionId=='placeAction' || actionId=='addFrameAction');
 			propertyEditors.lineWidth.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction'||
 							     actionId=='placeAction' || actionId=='addFrameAction');
@@ -711,12 +727,10 @@ function updatePropertiesForCurrentSelection() {
 							text = el.text.content;
 						if (el.text.textFont)
 							textFont = el.text.textFont;
-						if (el.text.textVAlign)
-							textVAlign = el.text.textVAlign;
-						else
-							textVAlign = 'middle';
 						if (el.text.textJustify)
 							textJustify = el.text.textJustify;
+						else
+							textJustify = 'center';
 					}
 					else if (el.frame) {
 						if (el.frame.description)
@@ -843,7 +857,6 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.frameStyle.setEnabled(false);
 		if(style) {
 			propertyEditors.style.setEnabled(true);
-			console.log('style =', style);
 			propertyEditors.style.setValue(style);
 		}
 		else
@@ -868,7 +881,6 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.textSize.setEnabled(false);
 		if (text) {
 			propertyEditors.text.setEnabled(true);
-			console.log('text =', text);
 			propertyEditors.text.setValue(text);
 		}
 		else
@@ -931,38 +943,42 @@ function getTextColor() {
 }
 function getStyle() {
 	//Get value from control
-	var style = $('#styleProperty').val();
-	//Take "style" off
-	style = style.substring(5);
+	var property = 'style';
+	var style = $('#'+property+'Property').val();
+	//Take property off
+	style = style.substring(property.length);
 	return style;
 }
-function getLabelStyle() {
+function getFrameStyle() {
 	//Get value from menu
-	var style = $('#frameStyleProperty').val();
-	//Take "style" off
-	style = style.substring(5);
+	var property = 'frameStyle';
+	var style = $('#'+property+'Property').val();
+	//Take property off
+	style = style.substring(property.length);
 	return style;
 }
 function getWidth() {
-	//Get value from control
+	//Get value from editor
 	return $('#lineWidthProperty').spinner("value");
 }
 function getFont() {
 	//Get from control
-	var font = $('#textFontProperty').val();
-	//Take "font" off
-	font = font.substring(4);
+	var property = 'textFont';
+	var font = $('#'+property+'Property').val();
+	//Take property off
+	font = font.substring(property.length);
 	return font;
 }
 function getFontSize() {
 	//Get value from control
-	var size = $('#textSizeProperty').val();
-	//Take "textSize" off
-	size = size.substring(8);
+	var property = 'textSize';
+	var size = $('#'+property+'Property').val();
+	//Take property off
+	size = size.substring(property.length);
 	return size;
 }
 function getJustification() {
-	//Get value from control
+	//Get value from editor
 	return propertyEditors['textJustify'].getValue();
 }
 function getTextVAlign() {
@@ -2799,7 +2815,7 @@ function showEditor(sketchId, noBreadcrumb, elementId) {
 
 	// update actions & properties
 	$('.property').addClass('propertyDisabled');
-	$('.selection').addClass('selectionDisabled');
+	//$('.selection').addClass('selectionDisabled');
 
 	$('.action').addClass('actionDisabled');
 	$('#showAllAction').removeClass('actionDisabled');
@@ -3500,7 +3516,6 @@ function onSetTextVAlign(align) {
 	if (!align)
 		return;
 	
-	align = align.substring(this.baseId.length);
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
 		action.setTextVAlign(align);
@@ -3731,7 +3746,7 @@ $(document).ready(function() {
 	propertyEditors.fillColor.setValue($.jPicker.List[STYLE_PICKER].color.active.val('hex'));
 	propertyEditors.fillColor.setEnabled(false);
 	propertyEditors.lineWidth = new WidthPropertySelect('lineWidth', 'lineWidthProperty');
-	//propertyEditors.lineWidth.setEnabled(false);
+	propertyEditors.lineWidth.setEnabled(false);
 	propertyEditors.textSize = new PropertySelect('textSize', 'textSizeProperty');
 	propertyEditors.textSize.onSetValue = onSetTextSize;
 	propertyEditors.textSize.setValue(12);
@@ -3746,13 +3761,14 @@ $(document).ready(function() {
 	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
 	propertyEditors.frameStyle.setValue('none');
 	propertyEditors.frameStyle.setEnabled(false);
-	propertyEditors.textJustify = new PropertySelect('textJustify', 'textJustifyProperty');
+	propertyEditors.textJustify = new AlignPropertySelect('textJustify', 'textJustifyProperty');
 	propertyEditors.textJustify.setValue('center');
+	propertyEditors.textJustify.setEnabled(false);
 	propertyEditors.textJustify.onSetValue = onSetTextJustify;
-	propertyEditors.textVAlign = new PropertySelect('textVAlign', 'textVAlignProperty');
-	propertyEditors.textVAlign.setValue('below');
+	propertyEditors.textVAlign = new AlignPropertySelect('textVAlign', 'textVAlignProperty');
+	//propertyEditors.textVAlign.setValue('below');
 	propertyEditors.textVAlign.onSetValue = onSetTextVAlign;
-	propertyEditors.textVAlign.setEnabled(false);
+	//propertyEditors.textVAlign.setEnabled(false);
 	propertyEditors.style = new PropertySelect('style', 'styleProperty');
 	propertyEditors.style.onSetValue = onSetStyle;
 	propertyEditors.style.setValue('none');
@@ -3765,18 +3781,24 @@ $(document).ready(function() {
 	//Disable any controls
 	$('#attributeSelect').prop('disabled', true);
 	$('#colorStyleLabel').addClass('textDisabled');
+	$('.selection').removeClass('selected');
+	$('.selection').addClass('selectionDisabled');
 	
 	$('#styleProperty').change(function() {
 		if(propertiesShowSelectionFlag)
 			propertyEditors.style.onSetValue($('#styleProperty').val());
 	});
-	$('#fontSize').change(function() {
+	$('#textSizeProperty').change(function() {
 		if(propertiesShowSelectionFlag)
-			propertyEditors.textSize.onSetValue($('#fontSize').val());
+			propertyEditors.textSize.onSetValue($('#textSizeProperty').val());
 	});
-	$('#fontFamily').change(function() {
+	$('#textFontProperty').change(function() {
 		if(propertiesShowSelectionFlag)
-			propertyEditors.textFont.onSetValue($('#fontFamily').val());
+			propertyEditors.textFont.onSetValue($('#textFontProperty').val());
+	});
+	$('#frameStyleProperty').change(function() {
+		if (propertiesShowSelectionFlag)
+			propertyEditors.frameStyle.onSetValue($('#frameStyleProperty').val());
 	});
 	onShowIndex();
 	

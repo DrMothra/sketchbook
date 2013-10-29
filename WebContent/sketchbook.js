@@ -290,15 +290,13 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			// default
 			if (element.frame.lineWidth)
 				outline.strokeWidth = element.frame.lineWidth;
-			if (element.frame.frameStyle && element.frame.frameStyle.indexOf('border')>=0) {
+			if (element.frame.style && element.frame.style.indexOf('border')>=0) {
 				if (element.frame.lineColor)
 					outline.strokeColor = colorToPaperjs(element.frame.lineColor);
 				else
 					outline.strokeColor = 'black';
 			}
-			if (element.frame.frameStyle && element.frame.frameStyle.indexOf('fill')>=0) {
-				console.log('fill color =', element.frame.fillColor);
-				
+			if (element.frame.style && element.frame.style.indexOf('fill')>=0) {
 				if (element.frame.fillColor)
 					outline.fillColor = colorToPaperjs(element.frame.fillColor);
 				else
@@ -326,13 +324,13 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			var title = new paper.PointText(new paper.Point(element.frame.x+element.frame.width/2, y));
 			title.characterStyle.fontSize = textSize;
 			title.content = '';
-			if (element.frame.showLabel===null || element.frame.showLabel===undefined)
+			if (element.frame.frameStyle===null || element.frame.frameStyle===undefined)
 				// default
 				title.content = element.frame.description;
 			else {
-				if (element.frame.showLabel.indexOf('sketch')>=0 && fromsketch)
+				if (element.frame.frameStyle.indexOf('sketch')>=0 && fromsketch)
 					title.content += getSketchTitle(fromsketch);
-				if (element.frame.showLabel.indexOf('frame')>=0) {
+				if (element.frame.frameStyle.indexOf('frame')>=0) {
 					if (title.content.length>0)
 						title.content += ': ';
 					title.content += element.frame.description;
@@ -353,11 +351,11 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			if (element.circle.lineWidth)
 				path.strokeWidth = element.circle.lineWidth;
 			
-			if (element.circle.lineColor && (element.circle.frameStyle.indexOf('border')>=0 ||
-							element.circle.frameStyle.indexOf('none')>=0)) {
+			if (element.circle.lineColor && (element.circle.style.indexOf('border')>=0 ||
+							element.circle.style.indexOf('none')>=0)) {
 				path.strokeColor = colorToPaperjs(element.circle.lineColor);
 			}
-			if (element.circle.fillColor && element.circle.frameStyle && element.circle.frameStyle.indexOf('fill')>=0) {
+			if (element.circle.fillColor && element.circle.style && element.circle.style.indexOf('fill')>=0) {
 				path.fillColor = colorToPaperjs(element.circle.fillColor);
 				path.closed = true;
 			}
@@ -415,9 +413,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			text.characterStyle.font = element.text.textFont;
 			text.characterStyle.fontSize = element.text.textSize;
 			text.paragraphStyle.justification = element.text.textJustify;
-			
-			console.log("justify = ", element.text.textJustify);
-			
 			text.characterStyle.fillColor = colorToPaperjs(element.text.textColor);
 			text.sketchElementId = element.id;
 			items.push(text);
@@ -764,12 +759,12 @@ Sketchbook.prototype.addCanvasAction = function(sketchId, color, name) {
 	return action;
 };
 
-Sketchbook.prototype.addCircleAction = function(sketchId, centre, rad, strokewidth, frameStyle, lineColor, fillColor) {
+Sketchbook.prototype.addCircleAction = function(sketchId, centre, rad, strokewidth, style, lineColor, fillColor) {
 	var action = new Action(this, 'addElements');
 	action.sketchId = sketchId;
 	var lineColor2 = parseHexColor(lineColor);
 	var fillColor2 = parseHexColor(fillColor);
-	var circle2 = { centrePoint : centre, radius : rad, lineColor: lineColor2, fillColor : fillColor2, lineWidth: strokewidth, frameStyle: frameStyle};
+	var circle2 = { centrePoint : centre, radius : rad, lineColor: lineColor2, fillColor : fillColor2, lineWidth: strokewidth, style: style};
 	action.elements =  [{ circle : circle2 }]; // id?
 	return action;
 };
@@ -786,14 +781,14 @@ Sketchbook.prototype.addTextAction = function(sketchId, text) {
 	return action;
 };
 
-Sketchbook.prototype.addFrameAction = function(sketchId, description, bounds, frameStyle, lineColor, lineWidth, fillColor, showLabel, textColor, textSize, textVAlign) {
+Sketchbook.prototype.addFrameAction = function(sketchId, description, bounds, style, lineColor, lineWidth, fillColor, frameStyle, textColor, textSize, textVAlign) {
 	var action = new Action(this, 'addElements');
 	action.sketchId = sketchId;
 	var lineColor2 = parseHexColor(lineColor);
 	var fillColor2 = parseHexColor(fillColor);
 	var textColor2 = parseHexColor(textColor);
-	var frame = { description: description, x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height, frameStyle: frameStyle, lineColor: lineColor2, fillColor: fillColor2, lineWidth: lineWidth,
-				showLabel : showLabel, textColor : textColor2, textSize: textSize, textVAlign : textVAlign};
+	var frame = { description: description, x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height, style: style, lineColor: lineColor2, fillColor: fillColor2, lineWidth: lineWidth,
+				frameStyle : frameStyle, textColor : textColor2, textSize: textSize, textVAlign : textVAlign};
 	action.elements = [{frame : frame}];
 	return action;	
 };
@@ -1328,9 +1323,6 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.lineColor = elval.lineColor;
 						el.undo.lineWidth = elval.lineWidth;
 						el.undo.fillColor = elval.fillColor;
-						el.undo.textVAlign = elval.textVAlign;
-						el.undo.textHAlign = elval.textHAlign;
-						el.undo.textHFit = elval.textHFit;
 						if (action.text)
 							elval.content = action.text;
 						if (action.textSize)
@@ -1347,12 +1339,6 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.lineWidth = action.lineWidth;
 						if (action.fillColor)
 							elval.fillColor = action.fillColor;
-						if (action.textVAlign)
-							elval.textVAlign = action.textVAlign;
-						if (action.textHAlign)
-							elval.textHAlign = action.textHAlign;
-						if (action.textHFit)
-							elval.textHFit = action.textHFit;
 					}
 					else if (element.image) {
 						var elval = element.image;

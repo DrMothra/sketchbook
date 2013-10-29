@@ -95,15 +95,15 @@ CircleTool.prototype = new Tool();
 CircleTool.prototype.begin = function(point) {
 	// activate overlay layer
 	activateOverlay(this.project);
-	this.frameStyle = getStyle();
+	this.style = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
 	this.lineWidth = getWidth();
 	this.startPoint = point;
 	this.path = new paper.Path.Circle(this.startPoint, this.radius);	
-	if (this.frameStyle.indexOf('border')>=0 || !this.frameStyle)
+	if (this.style.indexOf('border')>=0 || !this.style)
 		this.path.strokeColor = this.lineColor;
-	if(this.frameStyle.indexOf('fill')>=0) {
+	if(this.style.indexOf('fill')>=0) {
 		this.path.closed = true;
 		this.path.fillColor = this.fillColor;
 	}
@@ -121,7 +121,7 @@ CircleTool.prototype.move = function(point) {
 
 CircleTool.prototype.end = function(point) {
 	if (this.path) {		console.log("linewidth = ", this.path.strokeWidth);
-		var action = this.sketchbook.addCircleAction(this.sketchId, this.startPoint, this.radius, this.lineWidth, this.frameStyle, this.lineColor, this.fillColor);
+		var action = this.sketchbook.addCircleAction(this.sketchId, this.startPoint, this.radius, this.lineWidth, this.style, this.lineColor, this.fillColor);
 		this.path.remove();
 		delete this.path;
 		return action;
@@ -815,11 +815,11 @@ function FrameTool(project, sketchbook, sketchId, description) {
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;	
 	this.description = description;
-	this.frameStyle = getStyle();
+	this.style = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
 	this.lineWidth = getWidth();
-	this.showLabel = getLabelStyle();
+	this.frameStyle = getFrameStyle();
 	this.textColor = getTextColor();
 	this.textSize = getFontSize();
 	this.textVAlign = getTextVAlign();
@@ -845,7 +845,8 @@ FrameTool.prototype.end = function(point) {
 		delete this.path;
 	}
 	var bounds = new paper.Rectangle(this.startPoint, point);
-	return this.sketchbook.addFrameAction(this.sketchId, this.description, bounds, this.frameStyle, this.lineColor, this.lineWidth, this.fillColor, this.showLabel, this.textColor, this.textSize, this.textVAlign);
+	return this.sketchbook.addFrameAction(this.sketchId, this.description, bounds, this.style, this.lineColor, this.lineWidth, this.fillColor, this.frameStyle,
+					      this.textColor, this.textSize, this.textVAlign);
 };
 
 function TextTool(project, sketchbook, sketchId, content) {
