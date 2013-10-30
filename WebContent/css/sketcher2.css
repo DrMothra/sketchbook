@@ -196,7 +196,15 @@ div.action {
 	margin: 0px 3px 3px 3px;
 	cursor: default;
 }
-div.selection {
+div.selectiontextVAlign {
+	border: 1px solid black;
+	border-radius: 5px;
+	float: left;
+	background-color:#eeeeee;
+	margin: 2px;
+	padding: 0px;
+}
+div.selectiontextJustify {
 	border: 1px solid black;
 	border-radius: 5px;
 	float: left;
@@ -248,6 +256,7 @@ div.propertiesShowDisabled {
 }
 /* Property attributes */
 div.properties {
+	clear: both;
 	margin: 0px;
 	width: 20%;
 	float: left;

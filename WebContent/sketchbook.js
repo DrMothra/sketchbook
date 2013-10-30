@@ -376,7 +376,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			var item = null;
 			var bounds = new paper.Rectangle(element.image.x, element.image.y, element.image.width, element.image.height);
 			var outline = new paper.Path.Rectangle(bounds);
-			outline.fillColor = '#c0c0c0';
+			//outline.fillColor = '#c0c0c0';
 			//outline.strokeWidth = 1;
 			if (!imageId) {
 				console.log('Could not find image for url');
@@ -390,16 +390,17 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 					;
 				}
 				else {
+					//Dont fit for now
 					// fit
-					var aspect = item.image.width/item.image.height;
-					if (aspect > element.image.width/element.image.height) {
-						var sheight = element.image.width/aspect;
-						bounds = new paper.Rectangle(element.image.x, element.image.y+(element.image.height-sheight)/2, element.image.width, sheight);
-					}
-					else {
-						var swidth = element.image.height*aspect;
-						bounds = new paper.Rectangle(element.image.x+(element.image.width-swidth)/2, element.image.y, swidth, element.image.height);				
-					}
+					//var aspect = item.image.width/item.image.height;
+					//if (aspect > element.image.width/element.image.height) {
+					//	var sheight = element.image.width/aspect;
+					//	bounds = new paper.Rectangle(element.image.x, element.image.y+(element.image.height-sheight)/2, element.image.width, sheight);
+					//}
+					//else {
+					//	var swidth = element.image.height*aspect;
+					//	bounds = new paper.Rectangle(element.image.x+(element.image.width-swidth)/2, element.image.y, swidth, element.image.height);				
+					//}
 				}
 				item.bounds = bounds;
 			}
