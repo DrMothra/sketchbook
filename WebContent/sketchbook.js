@@ -94,14 +94,20 @@ Sketch.prototype.getElementById = function(id) {
 	return null;
 };
 
-Sketch.prototype.getCanvasByName = function(name) {
-	for (var i=0; i<this.elements.length; i++) {
-		var element = this.elements[i];
-		if (element.canvas.name == name)
-			return element;
+Sketch.prototype.getCanvasByName = function(canvasNames) {
+	//Return array of canvases
+	var elements = [];
+	for (var canvas=0; canvas<canvasNames.length; ++canvas) {
+		for (var i=0; i<this.elements.length; i++) {
+			var element = this.elements[i];
+			if (element.canvas.name == canvasNames[canvas]) {
+				elements.push(element);
+				break;
+			}
+		}
 	}
 	
-	return null;
+	return elements;
 }
 
 /** convert color to paper js color */
@@ -1293,7 +1299,7 @@ Sketchbook.prototype.doAction = function(action) {
 			} else {
 				var element = sketch.getElementById(el.elementId);
 				if (!element) {
-					console.log('setColor could not find element '+elementId+' in sketch '+sketchId);
+					console.log('setColor could not find element '+el.elementId+' in sketch '+el.sketchId);
 				}
 				else {
 					if (element.line) {

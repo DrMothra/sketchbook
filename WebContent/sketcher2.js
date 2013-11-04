@@ -190,6 +190,10 @@ function AlignPropertySelect(name, propertyId) {
 AlignPropertySelect.prototype = new PropertySelect();
 
 AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
+	//Ensure selection is not disabled
+	if (elem.hasClass('selectionDisabled'))
+		return;
+	
 	var id = elem.attr('id');
 	console.log('onPropertyOptionSelected '+this.name+' '+id);
 	if (!id)
@@ -228,10 +232,12 @@ AlignPropertySelect.prototype.setEnabled = function(enabled) {
 		$('.selection'+this.name).removeClass('selectionDisabled');
 		$('.selection'+this.name).removeClass('selected');
 		$('#'+this.name+'_'+this.currentValue).addClass('selected');
+		$('#'+this.name+'Label').removeClass('textDisabled');
 	}
 	else {
 		$('#'+this.name+'_'+this.currentValue).removeClass('selected');
 		$('.selection'+this.name).addClass('selectionDisabled');
+		$('#'+this.name+'Label').addClass('textDisabled');
 	}
 }
 function ColorPropertySelect(name, propertyId) {
@@ -569,6 +575,9 @@ function clearAll() {
 	
 	// show index
 	onShowIndex();
+	
+	//Reset background colour picker
+	$.jPicker.List[BACKGROUND_PICKER].color.active.val('hex', DEFAULT_CANVAS_COLOUR);
 }
 var propertiesShowSelectionFlag = false;
 function propertiesShowSelection() {
@@ -660,7 +669,7 @@ function updatePropertiesForCurrentSelection() {
 			var propertyEditor = propertyEditors[pname];
 			propertyEditor.resetValue();
 			if (!add)
-				propertyEditor.setEnabled(true);
+				propertyEditor.setEnabled(false);
 		}
 		if (add) {
 			propertyEditors.lineColor.setEnabled(actionId=='addLineAction' || actionId=='addCurveAction' || actionId=='addCircleAction'||
@@ -2881,6 +2890,13 @@ function showEditor(sketchId, noBreadcrumb, elementId) {
 	objectDetailProject.view.center = settings.detailCenter;
 	objectOverviewProject.view.zoom = settings.overviewZoom;
 	objectOverviewProject.view.center = settings.overviewCenter;
+	
+	//Ensure background picker matches to canvas colour
+	var bgColor = $('#objectDetailCanvas').css('background-color');
+	bgColor = parseCssColor(bgColor);
+	$.jPicker.List[BACKGROUND_PICKER].color.active.val('rgb', {r:bgColor.red*255, g:bgColor.green*255,
+							   b:bgColor.blue*255});
+	
 }
 
 function moveHistory() {
@@ -3194,9 +3210,13 @@ function onNewObject() {
 
 	var action = sketchbook.newSketchAction();
 	doAction(action);
-	//Need a canvas elememt representation so that we can change properties of it
+	//Need a canvas element representation so that we can change properties of it
 	var canvasAction = sketchbook.addCanvasAction(action.sketch.id, DEFAULT_CANVAS_COLOUR, 'detailCanvas');
 	doAction(canvasAction);
+	canvasAction = sketchbook.addCanvasAction(action.sketch.id, DEFAULT_CANVAS_COLOUR, 'overviewCanvas');
+	doAction(canvasAction);
+	//Reset background colour picker
+	$.jPicker.List[BACKGROUND_PICKER].color.active.val('hex', DEFAULT_CANVAS_COLOUR);
 }
 
 //GUI entry point
@@ -3450,12 +3470,13 @@ function onSetBackgroundColor(color) {
 		//Bypass selection mechanism as there isn't one for the canvas itself
 		var sketchId = currentSketch ? currentSketch.id : undefined;
 		if (sketchId) {
-			var element = currentSketch.getCanvasByName('detailCanvas');
+			//Update as many canvases as required
+			var canvases = ['detailCanvas', 'overviewCanvas'];
+			var elements = [];
+			elements = currentSketch.getCanvasByName(canvases);
 			
-			console.log('canvas id='+element.id);
-			
-			if (element.id) {
-				action.addElement(sketchId, element.id);
+			for (var i=0; i<elements.length; ++i){
+				action.addElement(sketchId, elements[i].id);
 				onSetProperty(action);
 			}
 		}
@@ -3649,7 +3670,7 @@ $(document).ready(function() {
 	    },
 	    color:
 	    {
-		active: new $.jPicker.Color({ hex: 'e6e6e6' })
+		active: new $.jPicker.Color({ hex: DEFAULT_CANVAS_COLOUR })
 	    }
 	  },
 	  function(color, context) {
@@ -3673,7 +3694,7 @@ $(document).ready(function() {
 	    },
 	    color:
 	    {
-		active: new $.jPicker.Color({ hex: '000000' })
+		active: new $.jPicker.Color({ hex: DEFAULT_LINE_COLOR })
 	    }
 	  },
 	  function(color, context) {
