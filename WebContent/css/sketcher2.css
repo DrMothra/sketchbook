@@ -11,6 +11,7 @@ h2 {
 canvas {
 	border:1px solid grey;
 }
+/* Labels */
 p.label {
 	line-height: 100%;
 	/*border: 1px solid gray;*/
@@ -27,13 +28,8 @@ span.label {
 	font-family: sans-serif;
 	font-size: small;
 }
-div { 
-	/*border:1px solid black;*/
-}
 div.page {
 	width:100%;
-/*	position: relative;
-	height:100%; */
 	background-color:#ffffff;
 }
 /* TABS */
@@ -49,13 +45,8 @@ div.tabhighlight {
 	background-color:#cccccc;
 }
 div.tabselected {
-	/*font-weight: bold;*/
 	background-color:#808080;
 	border: 1px solid black;
-}
-/* OBJECTS LIST */
-div.objects {
-	width:100%;
 }
 div.indexHeader {
 	width:100%;
@@ -71,10 +62,6 @@ div.helpItem {
 	margin-left: 10px;
 	margin-top: 3px;
 }
-input.button {	
-}
-input.filterText {
-}
 canvas.indexCanvas {
 	height: 400px;
 	width: 100%;
@@ -82,29 +69,15 @@ canvas.indexCanvas {
 /* EDITOR */
 div.editor {
 	width:100%;
-/*	clear:both; */
-/*	position: relative; */
 }
 div.editorLeft {
 	width:20%;
 	float: left;
-	/*position:absolute;
-	left:0%;
-	top:0%;*/
-	/*background-color:#f0f;*/
-}
-div.editorOverview {
-	background-color:#00f;
 }
 canvas.overviewCanvas {
  /* sizing doesn't work with paper js here :-( A hack to use resize callback set paperjs size on resize */
- /*	width: inherit; */
 	height: 198px;  
 	width: 99%;
-	/*border:none;*/
-}
-div.editorText {
-	/*background-color:#0ff;*/
 }
 canvas.textCanvas {
 	height: 250px;
@@ -112,30 +85,15 @@ canvas.textCanvas {
 }
 div.editorDetail {
 	float: left;
-	/*position:absolute;
-	left:25%;
-	top:0%;*/
-	/*background-color:#0f0;*/
 	width:79%; 
-	/*height:600px;*/
 }
 canvas.detailCanvas {
 	height:400px;
 	width: 99%;
 	background-color: #e6e6e6;
 }
-textarea.detailText {
-	position: absolute;
-	left: 1000px;
-	top: 200px;
-}
-
 div.selectionHistory {
-	/*background-color:#ff0;*/
 	width:100%; /* could be 50% if no border */
-	/*position:absolute;
-	left:50%;
-	top:0%;*/
 	float:left;
 }
 div.infoPane {
@@ -157,7 +115,6 @@ div.footer {
 div.sequencesColumn {
 	float: left;
 	width:33%; 
-	/*height:600px;*/
 }
 canvas.sequencesCanvas {
 	height:400px;
@@ -173,12 +130,87 @@ canvas.sequencesViewCanvas {
 	height:400px;
 	width: 99%;
 }
-.clear {
-    clear: both;
+/* Properties, attributes */
+div.properties {
+	clear: both;
+	margin: 0px;
+	width: 20%;
+	float: left;
+}
+.attributeForm {
+	margin: 3px 10px 3px 10px;
+}
+.attributeLabel {
+	width: 35%;
+	float: left;
+	margin-top: 3px;
+}
+div.textAttributes {
+	/*
+	border: 1px solid gray;
+	border-radius: 5px;
+	width: auto;
+	padding: 5px;*/
+}
+#textProperty {
+	margin-left: 30px;
+}
+div.textIcons {
+	clear: both;
+	float: left;
+	width: 80%;
+	margin: 10px;
+}
+div.textIcons img {
+	height: 22px;
+	width: 22px;
+	padding: 1px;
+	display: block;
+}
+div.selectiontextVAlign,
+div.selectiontextJustify {
+	border: 1px solid black;
+	border-radius: 5px;
+	float: left;
+	background-color:#eeeeee;
+	margin: 2px;
+	padding: 0px;
+}
+div.frameAttributes {
+	width: 100%;
+}
+.frameForm {
+	margin: 3px 10px 3px 10px;
+}
+div.frameIcons {
+	float: left;
+	width: 100%;
+	margin: 3px 10px 3px 10px;
+}
+div.frameIcons img {
+	height: 20px;
+	width: 20px;
+	padding: 1px;
+	display: block;
+}
+.styleAttributes {
+	clear: both;
+	margin-top: 50px;
+}
+.styleForm {
+	margin: 3px 10px 3px 10px;
+}
+.colourStyle {
+	float: left;
+	margin: 1px 20px 10px 10px;
 }
 div.iconGroup {
 	width:79%;
 	float:left;
+}
+p.actionLabel {
+	float: left;
+	margin: 1px;
 }
 div.actions {
 	width:auto; 
@@ -193,7 +225,6 @@ div.actions img {
 	padding: 1px;
 	display:block;
 }
-
 div.action {
 	border: 1px solid black;
 	border-radius: 5px;
@@ -202,172 +233,57 @@ div.action {
 	margin: 0px 3px 3px 3px;
 	cursor: default;
 }
-div.selectiontextVAlign,
-div.selectiontextJustify {
+div.actionSelected {
 	border: 1px solid black;
-	border-radius: 5px;
-	float: left;
-	background-color:#eeeeee;
-	margin: 2px;
-	padding: 0px;
-}
-div.selected {
 	background-color:#808080;
-}
-p.actionLabel {
-	float: left;
-	margin: 1px;
 }
 div.actionHighlight {
 	border: 1px solid gray;
 	background-color:#cccccc;
 }
-div.actionSelected {
-	border: 1px solid black;
-	background-color:#808080;
-}
 div.actionDisabled {
 	background-color:#ffffff;
 	color: gray;
+}
+div.selected {
+	background-color:#808080;
 }
 .selectionDisabled {
 	background-color:#ffffff;
 	color: gray;
 }
-div.propertiesShow {
-	border: 1px solid gray;
-	float: left;
-	background-color:#eeeeee;
-	margin: 1px;
-	cursor: default;
-}
-div.propertiesShowHighlight {
-	border: 1px solid gray;
-	background-color:#cccccc;
-}
-div.propertiesShowSelected {
-	border: 1px solid black;
-	background-color:#808080;
-}
-div.propertiesShowDisabled {
-	background-color:#ffffff;
-	color: gray;
-}
-/* Property attributes */
-div.properties {
-	clear: both;
-	margin: 0px;
-	width: 20%;
-	float: left;
-}
-div.attributes {
-	width: 100%;
-	float: left;
-}
-div.textAttributes {
-	/*
-	border: 1px solid gray;
-	border-radius: 5px;
-	width: auto;
-	padding: 5px;*/
-}
-.attributeLabel {
-	width: 35%;
-	float: left;
-	margin-top: 3px;
-}
-.styleAttributes {
-	clear: both;
-	margin-top: 50px;
-}
-div.frameIcons img {
-	height: 20px;
-	width: 20px;
-	padding: 1px;
-	display: block;
-}
-.styleSelector {
-	clear: both;
-}
-.styleConfirm {
-	clear: both;
-}
-div.textIcons {
-	clear: both;
-	float: left;
-	width: 80%;
-	margin: 10px;
-}
-div.textIcons img {
-	height: 22px;
-	width: 22px;
-	padding: 1px;
-	display: block;
-}
-div.frameAttributes {
-	width: 100%;
-}
-div.frameIcons {
-	float: left;
-	width: 100%;
-	margin: 3px 10px 3px 10px;
-}
-div.fontSize {
-	clear: both;
-	margin: 3px 10px 3px 10px;
-}
-div.fontFamily {
-	clear: both;
-	margin: 3px 10px 3px 10px;
-}
-#textInput {
-	clear: both;
-}
-#textProperty {
-	margin-left: 30px;
-}
-.textForm {
-	/*clear: both;*/
-	margin: 3px 10px 3px 10px;
-}
-.styleForm {
-	/*clear: both;*/
-	margin: 3px 10px 3px 10px;
-	/*float: left;*/
-}
-.frameForm {
-	margin: 3px 10px 3px 10px;
-}
-.colourStyle {
-	float: left;
-	margin: 1px 20px 10px 10px;
-}
-.styleConfirm {
-	width: 50%;
-	margin-left: 50px;
-}
-#styleSelect {
-	/*width: 100%;*/
-	margin: 3px 10px 3px 10px;
-}
-#widthForm {
-	display: inline;
-}
 .styleLabel {
 	width: 20%;
 	margin-top: 3px;
 }
-#lineColorProperty div.option {
-	width: 1em;
-	height: 1em;	
+.textEnabled {
+	color: black;
 }
-#textColorProperty div.option {
-	width: 1em;
-	height: 1em;	
+.textDisabled {
+	color: gray;
 }
-#fillColorProperty div.option {
-	width: 1em;
-	height: 1em;	
+/* UI controls */
+.picker {
+	margin-left: 5px;
+}
+div.slider {
+    width: 150px;
+    margin: 5px;
+    height: 7px;
+}
+.ui-slider .ui-slider-handle {
+    width: 15px;
+    height: 15px;
+}
+.spinner {
+	width: 25px;
+	font-size: small;
+}
+.ui-spinner-input {
+	text-align: right;
+}
+.ui-widget {
+	font-size: small;
 }
 div.option {
 	border: 3px solid white;
@@ -386,18 +302,6 @@ div.alpha {
 	height: 1em;	
 	float: left;
 	cursor: default;
-}
-div.fillColorHighlight {
-	border: 3px solid gray;
-}
-div.alphaHighlight {
-	border: 3px solid gray;
-}
-div.fillColorSelected {
-	border: 3px solid black;
-}
-div.alphaSelected {
-	border: 3px solid black;
 }
 div#addSequence {
 	font-size: large;
@@ -436,7 +340,6 @@ div.sequenceItem {
 	/*border: 1px solid gray;*/	
 	margin-left: 1em;
 }
-
 div.channelToggle {
 	border: 1px solid gray;
 	float: left;
@@ -444,39 +347,13 @@ div.channelToggle {
 div.channelActive {
 	background-color: #808080;
 }
-.picker {
-	margin-left: 5px;
-	/*float: left;*/
-}
-#setBackgroundColorProperty {
-	margin-left: 30px;
-}
-div.slider {
-    width: 150px;
-    margin: 5px;
-    height: 7px;
-}
-.ui-slider .ui-slider-handle {
-    width: 15px;
-    height: 15px;
-}
 div.format {
 	float: left;
 	display: inline;
 }
-.spinner {
-	width: 25px;
-	font-size: small;
-}
-.ui-spinner-input {
-	text-align: right;
-}
-.ui-widget {
-	font-size: small;
-}
-.textEnabled {
-	color: rgb(0,0,0);
-}
-.textDisabled {
-	color: gray;
+
+
+/* Utility */
+.clear {
+    clear: both;
 }

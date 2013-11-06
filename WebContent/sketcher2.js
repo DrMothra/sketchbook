@@ -319,35 +319,6 @@ WidthPropertySelect.prototype.setEnabled = function(enabled) {
 		$('#'+this.name+'Label').addClass('textDisabled');
 	}
 }
-
-function StylePropertySelect(name, propertyId) {
-	PropertySelect.call(this, name, propertyId);
-	this.name = name;
-}
-StylePropertySelect.prototype = new PropertySelect();
-
-StylePropertySelect.prototype.setValue = function(style) {
-	if (!style)
-		return;
-	
-	this.currentValue = style;
-	//Update menu
-	$('#styleSelect').val('style'+style);
-}
-StylePropertySelect.prototype.onSetValue = function(style) {
-	//Remove "style"
-	if (style)
-		style = style.substring(5);
-	
-	console.log('style =', style);
-	
-	this.currentValue = style;
-	if (propertiesShowSelection()) {
-		var action = sketchbook.setPropertiesAction();
-		action.setFrameStyle(style);
-		onSetProperty(action);
-	}
-}
 function SizePropertySelect(name, propertyId) {
 	PropertySelect.call(this, name, propertyId);
 	this.name = name;
@@ -662,7 +633,6 @@ function updatePropertiesForCurrentSelection() {
 		var enableSelector = (actionId=='addLineAction' || actionId=='addCircleAction' || actionId=='placeAction' ||
 							     actionId=='addFrameAction' || actionId=='addTextAction');
 		$('#attributeSelect').prop('disabled', !enableSelector);
-		$('#colorStyleLabel').removeClass('textDisabled');
 			
 		var add = actionId.substring(0, 3)=='add' || actionId.substr(0,5)=='place';
 		for (var pname in propertyEditors) {
@@ -686,7 +656,6 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.text.setEnabled(actionId=='addFrameAction' || actionId=='addTextAction');
 			propertyEditors.textJustify.setEnabled(actionId=='addTextAction');
 			propertyEditors.textFont.setEnabled(actionId=='addTextAction');
-			propertyEditors.rescale.setEnabled(actionId=='placeAction');
 		}
 	} else {
 		// element(s) with color(s)?
@@ -699,7 +668,6 @@ function updatePropertiesForCurrentSelection() {
 		var textFont = null;
 		var style = null;
 		var textVAlign = null;
-		var rescale = null;
 		var text = null;
 		var textJustify = null;
 		for (var i=0; i<currentSelections.length; i++) {
@@ -827,18 +795,9 @@ function updatePropertiesForCurrentSelection() {
 							frameStyle = el.icon.frameStyle;
 						else
 							frameStyle = 'none';
-						if (el.icon.rescale)
-							rescale = el.icon.rescale;
-						else
-							rescale = 'fit';
 					}
 					else if (el.image) {
 						console.log('got image');
-						if (el.image.rescale)
-							//rescale = el.image.rescale;
-							rescale = 'stretch'
-						else
-							rescale = 'stretch';
 					}
 				}
 			}
@@ -911,12 +870,6 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.textVAlign.setEnabled(false);
-		if (rescale!==null) {
-			propertyEditors.rescale.setEnabled(true);
-			propertyEditors.rescale.setValue(rescale);
-		}
-		else
-			propertyEditors.rescale.setEnabled(false);
 	}
 }
 	
@@ -1725,12 +1678,6 @@ function registerHighlightEvents() {
 	$(document).on('mouseout', 'div .action', function() {
 		$(this).removeClass('actionHighlight');
 	});
-	$(document).on('mouseover', 'div .propertiesShow', function() {
-		$(this).addClass('propertiesShowHighlight');
-	});
-	$(document).on('mouseout', 'div .propertiesShow', function() {
-		$(this).removeClass('propertiesShowHighlight');
-	});
 	$(document).on('mouseover', 'div #addSequence', function() {
 		$(this).addClass('addSequenceHighlight');
 	});
@@ -2488,13 +2435,13 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 	
 		var scale = (symbolBounds) ? Math.min((INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT-INDEX_CELL_MARGIN)/(symbolBounds.width+INDEX_CELL_MARGIN),
 				(INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT-INDEX_CELL_MARGIN)/(symbolBounds.height+INDEX_CELL_MARGIN)) : 1;
-		var placed = group; //symbol.place();
+		//var placed = group; //symbol.place();
 		//console.log('symbolbounds='+symbolBounds+', placed bounds='+placed.bounds);
-		placed.scale(scale);
+		group.scale(scale);
 		// naming this makes the Group creation explode :-(
 		//placed.name = ''+sketchId;
-		placed.translate(new paper.Point(INDEX_CELL_SIZE/2-placed.bounds.center.x, (INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT)/2-placed.bounds.center.y));
-		children.push(placed);
+		group.translate(new paper.Point(INDEX_CELL_SIZE/2-group.bounds.center.x, (INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT)/2-group.bounds.center.y));
+		children.push(group);
 	}
 	if (sketch) {
 		var label = new paper.PointText(new paper.Point(INDEX_CELL_SIZE/2, INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT+pt2px(LABEL_FONT_SIZE)));
@@ -3031,11 +2978,9 @@ function handleSelections(selections) {
 	}
 	updateActionsForCurrentSelection();
 	if (currentSelections.length==0) {
-		$('#propertiesShowSelection').addClass('propertiesShowDisabled');
 		handlePropertiesShowSelected('propertiesShowNew');
 	}
 	else {
-		$('#propertiesShowSelection').removeClass('propertiesShowDisabled');
 		handlePropertiesShowSelected('propertiesShowSelection');		
 	}
 	updatePropertiesForCurrentSelection();
@@ -3264,7 +3209,14 @@ function onClearAll() {
 function onShowIndex() {
 	showIndex();
 }
-
+//GUI entry point
+function onSaveScreenshot() {
+	var detailCanvas = document.getElementById('objectDetailCanvas');
+	if (detailCanvas) {
+		Canvas2Image.saveAsPNG(detailCanvas);
+		console.log('Image saved');
+	}
+}
 
 function readChosenFile(mergeFlag) {
 	if (!chosenFile)
@@ -3551,15 +3503,6 @@ function onSetLineWidth(value) {
 		onSetProperty(action);
 	}
 }
-function onSetRescale(value) {
-	if (!value)
-		return;
-	if (propertiesShowSelection()) {
-		var action = sketchbook.setPropertiesAction();
-		action.setRescale(value);
-		onSetProperty(action);
-	}
-}
 function onSetTextSize(size) {
 	if (!size)
 		return;
@@ -3740,9 +3683,7 @@ $(document).ready(function() {
 	
 	
 	$('.action').on('click', onActionSelected);
-	$('.propertiesShow').on('click', onPropertiesShowSelected);
-	//$('#colorProperty .option').on('click', onColorSelected);
-	//$('.alpha').on('click', onAlphaSelected);
+	
 	$('#objectDetailCanvas').on('dblclick', onPropertyEdit);
 	$(document).on('mousedown', '#sequences1Div .sequenceFrame', onSequenceFrameSelected);
 	$(document).on('mousedown', '#sequences1Div .sequenceObject', onSequenceFrameSelected);
@@ -3790,8 +3731,6 @@ $(document).ready(function() {
 	propertyEditors.style.onSetValue = onSetStyle;
 	propertyEditors.style.setValue('none');
 	propertyEditors.style.setEnabled(false);
-	propertyEditors.rescale = new PropertySelect('rescale', 'rescaleProperty');
-	propertyEditors.rescale.onSetValue = onSetRescale;
 	propertyEditors.backgroundColor = new PropertySelect('backgroundColor', 'backgroundColorProperty');
 	propertyEditors.backgroundColor.onSetValue = onSetBackgroundColor;
 	
