@@ -145,8 +145,11 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 	var items = new Array();
 	for (var ix=0; ix<elements.length; ix++) {
 		var element = elements[ix];
+		
+		console.log('topaper');
+		
 		if (element.line!==undefined) {
-			
+			console.log('drawing line');	
 			var path = new paper.Path();
 			// preserve id
 			path.sketchElementId = element.id;
@@ -178,6 +181,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		}
 		if (element.icon!==undefined) {
 			// copy sketch item(s)
+			console.log('Drawing icon');
 			
 			var sketch = sketchbook.sketches[element.icon.sketchId];
 			var group = null;
@@ -291,7 +295,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.frame!==undefined) {
-			
+			console.log('Drawing frame');
 			var outline = new paper.Path.Rectangle(new paper.Rectangle(element.frame.x, element.frame.y, element.frame.width, element.frame.height));
 			// default
 			if (element.frame.lineWidth)
@@ -353,24 +357,31 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.circle!==undefined) {
+			console.log('Drawing circle');
 			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
-			if (element.circle.lineWidth)
+			console.log('centre =', element.circle.centrePoint);
+			console.log('rad =', element.circle.radius);
+			if (element.circle.lineWidth){
 				path.strokeWidth = element.circle.lineWidth;
+				console.log('strokewidth =', path.strokeWidth);
+			}
 			
 			if (element.circle.lineColor && (element.circle.style.indexOf('border')>=0 ||
 							element.circle.style.indexOf('none')>=0)) {
 				path.strokeColor = colorToPaperjs(element.circle.lineColor);
+				console.log('strokeColor =', path.strokeColor);
 			}
 			if (element.circle.fillColor && element.circle.style && element.circle.style.indexOf('fill')>=0) {
 				path.fillColor = colorToPaperjs(element.circle.fillColor);
 				path.closed = true;
+				console.log('fillcolor =', path.fillColor);
 			}
 			// preserve id
 			path.sketchElementId = element.id;
 			items.push(path);
 		}
 		if (element.image!==undefined) {
-			
+			console.log('Drawing image');
 			var imageId = null;
 			for (var iid in images) {
 				if (images[iid].url==element.image.url) {
@@ -415,6 +426,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.text!==undefined) {
+			console.log('Drawing text');
 			var text = new paper.PointText(new paper.Point(element.text.x, element.text.y));
 			text.content = element.text.content;
 			text.characterStyle.font = element.text.textFont;

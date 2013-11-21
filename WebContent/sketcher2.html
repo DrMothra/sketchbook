@@ -19,6 +19,8 @@
 <script type="text/javascript" src="import.js"></script>
 <script type="text/javascript" src="sketcher2.js"></script>
 <script type="text/javascript" src="BlobBuilder.js"></script>
+<script type="text/javascript" src="js/Blob.js"></script>
+<script type="text/javascript" src="js/canvas-toBlob.js"></script>
 <script type="text/javascript" src="FileSaver.js"></script>
 <script src="jpicker-1.1.6.min.js" type="text/javascript"></script>
 <script src="js/canvas2image.js" type="text/javascript"></script>
@@ -37,7 +39,7 @@
 			<input type="text" value="sketch" id="filenameText"/>
 			<input type="button" value="Save" class="button" onclick="javascript:onSave();"/>
 			<input type="button" value="Clear All" class="button" onclick="javascript:onClearAll();"/>
-			<input type="button" value="Screenshot" class="button" onclick="javascript:onSaveScreenshot();"/>
+			<input type="button" id="screenShot" value="Screenshot"/>
 		</div>
 		<div class="helpItem">
 			<a href="http://www.cs.nott.ac.uk/~atg/trajectSketch.html" target="_blank">Help</a>

@@ -3209,14 +3209,6 @@ function onClearAll() {
 function onShowIndex() {
 	showIndex();
 }
-//GUI entry point
-function onSaveScreenshot() {
-	var detailCanvas = document.getElementById('objectDetailCanvas');
-	if (detailCanvas) {
-		Canvas2Image.saveAsPNG(detailCanvas);
-		console.log('Image saved');
-	}
-}
 
 function readChosenFile(mergeFlag) {
 	if (!chosenFile)
@@ -3680,7 +3672,25 @@ $(document).ready(function() {
 	$('#loadImage').on('change', onLoadImage);
 	$('#objectTextArea').change(onObjectTextChange);
 	$('#attributeSelect').change(onAttributeChange);
+	//$('#screenShot').addEventListener("submit", function(event) {
+	//	event.preventDefault();
+	//	var can = document.getElementById("objectDetailCanvas");
+	//	if (can) {
+	//		can.toBlob(function(blob) {
+	//			saveAs(blob, "screenShot.png");
+	//		}, "image/png");
+	//	}
+	//}, false);
 	
+	$('#screenShot').on("click", function(event) {
+		event.preventDefault();
+		var can = document.getElementById("objectDetailCanvas");
+		if (can) {
+			can.toBlob(function(blob) {
+				saveAs(blob, "screenShot.png");
+			}, "image/png");
+		}
+	});
 	
 	$('.action').on('click', onActionSelected);
 	

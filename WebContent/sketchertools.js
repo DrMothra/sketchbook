@@ -120,7 +120,7 @@ CircleTool.prototype.move = function(point) {
 };
 
 CircleTool.prototype.end = function(point) {
-	if (this.path) {		console.log("linewidth = ", this.path.strokeWidth);
+	if (this.path) {
 		var action = this.sketchbook.addCircleAction(this.sketchId, this.startPoint, this.radius, this.lineWidth, this.style, this.lineColor, this.fillColor);
 		this.path.remove();
 		delete this.path;
