@@ -3186,12 +3186,20 @@ function onNewSequence() {
 }
 
 // GUI entry point
+function get_blob() {
+	return window.Blob;
+}
+
 function onSave() {
 	var jstate = sketchbook.marshall();
-	var bb = new BlobBuilder();
-	bb.append(JSON.stringify(jstate));
+	//var bb = new BlobBuilder();
+	var bb = get_blob();
 	var filename = $('#filenameText').val()+'.json';
-	saveAs(bb.getBlob(), filename);
+	saveAs(new bb(
+	       [JSON.stringify(jstate)]
+	       , {type: "text/plain;charset=" + document.characterSet}
+	      )
+	, filename);
 	// OK!
 	console.log('saved sketchbook as '+filename);
 	sketchbook.changed = false;
@@ -3686,9 +3694,13 @@ $(document).ready(function() {
 		event.preventDefault();
 		var can = document.getElementById("objectDetailCanvas");
 		if (can) {
-			can.toBlob(function(blob) {
-				saveAs(blob, "screenShot.png");
-			}, "image/png");
+			try {
+				can.toBlob(function(blob) {
+					saveAs(blob, "screenShot.png");
+				}, "image/png");
+			} catch(e) {
+				alert("Security Error:Cannot save canvas with local images");
+			}
 		}
 	});
 	
