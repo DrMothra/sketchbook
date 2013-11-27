@@ -141,7 +141,7 @@ div.properties {
 	margin: 3px 10px 3px 10px;
 }
 .attributeLabel {
-	width: 35%;
+	width: 33%;
 	float: left;
 	margin-top: 3px;
 }
@@ -155,17 +155,32 @@ div.textAttributes {
 #textProperty {
 	margin-left: 30px;
 }
-div.textIcons {
+div.textAlign {
 	clear: both;
 	float: left;
 	width: 80%;
 	margin: 10px;
 }
-div.textIcons img {
+div.textAlign img {
 	height: 22px;
 	width: 22px;
 	padding: 1px;
 	display: block;
+}
+div.textIcons {
+	width: auto;
+	float: left;
+	margin-left: -5px;
+	margin-top: 5px;
+}
+div.alignIcons {
+	float: left;
+	margin-left: 10px;
+}
+div.frameIcons {
+	width: 100%;
+	float: left;
+	margin-left: 10px;
 }
 div.selectiontextVAlign,
 div.selectiontextJustify {
@@ -182,11 +197,7 @@ div.frameAttributes {
 .frameForm {
 	margin: 3px 10px 3px 10px;
 }
-div.frameIcons {
-	float: left;
-	width: 100%;
-	margin: 3px 10px 3px 10px;
-}
+
 div.frameIcons img {
 	height: 20px;
 	width: 20px;
@@ -264,7 +275,7 @@ div.selected {
 }
 /* UI controls */
 .picker {
-	margin-left: 5px;
+	margin-left: 27px;
 }
 div.slider {
     width: 150px;
