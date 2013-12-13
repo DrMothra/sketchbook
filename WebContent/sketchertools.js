@@ -39,10 +39,9 @@ LineTool.prototype.begin = function(point) {
 	// activate overlay layer
 	activateOverlay(this.project);
 	this.style = getStyle();
-	console.log('linetool style =', this.style);
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
-	this.lineWidth = getWidth();
+	this.lineWidth = getLineWidth();
 	this.path = new paper.Path();	
 	if (this.style.indexOf('border')>=0 || this.style.indexOf('none')>=0)
 		this.path.strokeColor = this.lineColor;
@@ -98,7 +97,7 @@ CircleTool.prototype.begin = function(point) {
 	this.style = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
-	this.lineWidth = getWidth();
+	this.lineWidth = getLineWidth();
 	this.startPoint = point;
 	this.path = new paper.Path.Circle(this.startPoint, this.radius);	
 	if (this.style.indexOf('border')>=0 || !this.style)
@@ -818,7 +817,7 @@ function FrameTool(project, sketchbook, sketchId, description) {
 	this.style = getStyle();
 	this.lineColor = getLineColor();
 	this.fillColor = getFillColor();
-	this.lineWidth = getWidth();
+	this.lineWidth = getLineWidth();
 	this.frameStyle = getFrameStyle();
 	this.textColor = getTextColor();
 	this.textSize = getFontSize();

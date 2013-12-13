@@ -146,10 +146,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 	for (var ix=0; ix<elements.length; ix++) {
 		var element = elements[ix];
 		
-		console.log('topaper');
-		
 		if (element.line!==undefined) {
-			console.log('drawing line');	
 			var path = new paper.Path();
 			// preserve id
 			path.sketchElementId = element.id;
@@ -181,8 +178,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		}
 		if (element.icon!==undefined) {
 			// copy sketch item(s)
-			console.log('Drawing icon');
-			
 			var sketch = sketchbook.sketches[element.icon.sketchId];
 			var group = null;
 			var bounds = null;
@@ -295,7 +290,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.frame!==undefined) {
-			console.log('Drawing frame');
 			var outline = new paper.Path.Rectangle(new paper.Rectangle(element.frame.x, element.frame.y, element.frame.width, element.frame.height));
 			// default
 			if (element.frame.lineWidth)
@@ -357,31 +351,24 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.circle!==undefined) {
-			console.log('Drawing circle');
 			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
-			console.log('centre =', element.circle.centrePoint);
-			console.log('rad =', element.circle.radius);
 			if (element.circle.lineWidth){
 				path.strokeWidth = element.circle.lineWidth;
-				console.log('strokewidth =', path.strokeWidth);
 			}
 			
 			if (element.circle.lineColor && (element.circle.style.indexOf('border')>=0 ||
 							element.circle.style.indexOf('none')>=0)) {
 				path.strokeColor = colorToPaperjs(element.circle.lineColor);
-				console.log('strokeColor =', path.strokeColor);
 			}
 			if (element.circle.fillColor && element.circle.style && element.circle.style.indexOf('fill')>=0) {
 				path.fillColor = colorToPaperjs(element.circle.fillColor);
 				path.closed = true;
-				console.log('fillcolor =', path.fillColor);
 			}
 			// preserve id
 			path.sketchElementId = element.id;
 			items.push(path);
 		}
 		if (element.image!==undefined) {
-			console.log('Drawing image');
 			var imageId = null;
 			for (var iid in images) {
 				if (images[iid].url==element.image.url) {
@@ -426,7 +413,6 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.text!==undefined) {
-			console.log('Drawing text');
 			var text = new paper.PointText(new paper.Point(element.text.x, element.text.y));
 			text.content = element.text.content;
 			text.characterStyle.font = element.text.textFont;
@@ -710,6 +696,9 @@ Sketchbook.prototype.addLineAction = function(sketchId, path, style, lineColor, 
 	var action = new Action(this, 'addElements');
 	action.sketchId = sketchId;
 	var lineColor2 = parseHexColor(lineColor);
+	
+	console.log('line action colour =', lineColor2);
+	
 	var fillColor2 = parseHexColor(fillColor);
 	//{ red: path.strokeColor.red, green: path.strokeColor.green, blue: path.strokeColor.blue };
 	var line = { lineColor: lineColor2, fillColor : fillColor2, lineWidth: path.strokeWidth, style: style, segments: [] };
@@ -844,17 +833,18 @@ Sketchbook.prototype.addElementsAction = function(sketchId, elements, fromBounds
 				}
 			}
 			if (newel.circle) {
+				console.log('add circle');
 				newel.circle.centrePoint.x = (newel.circle.centrePoint.x-fromBounds.left)*toBounds.width/fromBounds.width+toBounds.left;
 				newel.circle.centrePoint.y = (newel.circle.centrePoint.y-fromBounds.top)*toBounds.height/fromBounds.height+toBounds.top;
 				newel.circle.radius = toBounds.width < toBounds.height ? toBounds.width/2.0 : toBounds.height/2.0;
 			}
 			if (newel.icon) {
+				console.log('add icon');
 				transformIcon(newel.icon, fromBounds, toBounds);
 			}
 			if (newel.frame) {
-				console.log("before = ", newel.frame.x, " ", newel.frame.y);
+				console.log('add frame');
 				transformIcon(newel.frame, fromBounds, toBounds);
-				console.log("after = ", newel.frame.x, " ", newel.frame.y);
 			}
 			if (newel.image) {
 				transformIcon(newel.image, fromBounds, toBounds);

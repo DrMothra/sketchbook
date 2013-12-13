@@ -212,13 +212,11 @@ AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 };
 
 AlignPropertySelect.prototype.setValue = function(value) {
-	console.log('name = ', this.name);
 	if (!value)
 		return;
 	
 	this.currentValue = value;
 	
-	console.log('elem = ', '#'+this.name+'_'+value);
 	$('.selection'+this.name).removeClass('selected');
 	$('#'+this.name+'_'+this.currentValue).addClass('selected');
 };
@@ -294,7 +292,6 @@ function WidthPropertySelect(name, propertyId) {
 WidthPropertySelect.prototype = new PropertySelect();
 
 WidthPropertySelect.prototype.setValue = function(width) {
-	console.log('width =', width);
 	this.currentValue = width;
 	//Update spinner
 	$('#lineWidthProperty').spinner("value", width);
@@ -574,7 +571,7 @@ function parseCssColor(color) {
 function parseHexColor(color) {
 	var hex = color.match(/^(#)?([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])$/);
 	if (hex && hex.length >= 5) {
-		console.log('color is '+hex[2]+','+hex[3]+','+hex[4]);
+		//console.log('color is '+hex[2]+','+hex[3]+','+hex[4]);
 		return { red : parseInt(hex[2],16)/255, green : parseInt(hex[3],16)/255, blue : parseInt(hex[4],16)/255 };
 	}
 	else {
@@ -764,11 +761,10 @@ function updatePropertiesForCurrentSelection() {
 							style = 'none';
 					}
 					else if (el.icon) {
-						console.log('got icon');
-						if (el.icon.lineColor) 
+						if (el.icon.lineColor)
 							lineColor = el.icon.lineColor;
-						else 
-							lineColor = DEFAULT_LINE_COLOR;
+						else
+							lineColor = {red:0, green:0, blue:0};
 						if (el.icon.lineWidth)
 							lineWidth = el.icon.lineWidth;
 						if (el.icon.fillColor)
@@ -797,7 +793,7 @@ function updatePropertiesForCurrentSelection() {
 							frameStyle = 'none';
 					}
 					else if (el.image) {
-						console.log('got image');
+						//console.log('got image');
 					}
 				}
 			}
@@ -918,7 +914,7 @@ function getFrameStyle() {
 	style = style.substring(property.length);
 	return style;
 }
-function getWidth() {
+function getLineWidth() {
 	//Get value from editor
 	return $('#lineWidthProperty').spinner("value");
 }
@@ -1898,25 +1894,28 @@ function getNewTool(project, view) {
 			var sketchId = currentSketch ? currentSketch.id : undefined;
 			var elements = [];
 			// icon styling
-			var iconLineWidth = Number(getProperty('lineWidth', 1));
-			var iconFrameStyle = getProperty('frameStyle', '');
+			var iconLineWidth = getLineWidth();
+			var iconFrameStyle = getFrameStyle();
 			var iconLineColor = getLineColor();
+			iconLineColor = parseHexColor(iconLineColor);
 			var iconFillColor = getFillColor();
-			var iconTextVAlign = getProperty('textVAlign', 'middle');
-			var iconShowLabel = getProperty('showLabel', '');
-			var iconTextSize = getProperty('textSize', 12);
+			iconFillColor = parseHexColor(iconFillColor);
+			var iconTextVAlign = getTextVAlign();
+			var iconShowLabel = getFrameStyle();
+			var iconTextSize = getFontSize();
 			var iconTextColor = getTextColor();
-			var iconRescale = getProperty('rescale' ,'fit');
+
 			// convert selection to elements to add
 			for (var si=0; si<currentSelections.length; si++) {
 				var cs = currentSelections[si];
+				
 				if (cs.record.selection.sketch) {
 					// copy an entire sketch = icon/link ('place')
 					var icon = { icon: { sketchId: cs.record.selection.sketch.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
 						lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
-						showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize,
-						rescale : iconRescale } };
+						showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize } };
 					elements.push(icon);
+					console.log('created icon sketch');
 				} else if (cs.record.selection.elements) {
 					// copy elements into a new sketch
 					for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
@@ -1925,12 +1924,13 @@ function getNewTool(project, view) {
 						if (el.frame && sketchId!==cs.record.selection.sketchId) {
 							var icon = { icon: { sketchId: cs.record.selection.sketchId, elementId: el.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
 								lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
-								showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize,
-								rescale : iconRescale } };
-							elements.push(icon);						
+								showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize } };
+							elements.push(icon);
+							console.log('created icon frame');
 						}
-						else
+						else {
 							elements.push(cs.record.selection.elements[ei]);
+						}
 					}
 				}
 			}
@@ -1940,6 +1940,19 @@ function getNewTool(project, view) {
 			//Get list of selected elements
 			var sketchId = currentSketch ? currentSketch.id : undefined;
 			var elements = [];
+			
+			// icon styling
+			var iconLineWidth = getLineWidth();
+			var iconFrameStyle = getFrameStyle();
+			var iconLineColor = getLineColor();
+			iconLineColor = parseHexColor(iconLineColor);
+			var iconFillColor = getFillColor();
+			iconFillColor = parseHexColor(iconFillColor);
+			var iconTextVAlign = getTextVAlign();
+			var iconShowLabel = getFrameStyle();
+			var iconTextSize = getFontSize();
+			var iconTextColor = getTextColor();
+			
 			// convert selection to elements to add
 			for (var si=0; si<currentSelections.length; si++) {
 				var cs = currentSelections[si];
