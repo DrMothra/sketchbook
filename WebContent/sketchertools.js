@@ -809,6 +809,43 @@ CopyToSketchTool.prototype.end = function(point) {
 	return null;
 };
 
+function CloneTool(project, sketchbook, sketchId, elements, images) {
+	Tool.call(this, 'clone', project);
+	this.sketchbook = sketchbook;
+	this.sketchId = sketchId;	
+	this.elements = elements;
+	this.images = images;
+}
+CloneTool.prototype = new Tool();
+
+CloneTool.prototype.begin = function(point) {
+	this.startPoint = point;
+	if (this.elements) {
+		var items = elementsToPaperjs(this.elements, this.sketchbook, this.images);
+		this.group = new paper.Group(items);
+		console.log('cloning '+items.length+' items');
+	}
+	else
+		this.group = new paper.Group();
+	this.elementBounds = new paper.Rectangle(this.group.bounds);
+	this.group.visible = false;
+}
+CloneTool.prototype.move = function(point) {
+	
+}
+CloneTool.prototype.end = function(point) {
+	if (this.group) {
+		this.group.remove();
+		delete this.group;
+	}
+	if (this.elements) {
+		var width = this.elementBounds.width;
+		var height = this.elementBounds.height;
+		var bounds = new paper.Rectangle(this.startPoint.x-(width/2), this.startPoint.y-(height/2),
+						 width, height);
+		return this.sketchbook.addElementsAction(this.sketchId, this.elements, this.elementBounds, bounds);
+	}
+}
 function FrameTool(project, sketchbook, sketchId, description) {
 	Tool.call(this, 'frame', project);
 	this.sketchbook = sketchbook;

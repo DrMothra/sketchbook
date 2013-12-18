@@ -1890,7 +1890,7 @@ function getNewTool(project, view) {
 			if (currentSketch && currentSketch.id)
 				return new TextTool(project, sketchbook, currentSketch.id, takeOrphanText());// default
 		}
-		else if ($('#copyAction').hasClass('actionSelected') || $('#placeAction').hasClass('actionSelected')/* && !showingIndex*/) {
+		else if ($('#copyAction').hasClass('actionSelected') || $('#placeAction').hasClass('actionSelected')) {
 			var sketchId = currentSketch ? currentSketch.id : undefined;
 			var elements = [];
 			// icon styling
@@ -1935,6 +1935,50 @@ function getNewTool(project, view) {
 				}
 			}
 			return new CopyToSketchTool(project, sketchbook, sketchId, elements, images);
+		}
+		else if ($('#cloneAction').hasClass('actionSelected')) {
+			var sketchId = currentSketch ? currentSketch.id : undefined;
+			var elements = [];
+			// icon styling
+			var iconLineWidth = getLineWidth();
+			var iconFrameStyle = getFrameStyle();
+			var iconLineColor = getLineColor();
+			iconLineColor = parseHexColor(iconLineColor);
+			var iconFillColor = getFillColor();
+			iconFillColor = parseHexColor(iconFillColor);
+			var iconTextVAlign = getTextVAlign();
+			var iconShowLabel = getFrameStyle();
+			var iconTextSize = getFontSize();
+			var iconTextColor = getTextColor();
+
+			// convert selection to elements to add
+			for (var si=0; si<currentSelections.length; si++) {
+				var cs = currentSelections[si];
+				
+				if (cs.record.selection.sketch) {
+					// clone an entire sketch = icon/link ('place')
+					var icon = { icon: { sketchId: cs.record.selection.sketch.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
+						lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
+						showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize } };
+					elements.push(icon);
+				} else if (cs.record.selection.elements) {
+					// copy elements into a new sketch
+					for (var ei=0; ei<cs.record.selection.elements.length; ei++) {
+						// unless it is a frame from another sketch
+						var el = cs.record.selection.elements[ei];
+						if (el.frame && sketchId!==cs.record.selection.sketchId) {
+							var icon = { icon: { sketchId: cs.record.selection.sketchId, elementId: el.id, x:0, y:0, width:INDEX_CELL_SIZE, height:INDEX_CELL_SIZE,
+								lineWidth: iconLineWidth, frameStyle: iconFrameStyle, lineColor: iconLineColor, fillColor: iconFillColor,
+								showLabel : iconShowLabel, textVAlign : iconTextVAlign, textColor: iconTextColor, textSize: iconTextSize } };
+							elements.push(icon);
+						}
+						else {
+							elements.push(cs.record.selection.elements[ei]);
+						}
+					}
+				}
+			}
+			return new CloneTool(project, sketchbook, sketchId, elements, images);
 		}
 		else if ($('#moveAction').hasClass('actionSelected')) {
 			//Get list of selected elements
@@ -2104,6 +2148,8 @@ function registerMouseEvents() {
 				handleActionSelected('copyAction');
 				handleActionSelected('placeAction');
 			}
+			else if (ev.which=='K'.charCodeAt(0))
+				handleActionSelected('cloneAction');
 			else if (ev.which=='O'.charCodeAt(0))
 				handleActionSelected('addCircleAction');
 			else if (ev.which==KEY_DELETE)
@@ -2693,9 +2739,11 @@ function updateActionsForCurrentSelection() {
 		$('#copyAction').removeClass('actionDisabled');
 		$('#placeAction').addClass('actionDisabled');
 		$('#moveAction').removeClass('actionDisabled');
+		$('#cloneAction').removeClass('actionDisabled');
 	}
 	else {
 		$('#copyAction').addClass('actionDisabled');
+		$('#cloneAction').addClass('actionDisabled');
 		$('#moveAction').addClass('actionDisabled');
 		if (canPlace)
 			$('#placeAction').removeClass('actionDisabled');
