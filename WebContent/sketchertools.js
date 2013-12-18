@@ -828,6 +828,14 @@ CloneTool.prototype.begin = function(point) {
 	else
 		this.group = new paper.Group();
 	this.elementBounds = new paper.Rectangle(this.group.bounds);
+	if (this.elementBounds.width == 0) {
+		console.log('bounds width adjusted');
+		this.elementBounds.width = 5;
+	}
+	if (this.elementBounds.height == 0){
+		console.log('bounds height adjusted');
+		this.elementBounds.height = 5;
+	}
 	this.group.visible = false;
 }
 CloneTool.prototype.move = function(point) {
