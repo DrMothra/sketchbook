@@ -203,16 +203,16 @@ ShowAllTool.prototype.begin = function(point) {
 };
 
 /** common zoom tool */
-function ZoomTool(project, inFlag, keyZoomIn, keyZoomOut) {
+function ZoomTool(project, inFlag, wheelZooming) {
 	Tool.call(this,'zoom', project);
-	this.inFlag = keyZoomIn ? keyZoomIn : keyZoomOut ? false : inFlag;
+	this.inFlag = inFlag;
+	console.log('inflag =', this.inFlag);
 	this.ZOOM_INTERVAL = 20;
 	this.ZOOM_RATIO = 0.05;
 	this.zoomInterval = null;
 	this.zoomPoint = null;
 	this.zoomView = null;
-	this.keyZoomIn = keyZoomIn;
-	this.keyZoomOut = keyZoomOut;
+	this.wheelZooming = wheelZooming;
 };
 
 ZoomTool.prototype.zoomIn = function() {
@@ -255,10 +255,15 @@ ZoomTool.prototype.begin = function(point) {
 	this.zoomPoint = point;
 	this.zoomView = this.project.view;
 	var tool = this;
-	this.zoomInterval = setInterval(function() { 
+	if (this.wheelZooming) {
 		if (tool.inFlag) tool.zoomIn(); else tool.zoomOut();
-		}, this.ZOOM_INTERVAL);
-	this.zoomIn();
+	}
+	else {
+		this.zoomInterval = setInterval(function() { 
+			if (tool.inFlag) tool.zoomIn(); else tool.zoomOut();
+			}, this.ZOOM_INTERVAL);
+		this.zoomIn();
+	}
 };
 ZoomTool.prototype.move = function(point) {
 	if (this.keyZoomIn || this.keyZoomOut)

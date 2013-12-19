@@ -1839,7 +1839,10 @@ function checkHighlight(ev) {
 
 /** get new/current tool */
 function getNewTool(project, view) {
-	if ($('#selectAction').hasClass('actionSelected')) {
+	if (wheelZooming) {
+		return new ZoomTool(project, keyZoomIn, wheelZooming)
+	}
+	else if ($('#selectAction').hasClass('actionSelected')) {
 		var sketchId = currentSketch ? currentSketch.id : undefined;
 		return new SelectAreaTool(project, sketchbook, sketchId);
 	}
@@ -1848,8 +1851,8 @@ function getNewTool(project, view) {
 		if (project==selectionProject)
 			return new SelectAreaTool(project, sketchbook, sketchId);
 		else{
-			if (keyZoomIn || keyZoomOut)
-				return new ZoomTool(project, true, keyZoomIn, keyZoomOut);
+			if (keyZooming || wheelZooming)
+				return new ZoomTool(project, keyZoomIn, wheelZooming);
 			else
 				return new PanAndZoomTool(project, sketchbook, sketchId, keyPanDirection);
 		}
@@ -1859,10 +1862,10 @@ function getNewTool(project, view) {
 			return new ShowAllTool(project);
 		}
 		else if ($('#zoomInAction').hasClass('actionSelected')) {
-			return new ZoomTool(project, true, keyZoomIn, keyZoomOut);
+			return new ZoomTool(project, (keyZooming || wheelZooming) ? keyZoomIn : true, wheelZooming);
 		}
 		else if ($('#zoomOutAction').hasClass('actionSelected')) {
-			return new ZoomTool(project, false, keyZoomIn, keyZoomOut);
+			return new ZoomTool(project, keyZooming ? keyZoomIn : false, wheelZooming);
 		}
 	}
 	if (project==objectOverviewProject || project==objectDetailProject) {
@@ -2090,8 +2093,10 @@ function isSpecialKey(which) {
 var keyFiresTool = false;
 var mousePageX, mousePageY;
 var isShifted = false;
+var keyZooming = false;
 var keyZoomIn = false;
-var keyZoomOut = false;
+var wheelZooming = false;
+var wheelZoomIn = false;
 var keyPanDirection = 0;
 var PAN_INCREMENT = 1;
 var PAN_DIRECTION_RIGHT = 1;
@@ -2164,8 +2169,8 @@ function registerMouseEvents() {
 				if ($('#zoomInAction').hasClass('actionSelected') ||
 				    $('#zoomOutAction').hasClass('actionSelected') ||
 				    $('#panAction').hasClass('actionSelected')) {
+					keyZooming = true;
 					keyZoomIn = true;
-					keyZoomOut = false;
 					if (canvasTarget) {
 						var p = getProject(canvasTarget);
 						if (p && p.view) {
@@ -2187,8 +2192,8 @@ function registerMouseEvents() {
 				if ($('#zoomOutAction').hasClass('actionSelected') ||
 				    $('#zoomInAction').hasClass('actionSelected') ||
 				    $('#panAction').hasClass('actionSelected')) {
+					keyZooming = true;
 					keyZoomIn = false;
-					keyZoomOut = true;
 					if (canvasTarget) {
 						var p = getProject(canvasTarget);
 						if (p && p.view) {
@@ -2328,12 +2333,12 @@ function registerMouseEvents() {
 			return false;
 		}
 		//Handle keys that trigger actions/tools
-		if (keyZoomIn || keyZoomOut) {
+		if (keyZooming) {
 			ev.pageX = $(window).width()/2;
 			ev.pageY = $(window).height()/3;
 			toolUp(ev);
+			keyZooming = false;
 			keyZoomIn = false;
-			keyZoomOut = false;
 		}
 		if (keyPanDirection > 0) {
 			ev.pageX = $(window).width()/2;
@@ -3643,6 +3648,29 @@ function onAlphaSelected(alpha) {
 	}
 }
 
+function onScrollZoom(event) {
+	//Mouse wheel zoom
+	//Always allow
+	keyZoomIn = event.originalEvent.wheelDelta > 0 ? true : false;
+	wheelZooming = true;
+	if (canvasTarget) {
+		var p = getProject(canvasTarget);
+		if (p && p.view) {
+			var v = p.view;			
+			p.activate();
+			tool = getNewTool(p, v);
+			toolView = v;
+			toolProject = p;
+			if (tool)
+				tool.begin(view2project(toolView, $(window).width()/2, $(window).height()/3));
+			redraw(paper);
+			wheelZooming = keyZoomIn = false;
+			event.pageX = $(window).width()/2;
+			event.pageY = $(window).height()/3;
+			toolUp(event);
+		}
+	}
+}
 //Only executed our code once the DOM is ready.
 $(document).ready(function() {
 	
@@ -3768,6 +3796,8 @@ $(document).ready(function() {
 	$('.action').on('click', onActionSelected);
 	
 	$('#objectDetailCanvas').on('dblclick', onPropertyEdit);
+	$('#objectDetailCanvas').on('mousewheel', onScrollZoom);
+	
 	$(document).on('mousedown', '#sequences1Div .sequenceFrame', onSequenceFrameSelected);
 	$(document).on('mousedown', '#sequences1Div .sequenceObject', onSequenceFrameSelected);
 	$(document).on('mousedown', '#sequences2Div .sequenceSequence', onSequenceItemSelected);
