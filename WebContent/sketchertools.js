@@ -311,7 +311,9 @@ function HighlightTool(project) {
 	Tool.call(this, 'highlight', project);
 	this.highlightedItem = null;
 	this.highlightItem = null;
-	console.log('created HighlightTool for project '+project);
+	//DEBUG
+	//console.log('created HighlightTool for project '+project);
+	//END DEBUG
 }
 
 HighlightTool.prototype = new Tool();
@@ -360,7 +362,9 @@ function addHighlight(project, item) {
 HighlightTool.prototype.highlight = function(item) {
 	this.highlightedItem = item;
 	this.highlightItem = addHighlight(this.project, item);
-	console.log('created highlight for '+item);
+	//DEBUG
+	//console.log('created highlight for '+item);
+	//END DEBUG
 };
 
 /** find item (if any) at point in project - for select and highlight */
@@ -917,6 +921,11 @@ TextTool.prototype.begin = function(point) {
 	this.text.paragraphStyle.justification = getJustification();
 	this.text.characterStyle.fontSize = getFontSize();
 	this.text.characterStyle.font = getFont();
+	this.text.characterStyle.fontWeight = 'none';
+	//Font weight not implemented in paperjs properly yet
+	var italicText = $('#italicLabel').hasClass('ui-state-active') ? ' italic' : '';
+	var boldText = $('#boldLabel').hasClass('ui-state-active') ? ' bold' : '';
+	this.text.characterStyle.font +=  boldText + italicText;
 	this.text.content = this.content;	
 };
 

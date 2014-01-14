@@ -138,7 +138,8 @@ div.properties {
 	float: left;
 }
 .attributeForm {
-	margin: 3px 10px 3px 10px;
+	margin: 3px;
+	display: inline;
 }
 .attributeLabel {
 	width: 33%;
@@ -154,6 +155,11 @@ div.textAttributes {
 }
 #textProperty {
 	margin-left: 30px;
+}
+div.textFamily,
+div.textSize {
+	width: 95%;
+	margin: 3px 0px 7px 10px;
 }
 div.textAlign {
 	clear: both;
@@ -282,18 +288,8 @@ div.slider {
     margin: 5px;
     height: 7px;
 }
-.ui-slider .ui-slider-handle {
-    width: 15px;
-    height: 15px;
-}
 .spinner {
 	width: 25px;
-	font-size: small;
-}
-.ui-spinner-input {
-	text-align: right;
-}
-.ui-widget {
 	font-size: small;
 }
 div.option {
@@ -363,8 +359,36 @@ div.format {
 	display: inline;
 }
 
-
 /* Utility */
 .clear {
     clear: both;
+}
+#italicLabel,
+#boldLabel {
+	margin-top: 1px;
+	vertical-align: top;
+}
+#boldLabel {
+	margin-left: 37px;
+}
+
+/* JQuery UI */
+.ui-button-text {
+	font-size: 0.75em;
+}
+.ui-slider .ui-slider-handle {
+    width: 15px;
+    height: 15px;
+}
+.ui-spinner-input {
+	text-align: right;
+}
+.ui-widget {
+	font-size: small;
+}
+label.ui-state-default {
+	background: #ffffff;
+}
+label.ui-state-active {
+	background: #b2b2b2;
 }

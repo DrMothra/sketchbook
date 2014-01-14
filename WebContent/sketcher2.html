@@ -13,7 +13,7 @@
 <!-- from https://raw.github.com/desandro/imagesloaded/master/jquery.imagesloaded.min.js -->
 <script type="text/javascript" src="jquery.imagesloaded.min.js"></script>
 <script type="text/javascript" src="paper-weiser.js"></script>
-<!--<script type="text/javascript" src="paper.js"></script> -->
+<!--<script type="text/javascript" src="paper.js"></script>-->
 <script type="text/javascript" src="sketchbook.js"></script>
 <script type="text/javascript" src="sketchertools.js"></script>
 <script type="text/javascript" src="import.js"></script>
@@ -158,39 +158,47 @@
 		</form>
 		<div class="textAttributes">
 			<textarea id="textProperty" cols="20" rows="3"></textarea>
-			<form class="attributeForm" action="">
+			<div class="textFamily">
 				<span class="attributeLabel" id="textFontLabel">Font-family:</span>
-				<select id="textFontProperty">
-					<option value="textFontarial">Arial</option>
-					<option value="textFontcalibri">Calibri</option>
-					<option value="textFontcopperplate gothic bold">Copper</option>
-					<option value="textFontlucida">Lucida</option>
-					<option value="textFonttimes new roman">Times</option>
-					<option value="textFontverdana">Verdana</option>
-				</select>
-			</form>
-			<form class="attributeForm" action="">
+				<form class="attributeForm" action="">
+					<select id="textFontProperty">
+						<option value="textFontarial">Arial</option>
+						<option value="textFontcalibri">Calibri</option>
+						<option value="textFontcopperplate gothic light">Copper</option>
+						<option value="textFonthelvetica">Helvetica</option>
+						<option value="textFontlucida">Lucida</option>
+						<option value="textFontstencil">Stencil</option>
+						<option value="textFonttimes new roman">Times</option>
+						<option value="textFontverdana">Verdana</option>
+					</select>
+				</form>
+				<input type="checkbox" id="italic"><label id="italicLabel" for="italic"><i>I</i></label>
+			</div>
+			<div class="textSize">
 				<span class="attributeLabel" id="textSizeLabel">Font-size:</span>
-				<select id="textSizeProperty" name="">
-					<option value="textSize8">8</option>
-					<option value="textSize9">9</option>
-					<option value="textSize10">10</option>
-					<option value="textSize11">11</option>
-					<option value="textSize12" selected>12</option>
-					<option value="textSize14">14</option>
-					<option value="textSize16">16</option>
-					<option value="textSize18">18</option>
-					<option value="textSize20">20</option>
-					<option value="textSize22">22</option>
-					<option value="textSize24">24</option>
-					<option value="textSize26">26</option>
-					<option value="textSize28">28</option>
-					<option value="textSize36">36</option>
-					<option value="textSize48">48</option>
-					<option value="textSize72">72</option>
-					<option value="textSize96">96</option>
-				</select>
-			</form>
+				<form class="attributeForm" action="">
+					<select id="textSizeProperty" name="">
+						<option value="textSize8">8</option>
+						<option value="textSize9">9</option>
+						<option value="textSize10">10</option>
+						<option value="textSize11">11</option>
+						<option value="textSize12" selected>12</option>
+						<option value="textSize14">14</option>
+						<option value="textSize16">16</option>
+						<option value="textSize18">18</option>
+						<option value="textSize20">20</option>
+						<option value="textSize22">22</option>
+						<option value="textSize24">24</option>
+						<option value="textSize26">26</option>
+						<option value="textSize28">28</option>
+						<option value="textSize36">36</option>
+						<option value="textSize48">48</option>
+						<option value="textSize72">72</option>
+						<option value="textSize96">96</option>
+					</select>
+				</form>
+				<input type="checkbox" id="bold"><label id="boldLabel" for="bold"><b>B</b></label>
+			</div>
 			<div class="textAlign" id="textJustifyProperty">
 				<span class="attributeLabel" id="textJustifyLabel">Align:</span>
 				<div class="alignIcons">

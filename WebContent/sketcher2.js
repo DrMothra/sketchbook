@@ -195,7 +195,9 @@ AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 		return;
 	
 	var id = elem.attr('id');
-	console.log('onPropertyOptionSelected '+this.name+' '+id);
+	//DEBUG
+	//console.log('onPropertyOptionSelected '+this.name+' '+id);
+	//END DEBUG
 	if (!id)
 		return;
 	$('.selection'+this.name).removeClass('selected');
@@ -205,7 +207,9 @@ AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 	if (ix>0)
 		id = id.substring(ix+1);
 	id = String(id).replace(/_/g, ',');
+	//DEBUG
 	console.log('Selected '+this.name+' '+id);
+	//END DEBUG
 	// override...
 	this.currentValue = id;
 	this.onSetValue(id);
@@ -260,7 +264,9 @@ ColorPropertySelect.prototype.onSetValue = function(value) {
 	
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
+		//DEBUG
 		console.log('set '+this.name+' color=', color);
+		//END DEBUG
 		switch (this.name) {
 			case 'lineColor':
 				action.setLineColor(color);
@@ -343,6 +349,35 @@ SizePropertySelect.prototype.onSetValue = function(size) {
 	}
 }
 
+function TextWeightPropertySelect(name, propertyId) {
+	PropertySelect.call(this, name, propertyId);
+	this.name = name;
+}
+TextWeightPropertySelect.prototype = new PropertySelect();
+
+TextWeightPropertySelect.prototype.setValue = function(weight) {
+	this.currentValue = weight;
+	//Update menu - this will become fontWeight in future release
+	$('#italicLabel').removeClass('ui-state-active');
+	if (weight.indexOf("italic") > 0)
+		$('#italicLabel').addClass('ui-state-active');
+		
+	$('#boldLabel').removeClass('ui-state-active');
+	if (weight.indexOf("bold") > 0)
+		$('#boldLabel').addClass('ui-state-active');
+}
+
+TextWeightPropertySelect.prototype.setEnabled = function(enabled) {
+	if (enabled) {
+		$('#italic').button("enable");
+		$('#bold').button("enable");
+	}
+	else
+	{
+		$('#italic').button("disable");
+		$('#bold').button("disable")
+	}
+}
 // Text as a Property object
 function PropertyText(name, propertyId) {
 	this.name = name;
@@ -355,7 +390,9 @@ function PropertyText(name, propertyId) {
 	var checkfn = function(ev) {
 		var value = self.getValue();
 		if (value!=self.value) {
+			//DEBUG
 			console.log('text change: '+value);
+			//END DEBUG
 			self.value= value;
 			self.onSetValue(value);
 		}
@@ -473,7 +510,9 @@ function logBreadcrumbs() {
 		s += b;		
 	}
 	s += ']';
-	console.log('breadcrumbs: '+breadcrumbs);
+	//DEBUG
+	//console.log('breadcrumbs: '+breadcrumbs);
+	//END DEBUG
 }
 
 //==============================================================================
@@ -653,6 +692,7 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.text.setEnabled(actionId=='addFrameAction' || actionId=='addTextAction');
 			propertyEditors.textJustify.setEnabled(actionId=='addTextAction');
 			propertyEditors.textFont.setEnabled(actionId=='addTextAction');
+			propertyEditors.textWeight.setEnabled(actionId=='addTextAction');
 		}
 	} else {
 		// element(s) with color(s)?
@@ -663,6 +703,7 @@ function updatePropertiesForCurrentSelection() {
 		var lineWidth = null;
 		var textSize = null;
 		var textFont = null;
+		var textWeight = null;
 		var style = null;
 		var textVAlign = null;
 		var text = null;
@@ -697,6 +738,8 @@ function updatePropertiesForCurrentSelection() {
 							text = el.text.content;
 						if (el.text.textFont)
 							textFont = el.text.textFont;
+						if (el.text.textWeight)
+							textWeight = el.text.textWeight;
 						if (el.text.textJustify)
 							textJustify = el.text.textJustify;
 						else
@@ -854,6 +897,12 @@ function updatePropertiesForCurrentSelection() {
 		}
 		else
 			propertyEditors.textFont.setEnabled(false);
+		if (textWeight) {
+			propertyEditors.textWeight.setEnabled(true);
+			propertyEditors.textWeight.setValue(propertyEditors.textFont.getValue());
+		}
+		else
+			propertyEditors.textWeight.setEnabled(false);
 		if (textJustify) {
 			propertyEditors.textJustify.setEnabled(true);
 			propertyEditors.textJustify.setValue(textJustify);
@@ -1802,9 +1851,9 @@ function toolUp(ev) {
 	if (tool) {
 		// switch tool
 		toolProject.activate();
-		
-		console.log("tool activated = ", tool);
-		
+		//DEBUG
+		//console.log("tool activated = ", tool);
+		//END DEBUG
 		var action = tool.end(view2project(toolView, ev.pageX, ev.pageY));
 		tool = undefined;
 		if (action)
@@ -2350,7 +2399,9 @@ function registerMouseEvents() {
 	$(document).mousedown(function(ev) {
 		// which: 1=left, 2=middle, 3=right
 		mousePageX = ev.pageX; mousePageY = ev.pageY;
-		console.log('mousedown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
+		//DEBUG
+		//console.log('mousedown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
+		//END DEBUG
 		toolUp(ev);
 		//keyTarget = ev.target;
 		var p = getProject(ev.target);
@@ -2374,7 +2425,9 @@ function registerMouseEvents() {
 			// Hmm, mousemove is happening several times a second even when I don't move (as of 30/4/2013)
 			// suppress unless ACTUALLY moved...
 			if (ev.pageX!==mousePageX || ev.pageY!==mousePageY) {
-				console.log('blur orphan text on mousemove');
+				//DEBUG
+				//console.log('blur orphan text on mousemove');
+				//END DEBUG
 				//$('#orphanText').blur();
 			}
 		}
@@ -2398,11 +2451,15 @@ function registerMouseEvents() {
 
 //handle interface (page) resize - work-around for canvas sizing problem
 function handleResize() {
-	console.log('handle resize');
+	//DEBUG
+	//console.log('handle resize');
+	//END DEBUG
 	for (var vi in paper.View._views) {
 		var v = paper.View._views[vi];
 		if (v.isVisible()) {
-			console.log('canvas:resize to '+$(v._element).width()+","+$(v._element).height());
+			//DEBUG
+			//console.log('canvas:resize to '+$(v._element).width()+","+$(v._element).height());
+			//END DEBUG
 			// need to force a change or it does some weird partial rescaling
 			v.viewSize = new paper.Size(1,1);
 			v.viewSize = new paper.Size($(v._element).width(),$(v._element).height());
@@ -2425,7 +2482,9 @@ function getZoomForBounds(project, bounds) {
 		var w = $(project.view._element).width();
 		var h = $(project.view._element).height();
 		var zoom = Math.min(MAX_ZOOM, w/bw, h/bh);
-		console.log('showAll: bounds='+bw+','+bh+', canvas='+w+','+h+', zoom='+zoom+', bounds.center='+bounds.center);
+		//DEBUG
+		//console.log('showAll: bounds='+bw+','+bh+', canvas='+w+','+h+', zoom='+zoom+', bounds.center='+bounds.center);
+		//END DEBUG
 		return { zoom: zoom, center: bounds.center };
 	}
 
@@ -3614,6 +3673,14 @@ function onSetTextJustify(value) {
 	}
 }
 
+function onSetTextWeight(value) {
+	if (propertiesShowSelection()) {
+		var action = sketchbook.setPropertiesAction();
+		action.setTextWeight(value);
+		onSetProperty(action);
+	}
+}
+
 function onSetStyle(style) {
 	if (!style)
 		return;
@@ -3764,6 +3831,9 @@ $(document).ready(function() {
 		}
 	});
 	
+	$('#italic').button({ disabled:true });
+	$('#bold').button({ disabled:true });
+	
 	// register more GUI callbacks
 	$('#loadFile').on('change', onChooseFile);
 	$('#loadImage').on('change', onLoadImage);
@@ -3828,6 +3898,10 @@ $(document).ready(function() {
 	propertyEditors.textFont.onSetValue = onSetTextFont;
 	propertyEditors.textFont.setValue('arial');
 	propertyEditors.textFont.setEnabled(false);
+	propertyEditors.textWeight = new TextWeightPropertySelect('textWeight', 'textWeightProperty');
+	propertyEditors.textWeight.onSetValue = onSetTextWeight;
+	propertyEditors.textWeight.setValue('none');
+	propertyEditors.textWeight.setEnabled(false);
 	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
 	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
 	propertyEditors.frameStyle.setValue('none');
@@ -3868,6 +3942,30 @@ $(document).ready(function() {
 	$('#frameStyleProperty').change(function() {
 		if (propertiesShowSelectionFlag)
 			propertyEditors.frameStyle.onSetValue($('#frameStyleProperty').val());
+	});
+	$('#italic').click(function() {
+		if (propertiesShowSelectionFlag) {
+			//Font weight not implemented in paperjs properly yet
+			var font = 'textFont' + propertyEditors.textFont.getValue();
+			if (font.indexOf('italic') > 0) {
+				font = font.replace('italic', '');
+			} else {
+				font += ' italic';
+			}
+			propertyEditors.textFont.onSetValue(font);
+		}
+	});
+	$('#bold').click(function() {
+		if (propertiesShowSelectionFlag) {
+			//Font weight not implemented in paperjs properly yet
+			var font = 'textFont' + propertyEditors.textFont.getValue();
+			if (font.indexOf('bold') > 0) {
+				font = font.replace('bold', '');
+			} else {
+				font += ' bold';
+			}
+			propertyEditors.textFont.onSetValue(font);
+		}
 	});
 	onShowIndex();
 	
