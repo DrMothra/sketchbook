@@ -107,7 +107,7 @@ div.selectionInfo {
 }
 canvas.selectionCanvas {
 	height: 100px;
-	width: 100%;
+	width: 99%;
 }
 div.footer {
 	clear:both;

@@ -29,7 +29,8 @@ function LineTool(project, sketchbook, sketchId, curveFlag, straightFlag) {
 	Tool.call(this, 'line', project);
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;
-	this.curveFlag = curveFlag;	this.straightFlag = straightFlag;
+	this.curveFlag = curveFlag;
+	this.straightFlag = straightFlag;
 }
 
 // inherit (apparently)
@@ -53,20 +54,30 @@ LineTool.prototype.begin = function(point) {
 	this.path.add(point);	
 };
 
-LineTool.prototype.move = function(point) {	//Simulate straight lines
-	if (this.path) {		if (this.straightFlag) {			if (this.path.length > 1)				this.path.removeSegment(1);		}
-		this.path.add(point);	}
+LineTool.prototype.move = function(point) {
+	//Simulate straight lines
+	if (this.path) {
+		if (this.straightFlag) {
+			if (this.path.length > 1)
+				this.path.removeSegment(1);
+		}
+		this.path.add(point);
+	}
 };
 
 LineTool.prototype.end = function(point) {
-	if (this.path) {		if (this.straightFlag)			this.path.add(point);
+	if (this.path) {
+		if (this.straightFlag)
+			this.path.add(point);
 		if (this.path.length==0) {
 			// TODO? replace with dot
 			this.path.remove();
 			console.log('zero length line');
 			//lineToolPath = new paper.Path.Circle(point, DOT_SIZE/toolView.zoom);
 			//lineToolPath.fillColor = 'black';
-		} else {			if (!this.straightFlag)				this.path.simplify();
+		} else {
+			if (!this.straightFlag)
+				this.path.simplify();
 			// TODO 
 			console.log('lineTool: '+this.path);
 			// create 
@@ -113,13 +124,21 @@ CircleTool.prototype.move = function(point) {
 		this.path.remove();
 	}
 	// activate overlay layer
-	activateOverlay(this.project);	//Can't just subtract vectors?!!?	var newPoint = new paper.Point(point.x - this.startPoint.x, point.y - this.startPoint.y);	this.radius = newPoint.length;	
+	activateOverlay(this.project);
+	//Can't just subtract vectors?!!?
+	var newPoint = new paper.Point(point.x - this.startPoint.x, point.y - this.startPoint.y);
+	this.radius = newPoint.length;
+	
 	this.path = new paper.Path.Circle(this.startPoint, this.radius);
 	this.path.strokeColor = 'red';
 };
 
 CircleTool.prototype.end = function(point) {
 	if (this.path) {
+		//DEBUG
+		console.log('circle start =', this.startPoint);
+		console.log('radius =', this.radius);
+		//END DEBUG
 		var action = this.sketchbook.addCircleAction(this.sketchId, this.startPoint, this.radius, this.lineWidth, this.style, this.lineColor, this.fillColor);
 		this.path.remove();
 		delete this.path;
@@ -127,20 +146,71 @@ CircleTool.prototype.end = function(point) {
 	}
 	delete this.path;
 	return null;
-};function getItemFromId(project, id) {	//Get item from given element id	var children = project.layers[1].children;	for (var ci=0; ci<children.length; ci++) {		var c = children[ci];				console.log("child id = ", c.sketchElementId);				if (c.sketchElementId === id) {			return c;		}	}		return null;}
-function getElementBounds(project, elements) {	//Get bounds of all elements	var bounds = null;	for (var el=0; el<elements.length; ++el) {		var elem = elements[el];		var id = elem.id;		var item = getItemFromId(project, id);		if (item) {			if (bounds==null)				bounds = item.bounds;			else				bounds = bounds.unite(item.bounds);		}	}		return bounds;}
+};
+
+function getItemFromId(project, id) {
+	//Get item from given element id
+	var children = project.layers[1].children;
+	for (var ci=0; ci<children.length; ci++) {
+		var c = children[ci];
+		
+		console.log("child id = ", c.sketchElementId);
+		
+		if (c.sketchElementId === id) {
+			return c;
+		}
+	}
+	
+	return null;
+}
+
+function getElementBounds(project, elements) {
+	//Get bounds of all elements
+	var bounds = null;
+	for (var el=0; el<elements.length; ++el) {
+		var elem = elements[el];
+		var id = elem.id;
+		var item = getItemFromId(project, id);
+		if (item) {
+			if (bounds==null)
+				bounds = item.bounds;
+			else
+				bounds = bounds.unite(item.bounds);
+		}
+	}
+	
+	return bounds;
+}
+
 function MoveTool(project, sketchbook, sketchId, elements, images) {
 	// call super cons
 	Tool.call(this, 'move', project);
 	this.sketchbook = sketchbook;
 	this.sketchId = sketchId;
-	this.elements = elements;	this.images = images;
+	this.elements = elements;
+	this.images = images;
 }
 
 MoveTool.prototype = new Tool();
 
-MoveTool.prototype.begin = function(point) {	this.startPoint = point;	activateOverlay(this.project);	if (this.elements) {		this.bounds = getElementBounds(this.project, this.elements);		if (this.bounds != null) {			this.startPoint.x = this.bounds.x + this.bounds.width/2.0;			this.startPoint.y = this.bounds.y + this.bounds.height/2.0;			this.bounds.x = point.x - this.bounds.width/2.0;			this.bounds.y = point.y - this.bounds.height/2.0;			this.path = new paper.Path.Rectangle(this.bounds);			this.path.strokeColor = 'red';			this.path.strokeWidth = 1;			console.log('moving '+this.elements.length+' items');		}	}
-	else{		console.log("Nothing to move");	}
+MoveTool.prototype.begin = function(point) {
+	this.startPoint = point;
+	activateOverlay(this.project);
+	if (this.elements) {
+		this.bounds = getElementBounds(this.project, this.elements);
+		if (this.bounds != null) {
+			this.startPoint.x = this.bounds.x + this.bounds.width/2.0;
+			this.startPoint.y = this.bounds.y + this.bounds.height/2.0;
+			this.bounds.x = point.x - this.bounds.width/2.0;
+			this.bounds.y = point.y - this.bounds.height/2.0;
+			this.path = new paper.Path.Rectangle(this.bounds);
+			this.path.strokeColor = 'red';
+			this.path.strokeWidth = 1;
+		}
+	}
+	else{
+		console.log("Nothing to move");
+	}
 }
 
 MoveTool.prototype.move = function(point) {
@@ -148,7 +218,9 @@ MoveTool.prototype.move = function(point) {
 		this.path.remove();
 	
 	activateOverlay(this.project);
-	if (this.elements) {		this.bounds.x = point.x - this.bounds.width/2.0;		this.bounds.y = point.y - this.bounds.height/2.0;
+	if (this.elements) {
+		this.bounds.x = point.x - this.bounds.width/2.0;
+		this.bounds.y = point.y - this.bounds.height/2.0;
 		this.path = new paper.Path.Rectangle(this.bounds);
 		
 		this.path.strokeColor = 'red';
@@ -156,7 +228,12 @@ MoveTool.prototype.move = function(point) {
 	}
 }
 
-MoveTool.prototype.end = function(point) {	if (this.path) {		this.path.remove();		delete this.path;	}	
+MoveTool.prototype.end = function(point) {
+	if (this.path) {
+		this.path.remove();
+		delete this.path;
+	}
+	
 	if (this.elements) {
 		return this.sketchbook.moveItemsAction(this.sketchId, this.elements, this.startPoint, point);
 	}
@@ -206,7 +283,6 @@ ShowAllTool.prototype.begin = function(point) {
 function ZoomTool(project, inFlag, wheelZooming) {
 	Tool.call(this,'zoom', project);
 	this.inFlag = inFlag;
-	console.log('inflag =', this.inFlag);
 	this.ZOOM_INTERVAL = 20;
 	this.ZOOM_RATIO = 0.05;
 	this.zoomInterval = null;
@@ -304,7 +380,7 @@ PanTool.prototype.end = function(point) {
 	this.panView = null;
 };
 
-console.log('defining HighlightTool');
+//console.log('defining HighlightTool');
 
 /** highlight tool */
 function HighlightTool(project) {
@@ -832,7 +908,6 @@ CloneTool.prototype.begin = function(point) {
 	if (this.elements) {
 		var items = elementsToPaperjs(this.elements, this.sketchbook, this.images);
 		this.group = new paper.Group(items);
-		console.log('cloning '+items.length+' items');
 	}
 	else
 		this.group = new paper.Group();
@@ -846,6 +921,8 @@ CloneTool.prototype.begin = function(point) {
 		this.elementBounds.height = 5;
 	}
 	this.group.visible = false;
+	//DEBUG
+	console.log('bounds =', this.elementBounds);
 }
 CloneTool.prototype.move = function(point) {
 	
@@ -860,6 +937,9 @@ CloneTool.prototype.end = function(point) {
 		var height = this.elementBounds.height;
 		var bounds = new paper.Rectangle(this.startPoint.x-(width/2), this.startPoint.y-(height/2),
 						 width, height);
+        //DEBUG
+        console.log('Clone bounds =', bounds);
+
 		return this.sketchbook.addElementsAction(this.sketchId, this.elements, this.elementBounds, bounds);
 	}
 }

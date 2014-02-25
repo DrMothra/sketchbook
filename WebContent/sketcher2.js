@@ -391,7 +391,7 @@ function PropertyText(name, propertyId) {
 		var value = self.getValue();
 		if (value!=self.value) {
 			//DEBUG
-			console.log('text change: '+value);
+			//console.log('text change: '+value);
 			//END DEBUG
 			self.value= value;
 			self.onSetValue(value);
@@ -1048,7 +1048,9 @@ function handleActionSelected(id) {
 	$('.action').removeClass('actionSelected');
 	$('#'+id).addClass('actionSelected');
 	// TODO immediate action?
-	console.log('Selected action '+id);
+	//DEBUG
+	//console.log('Selected action '+id);
+	//END DEBUG
 
 	if (id=='selectAction') {
 		handlePropertiesShowSelected('propertiesShowSelection');
@@ -1292,7 +1294,9 @@ function showIndex(noBreadcrumb) {
 	clearProject(indexProject);
 	
 	var filter = $('#indexFilterText').val();
-	console.log('index filter: '+filter);
+	//DEBUG
+	//console.log('index filter: '+filter);
+	//END DEBUG
 	
 	for (var sid in sketchbook.sketches) {
 		
@@ -1859,7 +1863,7 @@ function toolUp(ev) {
 		if (action)
 			doAction(action);
 		//TODO handleEdit(tool, toolView);
-		redraw(paper);
+		//redraw(paper);
 	}	
 }
 /** check highlight */
@@ -2133,9 +2137,8 @@ function isSpecialKey(which) {
 	case KEY_ESCAPE:
 */		return true;
 	default:
-		if (which>=KEY_F1 && which<=KEY_F12)
-			return true;
-		return false;
+		return which >= KEY_F1 && which <= KEY_F12;
+
 	}
 }
 
@@ -2166,8 +2169,9 @@ function registerMouseEvents() {
 		// Note: this is not meant to be called multiple times when key is held down, but on Chrome
 		// it is being, so that will need some filtering
 		//console.log('keydown: '+ev.which+' ctrlKey='+ev.ctrlKey+' special='+isSpecialKey(ev.which));
-		console.log('keydown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
-		
+		//DEBUG
+		//console.log('keydown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
+		//END DEBUG
 		
 		if (keyFiresTool)
 			toolUp(ev);
@@ -2363,7 +2367,9 @@ function registerMouseEvents() {
 	});
 	$(document).keyup(function(ev) {
 		keyDown = undefined;
-		console.log('keyup: '+ev.which);
+		//DEBUG
+		//console.log('keyup: '+ev.which);
+		//END DEBUG
 		isShifted = false;
 		
 		if (keyFiresTool)
@@ -2540,8 +2546,9 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 	var backgroundGroups = [];
 	if (sketch)
 		backgroundGroups = refreshBackground(sketch);
-	
+
 	var items = elementsToPaperjs(elements, sketchbook, images);
+
 	if (backgroundGroups.length>0) {
 		items = backgroundGroups.concat(items);
 	}
@@ -2551,6 +2558,7 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 	if (items.length>0) {
 		var group;
 		group = new paper.Group(items);
+
 		//var symbol = new paper.Symbol(group); //getCachedSymbol(indexProject, sketchId);
 		//var symbolBounds = symbol.definition.bounds;
 		// try just a group...
@@ -2561,10 +2569,13 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 		//var placed = group; //symbol.place();
 		//console.log('symbolbounds='+symbolBounds+', placed bounds='+placed.bounds);
 		group.scale(scale);
+
 		// naming this makes the Group creation explode :-(
 		//placed.name = ''+sketchId;
 		group.translate(new paper.Point(INDEX_CELL_SIZE/2-group.bounds.center.x, (INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT)/2-group.bounds.center.y));
-		children.push(group);
+        //DEBUG
+		//children.push(group);
+        return group;
 	}
 	if (sketch) {
 		var label = new paper.PointText(new paper.Point(INDEX_CELL_SIZE/2, INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT+pt2px(LABEL_FONT_SIZE)));
@@ -2582,8 +2593,8 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 		return group;
 	}
 	else if (children.length>0){
-		var group = new paper.Group(children);		
-		return group;
+        var group = new paper.Group(children);
+        return group;
 	}
 	else
 		return new paper.Group();
@@ -2859,7 +2870,9 @@ function updateActionsForCurrentSelection() {
 /** show editor for object ID */
 function showEditor(sketchId, noBreadcrumb, elementId) {
 	if (!noBreadcrumb && (!currentSketch || currentSketch.id!==sketchId)) {
-		console.log('breadcrumb sketch '+sketchId+' element '+elementId);
+		//DEBUG
+		//console.log('breadcrumb sketch '+sketchId+' element '+elementId);
+		//END DEBUG
 		if (elementId)
 			breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_ELEMENT, sketchId, elementId));		
 		else
@@ -2976,7 +2989,9 @@ function moveHistory() {
 	for (var ci in selectionProject.activeLayer.children) {
 		var c = selectionProject.activeLayer.children[ci];
 		c.translate(new paper.Point(INDEX_CELL_SIZE,0));
-		console.log('moved '+ci+' '+c+' to '+c.position);
+		//DEBUG
+		//console.log('moved '+ci+' '+c+' to '+c.position);
+		//END DEBUG
 	}
 }
 
@@ -2987,7 +3002,9 @@ function clearCurrentSelection() {
 		for (var ii=0; ii<currentSelection.items.length; ii++) {
 			var item = currentSelection.items[ii];
 			item.remove();
-			console.log('removed selection for '+currentSelection.id);
+			//DEBUG
+			//console.log('removed selection for '+currentSelection.id);
+			//END DEBUG
 		}
 	}
 	currentSelections = new Array();
@@ -3049,7 +3066,9 @@ function handleSelections(selections) {
 		item.strokeWidth = 3;
 		item.strokeColor = '#808080';
 		currentSelection.items.push(item);
-		console.log('added history selection for '+currentSelection.id);
+		//DEBUG
+		//console.log('added history selection for '+currentSelection.id);
+		//END DEBUG
 		// TODO highlght current selection in object projects and/or index projects??
 		// if sequences view, first frame selection, show/zoom to...
 		if (showFrame && selectionRecord.selection.sequence && selectionRecord.selection.sequence.items) {
@@ -3156,7 +3175,9 @@ function doAction(action) {
 	else if (action.type=='select') {
 		//console.log('handle select '+JSON.stringify(action));
 		// TODO
-		console.log("handling select action");
+		//DEBUG
+		//console.log("handling select action");
+		//END DEBUG
 		
 		handleSelections(action.selections);
 		// delayed zoom (animation)

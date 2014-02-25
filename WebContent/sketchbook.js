@@ -351,7 +351,12 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 			items.push(group);
 		}
 		if (element.circle!==undefined) {
-			var path = new paper.Path.Circle(element.circle.centrePoint, element.circle.radius);
+			var path = new paper.Path.Circle(new paper.Point(element.circle.centreX, element.circle.centreY), element.circle.radius);
+
+            // preserve id
+            path.sketchElementId = element.id;
+            items.push(path);
+
 			if (element.circle.lineWidth){
 				path.strokeWidth = element.circle.lineWidth;
 			}
@@ -364,9 +369,7 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 				path.fillColor = colorToPaperjs(element.circle.fillColor);
 				path.closed = true;
 			}
-			// preserve id
-			path.sketchElementId = element.id;
-			items.push(path);
+
 		}
 		if (element.image!==undefined) {
 			var imageId = null;
@@ -773,7 +776,7 @@ Sketchbook.prototype.addCircleAction = function(sketchId, centre, rad, strokewid
 	action.sketchId = sketchId;
 	var lineColor2 = parseHexColor(lineColor);
 	var fillColor2 = parseHexColor(fillColor);
-	var circle2 = { centrePoint : centre, radius : rad, lineColor: lineColor2, fillColor : fillColor2, lineWidth: strokewidth, style: style};
+	var circle2 = { centreX : centre.x, centreY : centre.y, radius : rad, lineColor: lineColor2, fillColor : fillColor2, lineWidth: strokewidth, style: style};
 	action.elements =  [{ circle : circle2 }]; // id?
 	return action;
 };
@@ -836,8 +839,11 @@ Sketchbook.prototype.addElementsAction = function(sketchId, elements, fromBounds
 			}
 			if (newel.circle) {
 				console.log('add circle');
-				newel.circle.centrePoint.x = (newel.circle.centrePoint.x-fromBounds.left)*toBounds.width/fromBounds.width+toBounds.left;
-				newel.circle.centrePoint.y = (newel.circle.centrePoint.y-fromBounds.top)*toBounds.height/fromBounds.height+toBounds.top;
+				console.log('circle from bounds =', fromBounds);
+				console.log('circle to bounds =', toBounds);
+				
+				newel.circle.centreX = (newel.circle.centreX-fromBounds.left)*toBounds.width/fromBounds.width+toBounds.left;
+				newel.circle.centreY = (newel.circle.centreY-fromBounds.top)*toBounds.height/fromBounds.height+toBounds.top;
 				newel.circle.radius = toBounds.width < toBounds.height ? toBounds.width/2.0 : toBounds.height/2.0;
 			}
 			if (newel.icon) {
@@ -862,6 +868,12 @@ Sketchbook.prototype.addElementsAction = function(sketchId, elements, fromBounds
 	return action;
 };
 
+function circlePruner(key, value) {
+    if(value == 'Point')
+        return undefined;
+
+    return value;
+}
 
 /** return action to select a list of elements within a sketch - not really a model action */
 Sketchbook.prototype.selectItemsAction = function(defaultSketchId, items, zoomProject) {
@@ -899,7 +911,10 @@ Sketchbook.prototype.selectItemsAction = function(defaultSketchId, items, zoomPr
 				continue;
 			}
 			// clone element state to avoid problems with subsequent/parallel modifications (delete, etc.)
-			var cloned = JSON.parse(JSON.stringify(element));
+            //DEBUG
+            console.log('element = ', JSON.stringify(element));
+
+            var cloned = JSON.parse(JSON.stringify(element));
 			if (sketchId==defaultSketchId)
 				// element in default
 				defaultSelection.elements.push(cloned);
@@ -1116,8 +1131,6 @@ SetPropertiesAction.prototype.setTextFont = function(font) {
 
 SetPropertiesAction.prototype.setTextJustify = function(value) {
 	this.textJustify = value;
-	
-	console.log("setTextJustify = ", value);
 };
 
 SetPropertiesAction.prototype.setRescale = function(rescale) {
@@ -1272,8 +1285,8 @@ Sketchbook.prototype.doAction = function(action) {
 						}
 					}
 				if (elem.circle) {
-						elem.circle.centrePoint.x += action.delta.x;
-						elem.circle.centrePoint.y += action.delta.y;
+						elem.circle.centreX += action.delta.x;
+						elem.circle.centreY += action.delta.y;
 				
 						console.log("moved circle by ", action.delta);
 				}
