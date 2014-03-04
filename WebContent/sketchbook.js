@@ -911,9 +911,6 @@ Sketchbook.prototype.selectItemsAction = function(defaultSketchId, items, zoomPr
 				continue;
 			}
 			// clone element state to avoid problems with subsequent/parallel modifications (delete, etc.)
-            //DEBUG
-            console.log('element = ', JSON.stringify(element));
-
             var cloned = JSON.parse(JSON.stringify(element));
 			if (sketchId==defaultSketchId)
 				// element in default
@@ -1273,8 +1270,6 @@ Sketchbook.prototype.doAction = function(action) {
 		for (var ei=0; ei<action.elements.length; ei++) {
 			var id = action.elements[ei].id;
 			
-			console.log("element id = ", id);
-			
 			var elem = sketch.getElementById(id);
 			if (elem) {
 				if (elem.line) {
@@ -1348,6 +1343,7 @@ Sketchbook.prototype.doAction = function(action) {
 						el.undo.textJustify = elval.textJustify;
 						el.undo.textColor = elval.textColor;
 						el.undo.textFont = elval.textFont;
+                        el.undo.textWeight = elval.textWeight;
 						el.undo.lineColor = elval.lineColor;
 						el.undo.lineWidth = elval.lineWidth;
 						el.undo.fillColor = elval.fillColor;
@@ -1359,6 +1355,8 @@ Sketchbook.prototype.doAction = function(action) {
 							elval.textJustify = action.textJustify;
 						if (action.textFont)
 							elval.textFont = action.textFont;
+                        if(action.textWeight)
+                            elval.textWeight = action.textWeight;
 						if (action.textColor)
 							elval.textColor = action.textColor;
 						if (action.lineColor)

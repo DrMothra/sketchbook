@@ -195,9 +195,6 @@ AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 		return;
 	
 	var id = elem.attr('id');
-	//DEBUG
-	//console.log('onPropertyOptionSelected '+this.name+' '+id);
-	//END DEBUG
 	if (!id)
 		return;
 	$('.selection'+this.name).removeClass('selected');
@@ -207,9 +204,6 @@ AlignPropertySelect.prototype.onPropertyOptionSelected = function(elem, ev) {
 	if (ix>0)
 		id = id.substring(ix+1);
 	id = String(id).replace(/_/g, ',');
-	//DEBUG
-	console.log('Selected '+this.name+' '+id);
-	//END DEBUG
 	// override...
 	this.currentValue = id;
 	this.onSetValue(id);
@@ -264,9 +258,6 @@ ColorPropertySelect.prototype.onSetValue = function(value) {
 	
 	if (propertiesShowSelection()) {
 		var action = sketchbook.setPropertiesAction();
-		//DEBUG
-		console.log('set '+this.name+' color=', color);
-		//END DEBUG
 		switch (this.name) {
 			case 'lineColor':
 				action.setLineColor(color);
@@ -357,14 +348,17 @@ TextWeightPropertySelect.prototype = new PropertySelect();
 
 TextWeightPropertySelect.prototype.setValue = function(weight) {
 	this.currentValue = weight;
-	//Update menu - this will become fontWeight in future release
-	$('#italicLabel').removeClass('ui-state-active');
-	if (weight.indexOf("italic") > 0)
-		$('#italicLabel').addClass('ui-state-active');
-		
-	$('#boldLabel').removeClass('ui-state-active');
-	if (weight.indexOf("bold") > 0)
-		$('#boldLabel').addClass('ui-state-active');
+    this.value = weight;
+    //Update controls
+    $('#italicLabel').removeClass('ui-state-active');
+    $('#boldLabel').removeClass('ui-state-active');
+
+    if(weight.indexOf('italic') >= 0) {
+        $('#italicLabel').addClass('ui-state-active');
+    }
+    if(weight.indexOf('bold') >= 0) {
+        $('#boldLabel').addClass('ui-state-active');
+    }
 }
 
 TextWeightPropertySelect.prototype.setEnabled = function(enabled) {
@@ -390,9 +384,6 @@ function PropertyText(name, propertyId) {
 	var checkfn = function(ev) {
 		var value = self.getValue();
 		if (value!=self.value) {
-			//DEBUG
-			//console.log('text change: '+value);
-			//END DEBUG
 			self.value= value;
 			self.onSetValue(value);
 		}
@@ -510,9 +501,6 @@ function logBreadcrumbs() {
 		s += b;		
 	}
 	s += ']';
-	//DEBUG
-	//console.log('breadcrumbs: '+breadcrumbs);
-	//END DEBUG
 }
 
 //==============================================================================
@@ -899,7 +887,7 @@ function updatePropertiesForCurrentSelection() {
 			propertyEditors.textFont.setEnabled(false);
 		if (textWeight) {
 			propertyEditors.textWeight.setEnabled(true);
-			propertyEditors.textWeight.setValue(propertyEditors.textFont.getValue());
+			propertyEditors.textWeight.setValue(textWeight);
 		}
 		else
 			propertyEditors.textWeight.setEnabled(false);
@@ -990,6 +978,10 @@ function getJustification() {
 function getTextVAlign() {
 	return propertyEditors['textVAlign'].getValue();
 }
+function getTextWeight() {
+    //Get value from editor
+    return propertyEditors['textWeight'].getValue();
+}
 function handleActionSelected(id) {
 	var disabled = $('#'+id).hasClass('actionDisabled');
 	if (disabled)
@@ -1048,9 +1040,6 @@ function handleActionSelected(id) {
 	$('.action').removeClass('actionSelected');
 	$('#'+id).addClass('actionSelected');
 	// TODO immediate action?
-	//DEBUG
-	//console.log('Selected action '+id);
-	//END DEBUG
 
 	if (id=='selectAction') {
 		handlePropertiesShowSelected('propertiesShowSelection');
@@ -1294,9 +1283,6 @@ function showIndex(noBreadcrumb) {
 	clearProject(indexProject);
 	
 	var filter = $('#indexFilterText').val();
-	//DEBUG
-	//console.log('index filter: '+filter);
-	//END DEBUG
 	
 	for (var sid in sketchbook.sketches) {
 		
@@ -1855,9 +1841,6 @@ function toolUp(ev) {
 	if (tool) {
 		// switch tool
 		toolProject.activate();
-		//DEBUG
-		//console.log("tool activated = ", tool);
-		//END DEBUG
 		var action = tool.end(view2project(toolView, ev.pageX, ev.pageY));
 		tool = undefined;
 		if (action)
@@ -2169,9 +2152,6 @@ function registerMouseEvents() {
 		// Note: this is not meant to be called multiple times when key is held down, but on Chrome
 		// it is being, so that will need some filtering
 		//console.log('keydown: '+ev.which+' ctrlKey='+ev.ctrlKey+' special='+isSpecialKey(ev.which));
-		//DEBUG
-		//console.log('keydown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
-		//END DEBUG
 		
 		if (keyFiresTool)
 			toolUp(ev);
@@ -2367,9 +2347,6 @@ function registerMouseEvents() {
 	});
 	$(document).keyup(function(ev) {
 		keyDown = undefined;
-		//DEBUG
-		//console.log('keyup: '+ev.which);
-		//END DEBUG
 		isShifted = false;
 		
 		if (keyFiresTool)
@@ -2405,9 +2382,6 @@ function registerMouseEvents() {
 	$(document).mousedown(function(ev) {
 		// which: 1=left, 2=middle, 3=right
 		mousePageX = ev.pageX; mousePageY = ev.pageY;
-		//DEBUG
-		//console.log('mousedown: '+ev.which+' at '+ev.pageX+','+ev.pageY+' on '+ev.target+' ('+$(ev.target).attr('id')+') = '+(ev.pageX-pageOffsetLeft(ev.target))+','+(ev.pageY-pageOffsetTop(ev.target)));
-		//END DEBUG
 		toolUp(ev);
 		//keyTarget = ev.target;
 		var p = getProject(ev.target);
@@ -2431,9 +2405,6 @@ function registerMouseEvents() {
 			// Hmm, mousemove is happening several times a second even when I don't move (as of 30/4/2013)
 			// suppress unless ACTUALLY moved...
 			if (ev.pageX!==mousePageX || ev.pageY!==mousePageY) {
-				//DEBUG
-				//console.log('blur orphan text on mousemove');
-				//END DEBUG
 				//$('#orphanText').blur();
 			}
 		}
@@ -2457,15 +2428,9 @@ function registerMouseEvents() {
 
 //handle interface (page) resize - work-around for canvas sizing problem
 function handleResize() {
-	//DEBUG
-	//console.log('handle resize');
-	//END DEBUG
 	for (var vi in paper.View._views) {
 		var v = paper.View._views[vi];
 		if (v.isVisible()) {
-			//DEBUG
-			//console.log('canvas:resize to '+$(v._element).width()+","+$(v._element).height());
-			//END DEBUG
 			// need to force a change or it does some weird partial rescaling
 			v.viewSize = new paper.Size(1,1);
 			v.viewSize = new paper.Size($(v._element).width(),$(v._element).height());
@@ -2488,9 +2453,6 @@ function getZoomForBounds(project, bounds) {
 		var w = $(project.view._element).width();
 		var h = $(project.view._element).height();
 		var zoom = Math.min(MAX_ZOOM, w/bw, h/bh);
-		//DEBUG
-		//console.log('showAll: bounds='+bw+','+bh+', canvas='+w+','+h+', zoom='+zoom+', bounds.center='+bounds.center);
-		//END DEBUG
 		return { zoom: zoom, center: bounds.center };
 	}
 
@@ -2870,9 +2832,6 @@ function updateActionsForCurrentSelection() {
 /** show editor for object ID */
 function showEditor(sketchId, noBreadcrumb, elementId) {
 	if (!noBreadcrumb && (!currentSketch || currentSketch.id!==sketchId)) {
-		//DEBUG
-		//console.log('breadcrumb sketch '+sketchId+' element '+elementId);
-		//END DEBUG
 		if (elementId)
 			breadcrumbs.push(new Breadcrumb(BREADCRUMB_TYPE_ELEMENT, sketchId, elementId));		
 		else
@@ -2989,9 +2948,6 @@ function moveHistory() {
 	for (var ci in selectionProject.activeLayer.children) {
 		var c = selectionProject.activeLayer.children[ci];
 		c.translate(new paper.Point(INDEX_CELL_SIZE,0));
-		//DEBUG
-		//console.log('moved '+ci+' '+c+' to '+c.position);
-		//END DEBUG
 	}
 }
 
@@ -3002,9 +2958,6 @@ function clearCurrentSelection() {
 		for (var ii=0; ii<currentSelection.items.length; ii++) {
 			var item = currentSelection.items[ii];
 			item.remove();
-			//DEBUG
-			//console.log('removed selection for '+currentSelection.id);
-			//END DEBUG
 		}
 	}
 	currentSelections = new Array();
@@ -3066,9 +3019,6 @@ function handleSelections(selections) {
 		item.strokeWidth = 3;
 		item.strokeColor = '#808080';
 		currentSelection.items.push(item);
-		//DEBUG
-		//console.log('added history selection for '+currentSelection.id);
-		//END DEBUG
 		// TODO highlght current selection in object projects and/or index projects??
 		// if sequences view, first frame selection, show/zoom to...
 		if (showFrame && selectionRecord.selection.sequence && selectionRecord.selection.sequence.items) {
@@ -3175,9 +3125,6 @@ function doAction(action) {
 	else if (action.type=='select') {
 		//console.log('handle select '+JSON.stringify(action));
 		// TODO
-		//DEBUG
-		//console.log("handling select action");
-		//END DEBUG
 		
 		handleSelections(action.selections);
 		// delayed zoom (animation)
@@ -3921,7 +3868,7 @@ $(document).ready(function() {
 	propertyEditors.textFont.setEnabled(false);
 	propertyEditors.textWeight = new TextWeightPropertySelect('textWeight', 'textWeightProperty');
 	propertyEditors.textWeight.onSetValue = onSetTextWeight;
-	propertyEditors.textWeight.setValue('none');
+	propertyEditors.textWeight.setValue('normal');
 	propertyEditors.textWeight.setEnabled(false);
 	propertyEditors.frameStyle = new PropertySelect('frameStyle', 'frameStyleProperty');
 	propertyEditors.frameStyle.onSetValue = onSetFrameStyle;
@@ -3965,29 +3912,53 @@ $(document).ready(function() {
 			propertyEditors.frameStyle.onSetValue($('#frameStyleProperty').val());
 	});
 	$('#italic').click(function() {
-		if (propertiesShowSelectionFlag) {
-			//Font weight not implemented in paperjs properly yet
-			var font = 'textFont' + propertyEditors.textFont.getValue();
-			if (font.indexOf('italic') > 0) {
-				font = font.replace('italic', '');
-			} else {
-				font += ' italic';
-			}
-			propertyEditors.textFont.onSetValue(font);
-		}
+        var weight = propertyEditors.textWeight.getValue();
+
+        switch (weight) {
+            case 'normal':
+                weight = 'italic';
+                break;
+            case 'italic':
+                weight = 'normal';
+                break;
+            case 'bold':
+                weight = 'bold italic'
+                break;
+            case 'bold italic':
+                weight = 'bold';
+                break;
+            default :
+                break;
+        }
+        propertyEditors.textWeight.setValue(weight);
+        if (propertiesShowSelectionFlag) {
+            propertyEditors.textWeight.onSetValue(weight);
+        }
 	});
 	$('#bold').click(function() {
-		if (propertiesShowSelectionFlag) {
-			//Font weight not implemented in paperjs properly yet
-			var font = 'textFont' + propertyEditors.textFont.getValue();
-			if (font.indexOf('bold') > 0) {
-				font = font.replace('bold', '');
-			} else {
-				font += ' bold';
-			}
-			propertyEditors.textFont.onSetValue(font);
-		}
-	});
+        var weight = propertyEditors.textWeight.getValue();
+
+        switch (weight) {
+            case 'normal':
+                weight = 'bold';
+                break;
+            case 'bold':
+                weight = 'normal';
+                break;
+            case 'italic':
+                weight = 'bold italic'
+                break;
+            case 'bold italic':
+                weight = 'italic';
+                break;
+            default :
+                break;
+        }
+        propertyEditors.textWeight.setValue(weight);
+        if (propertiesShowSelectionFlag) {
+            propertyEditors.textWeight.onSetValue(weight);
+        }
+    });
 	onShowIndex();
 	
     $(window).resize(handleResize);

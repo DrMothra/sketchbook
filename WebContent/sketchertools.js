@@ -135,10 +135,6 @@ CircleTool.prototype.move = function(point) {
 
 CircleTool.prototype.end = function(point) {
 	if (this.path) {
-		//DEBUG
-		console.log('circle start =', this.startPoint);
-		console.log('radius =', this.radius);
-		//END DEBUG
 		var action = this.sketchbook.addCircleAction(this.sketchId, this.startPoint, this.radius, this.lineWidth, this.style, this.lineColor, this.fillColor);
 		this.path.remove();
 		delete this.path;
@@ -153,8 +149,6 @@ function getItemFromId(project, id) {
 	var children = project.layers[1].children;
 	for (var ci=0; ci<children.length; ci++) {
 		var c = children[ci];
-		
-		console.log("child id = ", c.sketchElementId);
 		
 		if (c.sketchElementId === id) {
 			return c;
@@ -387,9 +381,6 @@ function HighlightTool(project) {
 	Tool.call(this, 'highlight', project);
 	this.highlightedItem = null;
 	this.highlightItem = null;
-	//DEBUG
-	//console.log('created HighlightTool for project '+project);
-	//END DEBUG
 }
 
 HighlightTool.prototype = new Tool();
@@ -438,9 +429,6 @@ function addHighlight(project, item) {
 HighlightTool.prototype.highlight = function(item) {
 	this.highlightedItem = item;
 	this.highlightItem = addHighlight(this.project, item);
-	//DEBUG
-	//console.log('created highlight for '+item);
-	//END DEBUG
 };
 
 /** find item (if any) at point in project - for select and highlight */
@@ -921,8 +909,6 @@ CloneTool.prototype.begin = function(point) {
 		this.elementBounds.height = 5;
 	}
 	this.group.visible = false;
-	//DEBUG
-	console.log('bounds =', this.elementBounds);
 }
 CloneTool.prototype.move = function(point) {
 	
@@ -937,8 +923,6 @@ CloneTool.prototype.end = function(point) {
 		var height = this.elementBounds.height;
 		var bounds = new paper.Rectangle(this.startPoint.x-(width/2), this.startPoint.y-(height/2),
 						 width, height);
-        //DEBUG
-        console.log('Clone bounds =', bounds);
 
 		return this.sketchbook.addElementsAction(this.sketchId, this.elements, this.elementBounds, bounds);
 	}
@@ -1001,11 +985,7 @@ TextTool.prototype.begin = function(point) {
 	this.text.paragraphStyle.justification = getJustification();
 	this.text.characterStyle.fontSize = getFontSize();
 	this.text.characterStyle.font = getFont();
-	this.text.characterStyle.fontWeight = 'none';
-	//Font weight not implemented in paperjs properly yet
-	var italicText = $('#italicLabel').hasClass('ui-state-active') ? ' italic' : '';
-	var boldText = $('#boldLabel').hasClass('ui-state-active') ? ' bold' : '';
-	this.text.characterStyle.font +=  boldText + italicText;
+    this.text.characterStyle.fontWeight = getTextWeight();
 	this.text.content = this.content;	
 };
 
