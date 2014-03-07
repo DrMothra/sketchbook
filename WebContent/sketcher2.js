@@ -2535,9 +2535,7 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 		// naming this makes the Group creation explode :-(
 		//placed.name = ''+sketchId;
 		group.translate(new paper.Point(INDEX_CELL_SIZE/2-group.bounds.center.x, (INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT)/2-group.bounds.center.y));
-        //DEBUG
-		//children.push(group);
-        return group;
+        children.push(group);
 	}
 	if (sketch) {
 		var label = new paper.PointText(new paper.Point(INDEX_CELL_SIZE/2, INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT+pt2px(LABEL_FONT_SIZE)));
