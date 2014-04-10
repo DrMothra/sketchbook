@@ -148,11 +148,15 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 		
 		if (element.line!==undefined) {
 			var path = new paper.Path();
+
 			// preserve id
 			path.sketchElementId = element.id;
 			items.push(path);
-			if (element.line.lineWidth)
+			if (element.line.lineWidth) {
 				path.strokeWidth = element.line.lineWidth;
+                //DEBUG
+                console.log('Linewidth =', element.line.lineWidth);
+            }
 			if (element.line.lineColor && element.line.style && element.line.style.indexOf('none')>=0) {
 				path.strokeColor = colorToPaperjs(element.line.lineColor);
 			}
@@ -219,7 +223,18 @@ function elementsToPaperjs(elements, sketchbook, images, iconSketchIds, fromsket
 				bounds = group.bounds;
 			var iconBounds = new paper.Rectangle(element.icon.x, element.icon.y, element.icon.width, element.icon.height);
 			var fitFlag = !element.icon.rescale || element.icon.rescale.indexOf('stretch')<0;
-			group.transform(getMatrixFromTo(bounds, iconBounds, fitFlag));
+            var transformM = getMatrixFromTo(bounds, iconBounds, fitFlag);
+            //DEBUG
+            //console.log("scale x=", transformM.a, " scale y=", transformM.d);
+            //Scale all linewidths individually :-(
+            /*
+            for(var el=0; el<iconItems.length; ++el) {
+                if(iconItems[el].strokeWidth) {
+                    iconItems[el].strokeWidth *= transformM.a;
+                }
+            }
+            */
+			group.transform(transformM);
 
 			// package that group in another group for label, border, fill!
 			var iconItems = [];

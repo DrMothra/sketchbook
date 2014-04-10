@@ -1294,6 +1294,7 @@ function showIndex(noBreadcrumb) {
 		
 		var group = createIndexItem(sid, indexProject);
 		group.translate(new paper.Point(x*INDEX_CELL_SIZE, y*INDEX_CELL_SIZE));
+
 		console.log('add index item '+sid+' at '+x+','+y+': '+group);
 		
 		// lay out in an outwards 'square spiral'
@@ -1695,6 +1696,8 @@ function setupPaperjs() {
 	objectOverviewProject = setupCanvas('objectOverviewCanvas');	
 	selectionProject = setupCanvas('selectionCanvas');
 	sequencesViewProject = setupCanvas('sequencesViewCanvas');
+
+    paper.settings.applyMatrix = false;
 }
 
 var canvasTarget = null;
@@ -2517,18 +2520,16 @@ function createIndexItemFromElements(sketch, elements, indexProject) {
 	// make a visual icon for the object comprising a group with box, scaled view and text label
 	// (currently id)
 	var children = [];
+    //var group;
 	if (items.length>0) {
 		var group;
 		group = new paper.Group(items);
 
-		//var symbol = new paper.Symbol(group); //getCachedSymbol(indexProject, sketchId);
-		//var symbolBounds = symbol.definition.bounds;
-		// try just a group...
 		var symbolBounds = getBounds(group);
 	
 		var scale = (symbolBounds) ? Math.min((INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT-INDEX_CELL_MARGIN)/(symbolBounds.width+INDEX_CELL_MARGIN),
 				(INDEX_CELL_SIZE-INDEX_LABEL_HEIGHT-INDEX_CELL_MARGIN)/(symbolBounds.height+INDEX_CELL_MARGIN)) : 1;
-		//var placed = group; //symbol.place();
+		//DEBUG
 		//console.log('symbolbounds='+symbolBounds+', placed bounds='+placed.bounds);
 		group.scale(scale);
 

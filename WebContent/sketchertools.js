@@ -283,6 +283,7 @@ function ZoomTool(project, inFlag, wheelZooming) {
 	this.zoomPoint = null;
 	this.zoomView = null;
 	this.wheelZooming = wheelZooming;
+    removeHighlight();
 };
 
 ZoomTool.prototype.zoomIn = function() {
@@ -379,8 +380,10 @@ PanTool.prototype.end = function(point) {
 /** highlight tool */
 function HighlightTool(project) {
 	Tool.call(this, 'highlight', project);
-	this.highlightedItem = null;
-	this.highlightItem = null;
+	//this.highlightedItem = null;
+	//this.highlightItem = null;
+    highlightedItem = null;
+    highlightItem = null;
 }
 
 HighlightTool.prototype = new Tool();
@@ -388,8 +391,8 @@ HighlightTool.prototype = new Tool();
 HighlightTool.prototype.clearHighlight = function() {
 	if (this.highlightItem) {
 		this.highlightItem.remove();
-		this.highlightItem = null;
 	}
+    this.highlightItem = null;
 	this.highlightedItem = null;
 };
 
@@ -426,9 +429,21 @@ function addHighlight(project, item) {
 	return highlightItem;
 }
 
+var highlightedItem = null;
+var highlightItem = null;
+
+function removeHighlight() {
+    if(highlightItem ) {
+        highlightItem.remove();
+    }
+    highlightedItem = null;
+    highlightItem = null;
+}
 HighlightTool.prototype.highlight = function(item) {
-	this.highlightedItem = item;
-	this.highlightItem = addHighlight(this.project, item);
+	//this.highlightedItem = item;
+	//this.highlightItem = addHighlight(this.project, item);
+    highlightedItem = item;
+    highlightItem = addHighlight(this.project, item);
 };
 
 /** find item (if any) at point in project - for select and highlight */
@@ -513,16 +528,20 @@ HighlightTool.prototype.checkHighlight = function(point) {
 	//console.log('highlight test at '+point+' in '+project);
 	var item = getItemAtPoint(this.project, point);
 	if (item) {
-		if (item===this.highlightedItem) 
+		if (item===highlightedItem)
 			; // no-op
 		else {
-			this.clearHighlight();
+			//this.clearHighlight();
+            removeHighlight();
 			this.highlight(item);
 			//redraw(paper); ??
 		}
 	}
-	else
-		this.clearHighlight();
+	else {
+        //this.clearHighlight();
+        removeHighlight();
+    }
+
 
 };
 
@@ -533,7 +552,8 @@ HighlightTool.prototype.move = function(point) {
 	this.checkHighlight(point);
 };
 HighlightTool.prototype.end = function(point) {
-	this.clearHighlight();
+	//this.clearHighlight();
+    removeHighlight();
 	return null;
 };
 
